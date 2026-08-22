@@ -1,0 +1,9 @@
+{
+  "apps/web/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./apps/web/eslint.config.js"
+  ],
+  "packages/ui/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/ui/eslint.config.js"
+  ],
+  "*.md": ["prettier --write"]
+}
