@@ -1,0 +1,22 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  esbuild: true
+  msw: false
+  sharp: true
+  unrs-resolver: true
+
+catalog:
+  "@types/node": ^20
+  "@hugeicons/core-free-icons": ^4.3.0
+  "@hugeicons/react": ^1.1.10
+  "@tailwindcss/postcss": ^4.3.3
+  "@types/react": ^19
+  "@types/react-dom": ^19
+  eslint: 9.7.0
+  typescript: 5.9.3
+  react: 19.2.4
+  react-dom: 19.2.4
+  zod: ^4.4.3
