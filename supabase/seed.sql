@@ -1,0 +1,82 @@
+SET search_path TO public;
+
+DELETE FROM public.permissions;
+INSERT INTO public.permissions (name, level, resource, action, description)
+	VALUES
+		('self.user.read', 'self', 'user', 'read', 'View own profile information'),
+		('self.user.update', 'self', 'user', 'update', 'Edit own profile details'),
+		('self.lead.create', 'self', 'lead', 'create', 'Create new leads for own assignments'),
+		('self.lead.read', 'self', 'lead', 'read', 'View details of own leads'),
+		('self.lead.list', 'self', 'lead', 'list', 'List all own leads with filters'),
+		('self.lead.update', 'self', 'lead', 'update', 'Update information on own leads'),
+		('self.lead.delete', 'self', 'lead', 'delete', 'Remove own leads permanently'),
+		('self.lead_mail.create', 'self', 'lead_mail', 'create', 'Send new emails to own leads'),
+		('self.lead_mail.read', 'self', 'lead_mail', 'read', 'View email content of own lead mails'),
+		('self.lead_mail.list', 'self', 'lead_mail', 'list', 'List all emails for own leads'),
+		('system.user.create', 'system', 'user', 'create', 'Create new user accounts'),
+		('system.user.read', 'system', 'user', 'read', 'View any user"s profile information'),
+		('system.user.list', 'system', 'user', 'list', 'List all users with filters and pagination'),
+		('system.user.update', 'system', 'user', 'update', 'Edit any user"s profile details'),
+		('system.user.delete', 'system', 'user', 'delete', 'Deactivate or remove any user account'),
+		('system.user.manage', 'system', 'user', 'manage', 'Full user administration including role assignments'),
+		('system.role-permission.create', 'system', 'role-permission', 'create', 'Create new roles and permissions'),
+		('system.role-permission.read', 'system', 'role-permission', 'read', 'View role and permission configurations'),
+		('system.role-permission.list', 'system', 'role-permission', 'list', 'List all roles and their assigned permissions'),
+		('system.role-permission.update', 'system', 'role-permission', 'update', 'Modify role details and permission assignments'),
+		('system.role-permission.delete', 'system', 'role-permission', 'delete', 'Remove roles from the system'),
+		('system.role-permission.manage', 'system', 'role-permission', 'manage', 'Full access to configure roles and permissions'),
+		('system.invitation.create', 'system', 'invitation', 'create', 'Send new user invitations via email'),
+		('system.invitation.read', 'system', 'invitation', 'read', 'View invitation details and status'),
+		('system.invitation.list', 'system', 'invitation', 'list', 'List all invitations with filters'),
+		('system.invitation.update', 'system', 'invitation', 'update', 'Resend or modify pending invitations'),
+		('system.invitation.delete', 'system', 'invitation', 'delete', 'Revoke or cancel pending invitations'),
+		('system.invitation.manage', 'system', 'invitation', 'manage', 'Full invitation management including bulk operations'),
+		('system.lead.create', 'system', 'lead', 'create', 'Create new leads in the system'),
+		('system.lead.read', 'system', 'lead', 'read', 'View any lead"s details regardless of assignment'),
+		('system.lead.list', 'system', 'lead', 'list', 'List all leads across the organization'),
+		('system.lead.update', 'system', 'lead', 'update', 'Edit any lead"s information and assignments'),
+		('system.lead.delete', 'system', 'lead', 'delete', 'Remove leads from the system permanently'),
+		('system.lead.manage', 'system', 'lead', 'manage', 'Full lead administration including reassignment'),
+		('system.lead.export', 'system', 'lead', 'export', 'Export lead data to CSV or other formats'),
+		('system.lead_mail.create', 'system', 'lead_mail', 'create', 'Send emails to any lead in the system'),
+		('system.lead_mail.read', 'system', 'lead_mail', 'read', 'View email content for any lead'),
+		('system.lead_mail.list', 'system', 'lead_mail', 'list', 'List all lead emails across the organization'),
+		('system.lead_mail.update', 'system', 'lead_mail', 'update', 'Edit email records for any lead'),
+		('system.lead_mail.delete', 'system', 'lead_mail', 'delete', 'Remove email records from the system'),
+		('system.lead_mail.manage', 'system', 'lead_mail', 'manage', 'Full email management for all leads'),
+		('system.lead_mail.export', 'system', 'lead_mail', 'export', 'Export lead email data to CSV or other formats');
+
+DELETE FROM public.roles;
+INSERT INTO public.roles (role_name, description)
+	VALUES
+		('USER', 'Regular user with basic self-management permissions'),
+		('SUPPORT_AGENT', 'Support agent'),
+		('ADMIN', 'Admin'),
+		('SUPER_ADMIN', 'Super admin');
+
+DELETE FROM public.role_permissions;
+WITH role_perm_mapping (role_name, permission_name) AS (
+	VALUES
+		('USER', 'self.user.read'),
+		('USER', 'self.user.update'),
+		('USER', 'self.invitation.list'),
+		('USER', 'self.invitation.update'),
+		('SUPPORT_AGENT', 'self.user.read'),
+		('SUPPORT_AGENT', 'self.user.update'),
+		('SUPPORT_AGENT', 'system.user.read'),
+		('SUPPORT_AGENT', 'system.user.list'),
+		('ADMIN', 'self.user.read'),
+		('ADMIN', 'self.user.update'),
+		('ADMIN', 'system.user.read'),
+		('ADMIN', 'system.user.list'),
+		('ADMIN', 'system.user.update'),
+		('ADMIN', 'system.user.delete'),
+		('SUPER_ADMIN', 'self.user.read'),
+		('SUPER_ADMIN', 'self.user.update'),
+		('SUPER_ADMIN', 'system.user.manage')
+ )
+ INSERT INTO public.role_permissions (role_id, permission_id)
+ SELECT r.id, p.id
+ FROM role_perm_mapping rpm
+ JOIN public.roles r ON r.role_name = rpm.role_name::public."RoleEnum"
+ JOIN public.permissions p ON p.name = rpm.permission_name;

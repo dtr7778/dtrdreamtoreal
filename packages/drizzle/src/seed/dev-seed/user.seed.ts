@@ -1,0 +1,159 @@
+import { faker } from "@faker-js/faker";
+
+import {
+  InsertUser,
+  InsertUserRole,
+  RoleDataModel,
+  UserDataModel,
+  UserRoleTable,
+  UserTable,
+} from "../../schemas";
+import { RoleEnumSchema, RoleEnumType } from "../../schemas/enums/zod-db-enums";
+import { SYSTEM_ROLES } from "../roles.seed";
+import { db } from "../seed-db-client";
+import { seedConfigs } from "../seed.config";
+
+const DEFAULT_USERS: Array<{
+  name: string;
+  email: string;
+  role: RoleEnumType;
+  seed: string;
+}> = [
+  {
+    name: "John User",
+    email: "user@mail.com",
+    role: RoleEnumSchema.enum.USER,
+    seed: "user",
+  },
+  {
+    name: "Support Agent",
+    email: "support.agent@mail.com",
+    role: RoleEnumSchema.enum.SUPPORT_AGENT,
+    seed: "superagent",
+  },
+  {
+    name: "Admin Smith",
+    email: "admin@mail.com",
+    role: RoleEnumSchema.enum.ADMIN,
+    seed: "admin",
+  },
+  {
+    name: "Super Admin",
+    email: "superadmin@mail.com",
+    role: RoleEnumSchema.enum.SUPER_ADMIN,
+    seed: "superadmin",
+  },
+];
+
+// Configuration for random user generation
+const RANDOM_USER_CONFIG = {
+  BAN_PROBABILITY: 0.05,
+} as const;
+
+/**
+ * Creates a user object with default avatar from DiceBear API
+ */
+function createDefaultUser(
+  user: (typeof DEFAULT_USERS)[number],
+  roleId: string
+): InsertUser & { roleId: string } {
+  return {
+    name: user.name,
+    email: user.email,
+    emailVerified: true,
+    image: `https://api.dicebear.com/7.x/avataaars/png?size=128&seed=${user.seed}`,
+    banned: false,
+    role: user.role,
+    roleId,
+  };
+}
+
+/**
+ * Maps default users to their data with role IDs
+ */
+function buildDefaultUsersData(
+  roles: Array<RoleDataModel>
+): Array<InsertUser & { roleId: string }> {
+  return DEFAULT_USERS.map((user) => {
+    const role = roles.find(({ roleName }) => roleName === user.role)!;
+    return createDefaultUser(user, role.id);
+  });
+}
+
+/**
+ * Creates a random user with faker-generated data
+ */
+function createRandomUser(
+  roleData: RoleDataModel,
+  index: number
+): InsertUser & { roleId: string } {
+  const isBanned = faker.datatype.boolean(RANDOM_USER_CONFIG.BAN_PROBABILITY);
+
+  return {
+    name: faker.person.fullName(),
+    email: `seed.user.${index}@example.com`,
+    emailVerified: faker.datatype.boolean(),
+    image: faker.image.personPortrait({ size: 128 }),
+    banned: isBanned,
+    banExpires: isBanned ? faker.date.future() : null,
+    banReason: isBanned ? faker.lorem.sentence() : null,
+    role: roleData.roleName,
+    roleId: roleData.id,
+  };
+}
+
+/**
+ * Builds random users data based on remaining count
+ */
+function buildRandomUsersData(
+  roles: Array<RoleDataModel>,
+  remainingCount: number
+): Array<InsertUser> {
+  const randomUsers: Array<InsertUser> = [];
+
+  for (let i = 0; i < remainingCount; i++) {
+    const role = faker.helpers.arrayElement(roles);
+    const randomUser = createRandomUser(role, i);
+    randomUsers.push(randomUser);
+  }
+
+  return randomUsers;
+}
+
+/**
+ * Seeds users into the database
+ * @param roles - Array of existing role data models
+ * @returns Array of created user data models
+ */
+export async function seedUsers(
+  roles: Array<RoleDataModel>
+): Promise<Array<UserDataModel>> {
+  console.log("🌱 Seeding users...");
+
+  const remainingCount = Math.max(
+    0,
+    seedConfigs.targets.users - DEFAULT_USERS.length
+  );
+
+  const allowedRoles = roles.filter(({ roleName }) =>
+    SYSTEM_ROLES.includes(roleName)
+  );
+
+  const defaultUsersData = buildDefaultUsersData(allowedRoles);
+  const randomUsersData = buildRandomUsersData(allowedRoles, remainingCount);
+  const allUsersData = [...defaultUsersData, ...randomUsersData];
+
+  const users = await db.insert(UserTable).values(allUsersData).returning();
+
+  await db.insert(UserRoleTable).values(
+    users.map((user) => {
+      return {
+        roleId: roles.find(({ roleName }) => roleName === user.role)!.id,
+        userId: user.id,
+      } satisfies InsertUserRole;
+    })
+  );
+
+  console.log(`✅ ${users.length} Users seeded`);
+  return users;
+}

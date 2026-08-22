@@ -1,0 +1,77 @@
+{
+  "name": "@workspace/drizzle",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    "./client": {
+      "import": "./src/drizzle-client.ts",
+      "types": "./src/drizzle-client.ts"
+    },
+    "./schemas": {
+      "import": "./src/schemas/index.ts",
+      "types": "./src/schemas/index.ts"
+    },
+    "./zod-db-enums": {
+      "import": "./src/schemas/enums/zod-db-enums.ts",
+      "types": "./src/schemas/enums/zod-db-enums.ts"
+    },
+    "./enum-values": {
+      "import": "./src/schemas/enums/enum-values.ts",
+      "types": "./src/schemas/enums/enum-values.ts"
+    },
+    "./paginate-query": {
+      "import": "./src/paginate-query/index.ts",
+      "types": "./src/paginate-query/index.ts"
+    },
+    "./sql-helpers": {
+      "import": "./src/sql-helpers.ts",
+      "types": "./src/sql-helpers.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed:dev": "tsx ./src/seed/dev-seed/index.ts",
+    "db:seed:prod": "NODE_ENV=production tsx ./src/seed/prod-seed/index.ts",
+    "db:generate-dbml": "tsx ./src/generators/dbml-generator.ts",
+    "db:generate-sql": "tsx ./src/generators/sql-generator.ts",
+    "db:generate-full": "pnpm run db:generate && pnpm run db:generate-dbml && pnpm run db:generate-sql",
+    "db:generate-seed-sql": "tsx ./src/generators/seed-sql-generator.ts"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.5.0",
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "dotenv": "catalog:",
+    "drizzle-dbml-generator": "^0.10.0",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "@upstash/redis": "catalog:",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "drizzle-zod": "^0.8.3",
+    "postgres": "^3.4.9",
+    "zod": "catalog:"
+  }
+}
