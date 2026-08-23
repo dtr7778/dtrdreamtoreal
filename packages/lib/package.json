@@ -20,9 +20,11 @@
   },
   "exports": {
     "./redis": "./src/services/redis/index.ts",
+    "./redis/mock": "./tests/redis.mock.ts",
     "./qstash": "./src/services/qstash/index.ts",
     "./qstash/error": "./src/services/qstash/QstashError.ts",
     "./rate-limit": "./src/services/rate-limit/index.ts",
+    "./rate-limit/mock": "./tests/rate-limit.mock.ts",
     "./utils": "./src/utils/index.ts"
   },
   "devDependencies": {
@@ -31,6 +33,7 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "catalog:",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "zod": "catalog:"
   },
   "dependencies": {
