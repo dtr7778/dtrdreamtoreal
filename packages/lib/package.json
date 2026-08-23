@@ -18,6 +18,12 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    "./redis": "./src/services/redis/index.ts",
+    "./qstash": "./src/services/qstash/index.ts",
+    "./qstash/error": "./src/services/qstash/QstashError.ts",
+    "./utils": "./src/utils/index.ts"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "@workspace/eslint-config": "workspace:*",
@@ -25,5 +31,9 @@
     "eslint": "catalog:",
     "typescript": "catalog:",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@upstash/qstash": "catalog:",
+    "@upstash/redis": "catalog:"
   }
 }
