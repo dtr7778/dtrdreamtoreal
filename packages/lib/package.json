@@ -22,6 +22,7 @@
     "./redis": "./src/services/redis/index.ts",
     "./qstash": "./src/services/qstash/index.ts",
     "./qstash/error": "./src/services/qstash/QstashError.ts",
+    "./rate-limit": "./src/services/rate-limit/index.ts",
     "./utils": "./src/utils/index.ts"
   },
   "devDependencies": {
@@ -34,6 +35,7 @@
   },
   "dependencies": {
     "@upstash/qstash": "catalog:",
+    "@upstash/ratelimit": "catalog:",
     "@upstash/redis": "catalog:"
   }
 }
