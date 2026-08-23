@@ -1,0 +1,29 @@
+{
+  "name": "@workspace/lib",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  }
+}
