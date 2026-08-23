@@ -5,5 +5,11 @@
   "packages/ui/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/ui/eslint.config.js"
   ],
+  "packages/drizzle/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/drizzle/eslint.config.js"
+  ],
+  "packages/lib/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/lib/eslint.config.js"
+  ],
   "*.md": ["prettier --write"]
 }
