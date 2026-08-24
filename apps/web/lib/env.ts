@@ -27,6 +27,7 @@ export const env = createEnv({
     BETTER_AUTH_URL: z.url(),
     BETTER_AUTH_SECRET: z.string(),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
+    SUPABASE_SECRET_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -35,6 +36,8 @@ export const env = createEnv({
     NEXT_PUBLIC_SITE_URL: z.url().min(1),
     NEXT_PUBLIC_SITE_NAME: z.string().min(1),
     NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: z.string().min(1),
+    NEXT_PUBLIC_SUPABASE_URL: z.url().min(1),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: z.string().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -59,6 +62,9 @@ export const env = createEnv({
           BETTER_AUTH_SECRET: "secret",
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: "client_id",
           GOOGLE_AUTH_CLIENT_SECRET: "client_secret",
+          NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: "key",
+          SUPABASE_SECRET_KEY: "secret",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -80,5 +86,9 @@ export const env = createEnv({
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID:
             process.env.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID,
           GOOGLE_AUTH_CLIENT_SECRET: process.env.GOOGLE_AUTH_CLIENT_SECRET,
+          NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY:
+            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+          SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
         },
 });
