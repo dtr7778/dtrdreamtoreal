@@ -15,4 +15,12 @@ export const API_MESSAGES = {
     BAN: "User has been banned successfully.",
     UNBAN: "User has been unbanned successfully.",
   },
+  NOTIFICATION: {
+    GET_NOTIFICATIONS: "Notifications loaded successfully.",
+    GET_SETTINGS: "Notification settings loaded successfully.",
+    UPDATE_SETTINGS: "Notification settings updated successfully.",
+    MARK_AS_READ: "Notification marked as read.",
+    SUBSCRIBE_PUSH: "Successfully subscribed to push notifications.",
+    UNSUBSCRIBE_PUSH: "Successfully unsubscribed from push notifications.",
+  },
 };
