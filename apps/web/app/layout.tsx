@@ -11,6 +11,7 @@ import { cn } from "@workspace/ui/lib/utils";
 
 import { env } from "@/lib/env";
 
+import { DevPanel } from "@/components/dev-panel";
 import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
@@ -108,6 +109,14 @@ export default function RootLayout({
                 removeDelay: 2000,
                 className: "__react-hot-toast",
               }}
+            />
+            <DevPanel
+              currentEnv={env.NODE_ENV}
+              envVars={Object.entries(process.env)
+                .filter(
+                  ([k]) => k.startsWith("NEXT_PUBLIC_") || k === "NODE_ENV"
+                )
+                .map(([key, value]) => ({ key, value: value ?? "" }))}
             />
           </TooltipProvider>
         </ThemeProvider>
