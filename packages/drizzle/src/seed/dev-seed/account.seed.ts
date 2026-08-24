@@ -25,6 +25,7 @@ export async function seedAccounts(
         providerId: "credential",
         password: hashedPassword,
         userId: u.id,
+        issuer: "local:credential",
       }) as InsertAccount
   );
 

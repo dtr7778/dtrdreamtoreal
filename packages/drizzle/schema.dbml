@@ -273,6 +273,7 @@ table user_activities {
 
 table accounts {
   id uuid [pk, not null, default: `gen_random_uuid()`]
+  issuer text [not null]
   account_id text [not null]
   provider_id text [not null]
   access_token text
@@ -300,6 +301,7 @@ table files {
   original_name varchar(255) [not null]
   mime_type varchar(127) [not null]
   size bigint [not null]
+  url varchar [not null]
   uploaded_by uuid
   entity_type varchar(50)
   entity_id uuid

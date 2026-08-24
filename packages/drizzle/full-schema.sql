@@ -1,4 +1,4 @@
-◇ injected env (0) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (6) from ../../.env // tip: ⌘ enable debugging { debug: true }
 CREATE TYPE "public"."ContactSubmissionStatusEnum" AS ENUM('PENDING', 'READ', 'REPLIED', 'SPAM');
 CREATE TYPE "public"."FeedbackIssueStatusEnum" AS ENUM('OPEN', 'IN_PROGRESS', 'NEEDS_INFO', 'RESOLVED', 'CLOSED');
 CREATE TYPE "public"."FeedbackIssueTypeEnum" AS ENUM('BUG', 'FEATURE_REQUEST', 'FEEDBACK', 'SUGGESTION', 'REPORT', 'OTHER');
@@ -149,6 +149,7 @@ CREATE TABLE "user_activities" (
 
 CREATE TABLE "accounts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"issuer" text NOT NULL,
 	"account_id" text NOT NULL,
 	"provider_id" text NOT NULL,
 	"access_token" text,
@@ -170,6 +171,7 @@ CREATE TABLE "files" (
 	"original_name" varchar(255) NOT NULL,
 	"mime_type" varchar(127) NOT NULL,
 	"size" bigint NOT NULL,
+	"url" varchar NOT NULL,
 	"uploaded_by" uuid,
 	"entity_type" varchar(50),
 	"entity_id" uuid,
