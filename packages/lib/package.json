@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
+    "./types": "./src/types/index.ts",
     "./redis": "./src/services/redis/index.ts",
     "./redis/mock": "./tests/redis.mock.ts",
     "./qstash": "./src/services/qstash/index.ts",
