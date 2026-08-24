@@ -131,3 +131,9 @@
     cursor: pointer;
   }
 }
+
+@layer components {
+  .__react-hot-toast {
+    @apply rounded-lg! border bg-popover! text-popover-foreground! shadow-md;
+  }
+}

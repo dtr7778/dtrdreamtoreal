@@ -1,18 +1,25 @@
-import { Geist_Mono, Public_Sans } from "next/font/google"
+import "../server/orpc.server-client";
 
-import "@workspace/ui/globals.css"
-import { ThemeProvider } from "@/components/providers/theme-provider"
-import { cn } from "@workspace/ui/lib/utils"
-import { Metadata, Viewport } from "next"
-import { THEME_COLOR } from "@/constants"
-import { env } from "@/lib/env"
+import { Metadata, Viewport } from "next";
+import { Geist_Mono, Public_Sans } from "next/font/google";
 
-const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" })
+import { Toaster } from "react-hot-toast";
+
+import "@workspace/ui/globals.css";
+import { cn } from "@workspace/ui/lib/utils";
+
+import { env } from "@/lib/env";
+
+import { ThemeProvider } from "@/components/providers/theme-provider";
+
+import { THEME_COLOR } from "@/constants";
+
+const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
 export const metadata: Metadata = {
   applicationName: env.NEXT_PUBLIC_SITE_NAME,
@@ -63,16 +70,16 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: env.NEXT_PUBLIC_SITE_NAME,
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: THEME_COLOR,
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html
@@ -87,8 +94,20 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="top-center"
+            reverseOrder={true}
+            gutter={6}
+            toastOptions={{
+              duration: 3000,
+              removeDelay: 2000,
+              className: "__react-hot-toast",
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
