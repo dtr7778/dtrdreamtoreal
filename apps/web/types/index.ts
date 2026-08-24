@@ -33,8 +33,6 @@ export type AuthSession = {
   token: string;
   ipAddress?: string | null | undefined;
   userAgent?: string | null | undefined;
-  activeOrganizationId?: string | null | undefined;
-  activeTeamId?: string | null | undefined;
   impersonatedBy?: string | null | undefined;
 };
 
@@ -44,3 +42,8 @@ export type PermissionType = Pick<
   PermissionDataModel,
   "name" | "level" | "resource" | "action"
 >;
+
+export interface FieldError<TFieldNames> {
+  fieldName: TFieldNames;
+  message: string;
+}
