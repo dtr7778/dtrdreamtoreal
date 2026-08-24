@@ -41,9 +41,11 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@date-fns/tz": "catalog:",
     "@supabase/supabase-js": "catalog:",
     "@upstash/qstash": "catalog:",
     "@upstash/ratelimit": "catalog:",
-    "@upstash/redis": "catalog:"
+    "@upstash/redis": "catalog:",
+    "date-fns": "catalog:"
   }
 }
