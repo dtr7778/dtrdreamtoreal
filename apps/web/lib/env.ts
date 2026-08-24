@@ -21,6 +21,9 @@ export const env = createEnv({
     QSTASH_TOKEN: z.string().min(1),
     QSTASH_CURRENT_SIGNING_KEY: z.string().min(1),
     QSTASH_NEXT_SIGNING_KEY: z.string().min(1),
+    RESEND_API_KEY: z.string().min(1),
+    SUPPORT_MAIL: z.email().min(1),
+    MAIL_FROM: z.email().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -45,6 +48,9 @@ export const env = createEnv({
           QSTASH_TOKEN: "token",
           QSTASH_CURRENT_SIGNING_KEY: "current_signing_key",
           QSTASH_NEXT_SIGNING_KEY: "next_signing_key",
+          RESEND_API_KEY: "resend_api_key",
+          SUPPORT_MAIL: "support@example.com",
+          MAIL_FROM: "test@example.com",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -58,5 +64,8 @@ export const env = createEnv({
           QSTASH_TOKEN: process.env.QSTASH_TOKEN,
           QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
           QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+          RESEND_API_KEY: process.env.RESEND_API_KEY,
+          SUPPORT_MAIL: process.env.SUPPORT_MAIL,
+          MAIL_FROM: process.env.MAIL_FROM,
         },
 });
