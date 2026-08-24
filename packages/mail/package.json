@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@workspace/lib": "workspace:*",
+    "@workspace/drizzle": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-email": "^6.9.2",
