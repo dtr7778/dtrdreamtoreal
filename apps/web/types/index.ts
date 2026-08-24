@@ -55,3 +55,9 @@ export interface IApiHookInput<TFieldNames = string> {
   onError?: (errorMessage: string) => void;
   onValidationErrors?: (fields: Array<FieldError<TFieldNames>>) => void;
 }
+
+export type BreadcrumbRouteType = {
+  title: string;
+  path: string;
+  children?: BreadcrumbRouteType[];
+};
