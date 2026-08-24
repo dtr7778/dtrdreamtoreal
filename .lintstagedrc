@@ -14,5 +14,8 @@
   "packages/vitest-config/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/vitest-config/eslint.config.js"
   ],
+  "packages/mail/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/mail/eslint.config.js"
+  ],
   "*.md": ["prettier --write"]
 }
