@@ -19,6 +19,7 @@ export async function seedFile(): Promise<Array<FileDataModel>> {
         filename,
         originalName: filename,
         mimeType: faker.system.mimeType(),
+        url: faker.internet.url(),
         size: 2000,
         key,
       } satisfies InsertFile;
