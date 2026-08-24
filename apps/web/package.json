@@ -20,18 +20,43 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.1",
+    "@hookform/resolvers": "catalog:",
     "@hugeicons/core-free-icons": "catalog:",
     "@hugeicons/react": "catalog:",
+    "@orpc/client": "^1.15.0",
+    "@orpc/contract": "^1.15.0",
+    "@orpc/json-schema": "^1.15.0",
+    "@orpc/openapi": "^1.15.0",
+    "@orpc/server": "^1.15.0",
+    "@orpc/tanstack-query": "^1.15.0",
+    "@orpc/zod": "^1.15.0",
+    "@supabase/supabase-js": "catalog:",
     "@t3-oss/env-nextjs": "^0.13.11",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-query-devtools": "catalog:",
+    "@upstash/qstash": "catalog:",
+    "@upstash/redis": "catalog:",
+    "@workspace/drizzle": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "@workspace/mail": "workspace:*",
     "@workspace/ui": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "immer": "catalog:",
+    "lucide-react": "catalog:",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "zod": "catalog:"
+    "react-hook-form": "catalog:",
+    "react-hot-toast": "^2.6.0",
+    "ua-parser-js": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "catalog:",
@@ -40,6 +65,7 @@
     "@types/react-dom": "catalog:",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "catalog:",
     "typescript": "catalog:"
   }

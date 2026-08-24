@@ -47,3 +47,11 @@ export interface FieldError<TFieldNames> {
   fieldName: TFieldNames;
   message: string;
 }
+
+export interface IApiHookInput<TFieldNames = string> {
+  onRequestStart?: () => void;
+  onRequestEnd?: () => void;
+  onSuccess?: (message: string) => void;
+  onError?: (errorMessage: string) => void;
+  onValidationErrors?: (fields: Array<FieldError<TFieldNames>>) => void;
+}

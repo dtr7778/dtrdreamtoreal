@@ -9,4 +9,10 @@ export const API_MESSAGES = {
       INVALID_SIGNATURE: "Invalid request signature. Access denied.",
     },
   },
+  AUTH: {
+    REQUEST_RESET_PASSWORD: "Password reset link has been sent to your email.",
+    METADATA: "Auth metadata loaded successfully.",
+    BAN: "User has been banned successfully.",
+    UNBAN: "User has been unbanned successfully.",
+  },
 };

@@ -7,7 +7,7 @@ import { RoleEnumType } from "@workspace/drizzle/zod-db-enums";
 import { auth } from "@/lib/better-auth/auth";
 import { hasPermission, PermissionStrType } from "@/lib/permission";
 
-import { getUserRolesAndPermissionWithOrg } from "@/features/auth/data/getUserPermission";
+import { getUserRolesAndPermission } from "@/features/auth/data/getUserPermission";
 import { AuthSession, AuthUser } from "@/types";
 import { ORPCContext } from "@/types/orpc.types";
 
@@ -55,9 +55,7 @@ export async function getAuthData(
 export async function getRolesAndPermissionsWithContext(
   userId: string,
   context: ORPCContext
-): Promise<Awaited<
-  ReturnType<typeof getUserRolesAndPermissionWithOrg>
-> | null> {
+): Promise<Awaited<ReturnType<typeof getUserRolesAndPermission>> | null> {
   try {
     if (
       context.roles != null &&
@@ -71,7 +69,7 @@ export async function getRolesAndPermissionsWithContext(
       };
     }
 
-    const rolesAndPermissions = await getUserRolesAndPermissionWithOrg(
+    const rolesAndPermissions = await getUserRolesAndPermission(
       userId,
       context.db
     );

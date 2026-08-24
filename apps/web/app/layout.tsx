@@ -5,6 +5,7 @@ import { Geist_Mono, Public_Sans } from "next/font/google";
 
 import { Toaster } from "react-hot-toast";
 
+import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import "@workspace/ui/globals.css";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -96,17 +97,19 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <TanstackQueryProvider>{children}</TanstackQueryProvider>
-          <Toaster
-            position="top-center"
-            reverseOrder={true}
-            gutter={6}
-            toastOptions={{
-              duration: 3000,
-              removeDelay: 2000,
-              className: "__react-hot-toast",
-            }}
-          />
+          <TooltipProvider>
+            <TanstackQueryProvider>{children}</TanstackQueryProvider>
+            <Toaster
+              position="top-center"
+              reverseOrder={true}
+              gutter={6}
+              toastOptions={{
+                duration: 3000,
+                removeDelay: 2000,
+                className: "__react-hot-toast",
+              }}
+            />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

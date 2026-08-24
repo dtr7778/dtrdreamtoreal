@@ -8,7 +8,7 @@ import { RoleEnumSchema, RoleEnumType } from "@workspace/drizzle/zod-db-enums";
 import { hasPermission, PermissionStrType } from "@/lib/permission";
 
 import { DEFAULT_AUTH_PATH } from "@/constants";
-import { getAuthUserWithRolesAndPermissionsWithOrgCache } from "@/features/auth/data/getAuthUser";
+import { getAuthUserWithRolesAndPermissionsCache } from "@/features/auth/data/getAuthUser";
 
 export function isAdmin(roles: Array<{ roleName: RoleEnumType | string }>) {
   return roles.some(
@@ -18,10 +18,10 @@ export function isAdmin(roles: Array<{ roleName: RoleEnumType | string }>) {
   );
 }
 
-export const requireUserPermissionsWithOrgCache = cache(
+export const requireUserPermissionsCache = cache(
   async (inputPermissions: Array<PermissionStrType>, resourceId?: string) => {
     const { session, user, permissions } =
-      await getAuthUserWithRolesAndPermissionsWithOrgCache();
+      await getAuthUserWithRolesAndPermissionsCache();
 
     if (
       !hasPermission(permissions, inputPermissions, {
