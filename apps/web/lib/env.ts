@@ -17,6 +17,10 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1),
     REDIS_REST_URL: z.url().min(1),
     REDIS_REST_TOKEN: z.string().min(1),
+    QSTASH_URL: z.url().min(1),
+    QSTASH_TOKEN: z.string().min(1),
+    QSTASH_CURRENT_SIGNING_KEY: z.string().min(1),
+    QSTASH_NEXT_SIGNING_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -37,6 +41,10 @@ export const env = createEnv({
             "postgresql://postgres:postgres@localhost:5432/postgres",
           REDIS_REST_URL: "http://localhost:6379",
           REDIS_REST_TOKEN: "token",
+          QSTASH_URL: "http://localhost:8080",
+          QSTASH_TOKEN: "token",
+          QSTASH_CURRENT_SIGNING_KEY: "current_signing_key",
+          QSTASH_NEXT_SIGNING_KEY: "next_signing_key",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -46,5 +54,9 @@ export const env = createEnv({
           DATABASE_URL: process.env.DATABASE_URL,
           REDIS_REST_URL: process.env.REDIS_REST_URL,
           REDIS_REST_TOKEN: process.env.REDIS_REST_TOKEN,
+          QSTASH_URL: process.env.QSTASH_URL,
+          QSTASH_TOKEN: process.env.QSTASH_TOKEN,
+          QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+          QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
         },
 });
