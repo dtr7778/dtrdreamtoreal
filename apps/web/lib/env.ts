@@ -28,6 +28,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: z.string(),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
     SUPABASE_SECRET_KEY: z.string().min(1),
+    WEB_PUSH_PRIVATE_KEY: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -38,6 +39,7 @@ export const env = createEnv({
     NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: z.string().min(1),
     NEXT_PUBLIC_SUPABASE_URL: z.url().min(1),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: z.string().min(1),
+    NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: z.string().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -55,7 +57,7 @@ export const env = createEnv({
           QSTASH_TOKEN: "token",
           QSTASH_CURRENT_SIGNING_KEY: "current_signing_key",
           QSTASH_NEXT_SIGNING_KEY: "next_signing_key",
-          RESEND_API_KEY: "resend_api_key",
+          RESEND_API_KEY: "re_any_key_works",
           SUPPORT_MAIL: "support@example.com",
           MAIL_FROM: "test@example.com",
           BETTER_AUTH_URL: "http://localhost:3000",
@@ -65,6 +67,8 @@ export const env = createEnv({
           NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: "key",
           SUPABASE_SECRET_KEY: "secret",
+          NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: "public_key",
+          WEB_PUSH_PRIVATE_KEY: "private_key",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -90,5 +94,8 @@ export const env = createEnv({
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY:
             process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
           SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+          NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY:
+            process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY,
+          WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY,
         },
 });
