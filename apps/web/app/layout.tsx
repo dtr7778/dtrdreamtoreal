@@ -10,6 +10,7 @@ import { cn } from "@workspace/ui/lib/utils";
 
 import { env } from "@/lib/env";
 
+import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 import { THEME_COLOR } from "@/constants";
@@ -95,7 +96,7 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          {children}
+          <TanstackQueryProvider>{children}</TanstackQueryProvider>
           <Toaster
             position="top-center"
             reverseOrder={true}
