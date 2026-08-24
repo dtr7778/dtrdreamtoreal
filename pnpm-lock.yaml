@@ -106,6 +106,10 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      '@supabase/supabase-js':
+        specifier: 'catalog:'
+        version: 2.112.4
     devDependencies:
       '@commitlint/cli':
         specifier: ^21.2.2
@@ -137,6 +141,9 @@ importers:
       cz-conventional-changelog:
         specifier: ^3.3.0
         version: 3.3.0(@types/node@20.19.41)(typescript@5.9.3)
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.4.2
       eslint:
         specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)

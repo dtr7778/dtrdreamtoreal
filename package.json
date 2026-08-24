@@ -21,8 +21,12 @@
     "typecheck": "turbo typecheck",
     "prepare": "husky",
     "commit": "cz",
+    "seed:storage": "tsx scripts/seed/storage.seed.ts",
     "docker:dev:up": "bash scripts/docker-compose-wrapper.sh -f ./infra/docker/docker-compose-dev.yml up -d",
     "docker:dev:down": "bash scripts/docker-compose-wrapper.sh -f ./infra/docker/docker-compose-dev.yml down"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "catalog:"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
@@ -42,6 +46,7 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.18",
     "typescript": "catalog:",
+    "dotenv": "catalog:",
     "vitest": "catalog:"
   },
   "packageManager": "pnpm@10.33.4",
