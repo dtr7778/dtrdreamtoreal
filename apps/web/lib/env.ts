@@ -24,6 +24,9 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().min(1),
     SUPPORT_MAIL: z.email().min(1),
     MAIL_FROM: z.email().min(1),
+    BETTER_AUTH_URL: z.url(),
+    BETTER_AUTH_SECRET: z.string(),
+    GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -31,6 +34,7 @@ export const env = createEnv({
       .default("development"),
     NEXT_PUBLIC_SITE_URL: z.url().min(1),
     NEXT_PUBLIC_SITE_NAME: z.string().min(1),
+    NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: z.string().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -51,6 +55,10 @@ export const env = createEnv({
           RESEND_API_KEY: "resend_api_key",
           SUPPORT_MAIL: "support@example.com",
           MAIL_FROM: "test@example.com",
+          BETTER_AUTH_URL: "http://localhost:3000",
+          BETTER_AUTH_SECRET: "secret",
+          NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: "client_id",
+          GOOGLE_AUTH_CLIENT_SECRET: "client_secret",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -67,5 +75,10 @@ export const env = createEnv({
           RESEND_API_KEY: process.env.RESEND_API_KEY,
           SUPPORT_MAIL: process.env.SUPPORT_MAIL,
           MAIL_FROM: process.env.MAIL_FROM,
+          BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+          BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+          NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID:
+            process.env.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID,
+          GOOGLE_AUTH_CLIENT_SECRET: process.env.GOOGLE_AUTH_CLIENT_SECRET,
         },
 });
