@@ -11,12 +11,16 @@ import { getColumn, isDateRangeFilter } from "./utils";
  * - Date ranges: { from, to } → gte/lte conditions
  */
 export function buildFilterWhere(
-  filter: Record<string, FilterValue> | null | undefined,
+  filter: Record<string, FilterValue | null | undefined> | null | undefined,
   tableColumns: TableColumns
 ): SQL | undefined {
   if (!filter || !Object.keys(filter).length) return undefined;
 
   const conditions = Object.entries(filter).flatMap(([key, value]) => {
+    if (!value) {
+      return [];
+    }
+
     const col = getColumn(tableColumns, key);
     if (!col) return [];
 
