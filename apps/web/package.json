@@ -20,7 +20,10 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "catalog:",
@@ -64,6 +67,7 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@next/env": "^16.3.3",
     "@serwist/turbopack": "^9.5.12",
     "@storybook/react-vite": "catalog:",
     "@tailwindcss/postcss": "catalog:",
@@ -71,12 +75,14 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/web-push": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "babel-plugin-react-compiler": "^1.0.0",
     "esbuild": "^0.28.2",
     "eslint": "catalog:",
     "serwist": "^9.5.12",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:"
   }
 }

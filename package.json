@@ -19,12 +19,14 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
-    "test": "turbo test",
     "prepare": "husky",
     "commit": "cz",
     "seed:storage": "tsx scripts/seed/storage.seed.ts",
     "docker:dev:up": "bash scripts/docker-compose-wrapper.sh -f ./infra/docker/docker-compose-dev.yml up -d",
-    "docker:dev:down": "bash scripts/docker-compose-wrapper.sh -f ./infra/docker/docker-compose-dev.yml down"
+    "docker:dev:down": "bash scripts/docker-compose-wrapper.sh -f ./infra/docker/docker-compose-dev.yml down",
+    "test": "turbo test",
+    "test:projects": "vitest run",
+    "test:projects:watch": "vitest --watch"
   },
   "dependencies": {
     "@supabase/supabase-js": "catalog:"
