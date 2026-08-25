@@ -5,29 +5,16 @@ import {
   CONTACT_SUBMISSION_STATUS,
   FEEDBACK_ISSUE_STATUS,
   FEEDBACK_ISSUE_TYPE,
+  FILE_ENTITY_TYPES,
   NOTIFICATION_CATEGORY,
   NOTIFICATION_LEVEL,
   PERMISSION_LEVEL,
-  PRIVATE_ENTITY_TYPES,
-  PUBLIC_ENTITY_TYPES,
   RESOURCE_TYPE,
   ROLES,
 } from "./enum-values";
 
-export const PublicEntityTypeEnumSchema = z.enum(PUBLIC_ENTITY_TYPES);
-export type PublicEntityTypeEnumType = z.infer<
-  typeof PublicEntityTypeEnumSchema
->;
-
-export const PrivateEntityTypeEnumSchema = z.enum(PRIVATE_ENTITY_TYPES);
-export type PrivateEntityTypeEnumType = z.infer<
-  typeof PrivateEntityTypeEnumSchema
->;
-
-export const EntityTypeEnumSchema = PublicEntityTypeEnumSchema.or(
-  PrivateEntityTypeEnumSchema
-);
-export type EntityTypeEnumType = z.infer<typeof EntityTypeEnumSchema>;
+export const FileEntityTypeEnumSchema = z.enum(FILE_ENTITY_TYPES);
+export type FileEntityTypeEnumType = z.infer<typeof FileEntityTypeEnumSchema>;
 
 export const RoleEnumSchema = z.enum(ROLES);
 export type RoleEnumType = z.infer<typeof RoleEnumSchema>;

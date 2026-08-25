@@ -16,7 +16,7 @@ import {
 import z from "zod";
 
 import { db_id, db_soft_delete } from "../../db-utils";
-import { EntityTypeEnumType } from "../enums/zod-db-enums";
+import { FileEntityTypeEnumType } from "../enums/zod-db-enums";
 import { UserTable } from "./user";
 
 export const FileTable = pgTable(
@@ -32,7 +32,7 @@ export const FileTable = pgTable(
     uploadedBy: uuid("uploaded_by"),
     entityType: varchar("entity_type", {
       length: 50,
-    }).$type<EntityTypeEnumType>(),
+    }).$type<FileEntityTypeEnumType>(),
     entityId: uuid("entity_id"), // ID of the associated entity
     uploadedAt: timestamp("uploaded_at", {
       withTimezone: true,
