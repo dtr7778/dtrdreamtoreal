@@ -21,7 +21,7 @@ export const qstashMinRateLimit = createRatelimit({
   requests: 100,
   window: "1 m",
   algorithm: "slidingWindow",
-  prefix: "mail:ratelimit:min",
+  prefix: "qstash-ratelimit:min",
 });
 
 export const qstashHourlyRateLimit = createRatelimit({
@@ -29,5 +29,5 @@ export const qstashHourlyRateLimit = createRatelimit({
   requests: 1000,
   window: "1 h",
   algorithm: "slidingWindow",
-  prefix: "mail:ratelimit:hr",
+  prefix: "qstash-ratelimit:hr",
 });
