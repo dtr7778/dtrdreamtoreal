@@ -22,7 +22,6 @@ export const AccountTable = pgTable(
   "accounts",
   {
     id: db_id,
-    issuer: text("issuer").notNull(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
     accessToken: text("access_token"),
