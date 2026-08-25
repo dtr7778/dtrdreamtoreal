@@ -1,0 +1,78 @@
+import type { MetadataRoute } from "next";
+
+import { env } from "@/lib/env";
+
+import { BACKGROUND_COLOR, DEFAULT_AUTH_PATH, THEME_COLOR } from "@/constants";
+import { toSlug } from "@/utils/toSlug";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: env.NEXT_PUBLIC_SITE_NAME,
+    short_name: toSlug(env.NEXT_PUBLIC_SITE_NAME),
+    description: "DTR - Dream To Real website",
+    start_url: DEFAULT_AUTH_PATH,
+    scope: DEFAULT_AUTH_PATH,
+    lang: "en-US",
+    dir: "ltr",
+    display_override: ["window-controls-overlay", "standalone", "minimal-ui"],
+    orientation: "any",
+    background_color: BACKGROUND_COLOR,
+    theme_color: THEME_COLOR,
+    categories: ["business", "productivity", "utilities"],
+    prefer_related_applications: false,
+    icons: [
+      {
+        src: "/icons/icon-48x48.png",
+        sizes: "48x48",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-72x72.png",
+        sizes: "72x72",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-96x96.png",
+        sizes: "96x96",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-128x128.png",
+        sizes: "128x128",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-144x144.png",
+        sizes: "144x144",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-152x152.png",
+        sizes: "152x152",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-256x256.png",
+        sizes: "256x256",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-384x384.png",
+        sizes: "384x384",
+        type: "image/png",
+      },
+      {
+        src: "/icons/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    screenshots: [],
+    shortcuts: [],
+  };
+}

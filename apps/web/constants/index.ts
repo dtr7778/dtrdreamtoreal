@@ -1,6 +1,6 @@
 import { BreadcrumbRouteType, RoutePathType } from "@/types";
 
-export const THEME_COLOR = "#f97770";
+export const THEME_COLOR = "#9f0712";
 export const BACKGROUND_COLOR = "#ffffff";
 
 export const DEFAULT_AUTH_PATH: RoutePathType = "/dashboard";
