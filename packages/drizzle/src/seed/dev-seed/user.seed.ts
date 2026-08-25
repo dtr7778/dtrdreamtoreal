@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
+import { hashPassword } from "better-auth/crypto";
 
 import {
+  AccountTable,
+  InsertAccount,
   InsertUser,
   InsertUserRole,
   RoleDataModel,
@@ -49,6 +52,8 @@ const DEFAULT_USERS: Array<{
 const RANDOM_USER_CONFIG = {
   BAN_PROBABILITY: 0.05,
 } as const;
+
+const DEFAULT_PASSWORD = "12345678";
 
 /**
  * Creates a user object with default avatar from DiceBear API
@@ -155,5 +160,24 @@ export async function seedUsers(
   );
 
   console.log(`✅ ${users.length} Users seeded`);
+
+  console.log("🌱 Seeding accounts...");
+
+  const hashedPassword = await hashPassword(DEFAULT_PASSWORD);
+
+  const accountsData: Array<InsertAccount> = users.map(
+    (u) =>
+      ({
+        accountId: faker.string.uuid(),
+        providerId: "credential",
+        password: hashedPassword,
+        userId: u.id,
+      }) as InsertAccount
+  );
+
+  await db.insert(AccountTable).values(accountsData).returning();
+
+  console.log(`✅ ${accountsData.length} Accounts seeded`);
+
   return users;
 }

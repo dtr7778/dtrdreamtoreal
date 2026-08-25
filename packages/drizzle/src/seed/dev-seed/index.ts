@@ -3,8 +3,6 @@ import { seedPermission } from "../permission.seed";
 import { seedRolePermission } from "../rolePermission.seed";
 import { seedRoles } from "../roles.seed";
 import { db } from "../seed-db-client";
-import { seedAccounts } from "./account.seed";
-import { seedFile } from "./file.seed";
 import { seedUsers } from "./user.seed";
 
 async function main() {
@@ -16,9 +14,6 @@ async function main() {
   const permissions = await seedPermission();
 
   const users = await seedUsers(roles);
-  const accounts = await seedAccounts(users);
-
-  const files = await seedFile();
 
   const rolesAndPermissions = await seedRolePermission(roles, permissions);
 
@@ -26,8 +21,6 @@ async function main() {
 
   console.log(`Roles and Permissions: ${rolesAndPermissions.length}`);
   console.log(`Users: ${users.length}`);
-  console.log(`Accounts: ${accounts.length}`);
-  console.log(`Files: ${files.length}`);
 
   console.log("\n🎉 Seed completed successfully!");
 }
