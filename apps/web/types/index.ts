@@ -1,9 +1,13 @@
 import { RouteType } from "next/dist/lib/load-custom-routes";
 
+import { LucideIcon } from "lucide-react";
+
 import type {
   PermissionDataModel,
   RoleDataModel,
 } from "@workspace/drizzle/schemas";
+
+import { PermissionStrType } from "@/lib/permission";
 
 export type RoutePathType = __next_route_internal_types__.RouteImpl<RouteType>;
 
@@ -60,4 +64,18 @@ export type BreadcrumbRouteType = {
   title: string;
   path: string;
   children?: BreadcrumbRouteType[];
+};
+
+export type SidebarMenuLinkType = {
+  title: string;
+  path: string;
+  pathRegex: RegExp;
+  icon?: LucideIcon | undefined;
+  items?: Array<SidebarMenuLinkType> | undefined;
+  permissions?: Array<PermissionStrType>;
+};
+
+export type SidebarGroupMenuLinkType = {
+  groupName?: string;
+  items: Array<SidebarMenuLinkType>;
 };
