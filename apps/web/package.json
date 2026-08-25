@@ -23,7 +23,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "^1.7.1",
+    "@better-auth/drizzle-adapter": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@hugeicons/core-free-icons": "catalog:",
     "@hugeicons/react": "catalog:",
@@ -57,6 +57,7 @@
     "react-hook-form": "catalog:",
     "react-hot-toast": "^2.6.0",
     "ua-parser-js": "catalog:",
+    "web-push": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
   },
@@ -65,6 +66,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/web-push": "catalog:",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "babel-plugin-react-compiler": "^1.0.0",

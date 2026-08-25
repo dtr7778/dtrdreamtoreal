@@ -1,6 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-
-import { GalleryVerticalEnd } from "lucide-react";
 
 import {
   SidebarMenuButton,
@@ -8,6 +7,8 @@ import {
 } from "@workspace/ui/components/sidebar";
 
 import { env } from "@/lib/env";
+
+import siteLogoSvg from "@/public/sitelogo.svg";
 
 export function SidebarLogo() {
   return (
@@ -17,8 +18,12 @@ export function SidebarLogo() {
         className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         render={
           <Link href={{ pathname: "/dashboard" }}>
-            <span className="inline-flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <GalleryVerticalEnd className="size-4" />
+            <span className="flex aspect-square size-8 items-center justify-center">
+              <Image
+                src={siteLogoSvg}
+                alt={`${env.NEXT_PUBLIC_SITE_NAME} logo`}
+                unoptimized
+              />
             </span>
             <span className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">

@@ -19,7 +19,8 @@
     "SUPPORT_MAIL",
     "MAIL_FROM",
     "SUPABASE_SECRET_KEY",
-    "NEXT_RUNTIME"
+    "NEXT_RUNTIME",
+    "WEB_PUSH_PRIVATE_KEY"
   ],
   "tasks": {
     "build": {

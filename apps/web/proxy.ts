@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getSessionCookie } from "better-auth/cookies";
-import { eq } from "drizzle-orm";
-
-import { RoleTable, UserRoleTable } from "@workspace/drizzle/schemas";
 
 import { auth } from "@/lib/better-auth/auth";
-import { db } from "@/lib/db";
 
 import {
   AUTH_ROUTES,
-  DEFAULT_ADMIN_PATH,
   DEFAULT_AUTH_PATH,
   DEFAULT_UNAUTH_PATH,
   PUBLIC_ROUTES,
 } from "@/constants";
 import type { RoutePathType } from "@/types";
-import { isAdmin } from "@/utils/user-utils";
 
 async function getDbSession(headers: Headers) {
   return auth.api.getSession({
@@ -29,14 +23,6 @@ async function getDbSession(headers: Headers) {
 
 async function signOut(headers: Headers) {
   return auth.api.signOut({ headers });
-}
-
-async function getUserRoles(userId: string) {
-  return await db
-    .select({ roleName: RoleTable.roleName })
-    .from(UserRoleTable)
-    .innerJoin(RoleTable, eq(RoleTable.id, UserRoleTable.roleId))
-    .where(eq(UserRoleTable.userId, userId));
 }
 
 export async function proxy(request: NextRequest) {
@@ -66,20 +52,6 @@ export async function proxy(request: NextRequest) {
     // Auth user hitting auth pages
     if (session && isAuthRoute) {
       return NextResponse.redirect(new URL(DEFAULT_AUTH_PATH, request.url));
-    }
-
-    const roles = session ? await getUserRoles(session.user.id) : null;
-
-    const isAdminUser = roles ? isAdmin(roles) : false;
-
-    // 🔒 Protect admin routes
-    if (pathname.startsWith(DEFAULT_ADMIN_PATH) && !isAdminUser) {
-      return NextResponse.redirect(new URL(DEFAULT_AUTH_PATH, request.url));
-    }
-
-    // 🔁 Redirect admin ONLY from base dashboard
-    if (isAdminUser && pathname === DEFAULT_AUTH_PATH) {
-      return NextResponse.redirect(new URL(DEFAULT_ADMIN_PATH, request.url));
     }
 
     // ✅ Allow shared routes (no redirect)

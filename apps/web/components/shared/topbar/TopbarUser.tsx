@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { BellRing, LogOut, UserRoundCog } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +54,7 @@ export function TopbarUser() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
+      <DropdownMenuTrigger className="size-8">
         <UserAvatar
           userEmail={user.email}
           imageUrl={user?.image}
@@ -71,7 +70,6 @@ export function TopbarUser() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
             <UserAvatar
-              className="px-1 py-1.5"
               userEmail={user.email}
               imageUrl={user?.image}
               userName={user.name}

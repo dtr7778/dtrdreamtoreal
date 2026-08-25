@@ -57,7 +57,7 @@ export default function LoginForm({
       },
       {
         onRequest: () => {
-          toast.loading("Logging in...", { id: toastId });
+          toast.loading("Logging...", { id: toastId });
           setIsLoading(true);
         },
         onSuccess: async () => {

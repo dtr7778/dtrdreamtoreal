@@ -176,6 +176,7 @@ function useLinkUnLinkAccount(provider: string, account?: Account) {
     return authClient.unlinkAccount(
       {
         accountId: account.accountId,
+        providerId: provider,
       },
       {
         onRequest: () => {
@@ -195,7 +196,7 @@ function useLinkUnLinkAccount(provider: string, account?: Account) {
         },
       }
     );
-  }, [router, account]);
+  }, [router, account, provider]);
 
   return { linkAccount, unlinkAccount, isLoading };
 }
