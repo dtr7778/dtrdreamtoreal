@@ -1,8 +1,4 @@
-import {
-  InsertPermission,
-  PermissionDataModel,
-  PermissionTable,
-} from "../schemas";
+import { PermissionDataModel, PermissionTable } from "../schemas";
 import {
   ActionTypeEnumType,
   PermissionLevelEnumType,
@@ -15,7 +11,12 @@ export const separator = ".";
 export type PermissionType =
   `${PermissionLevelEnumType}${typeof separator}${ResourceTypeEnumType}${typeof separator}${ActionTypeEnumType}`;
 
-type CreatePermissionType = Omit<InsertPermission, "name">;
+type CreatePermissionType = {
+  level: PermissionLevelEnumType;
+  resource: ResourceTypeEnumType;
+  action: ActionTypeEnumType;
+  description?: string | null | undefined;
+};
 
 const selfPermissions: CreatePermissionType[] = [
   // User

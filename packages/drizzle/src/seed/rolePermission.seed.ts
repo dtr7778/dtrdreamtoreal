@@ -42,11 +42,13 @@ export const rolesAndPermissionData: Array<{
       "self.user.read",
       "self.user.update",
 
+      "system.role-permission.list",
+      "system.role-permission.read",
+
       // System user management
       "system.user.read",
       "system.user.list",
       "system.user.update",
-      "system.user.delete",
     ],
   },
   {
@@ -55,7 +57,9 @@ export const rolesAndPermissionData: Array<{
       "self.user.read",
       "self.user.update",
 
-      // Full system control (manage bypasses specific actions)
+      "system.role-permission.list",
+      "system.role-permission.read",
+
       "system.user.manage",
     ],
   },

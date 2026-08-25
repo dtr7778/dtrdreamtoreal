@@ -67,12 +67,15 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('SUPPORT_AGENT', 'system.user.list'),
 		('ADMIN', 'self.user.read'),
 		('ADMIN', 'self.user.update'),
+		('ADMIN', 'system.role-permission.list'),
+		('ADMIN', 'system.role-permission.read'),
 		('ADMIN', 'system.user.read'),
 		('ADMIN', 'system.user.list'),
 		('ADMIN', 'system.user.update'),
-		('ADMIN', 'system.user.delete'),
 		('SUPER_ADMIN', 'self.user.read'),
 		('SUPER_ADMIN', 'self.user.update'),
+		('SUPER_ADMIN', 'system.role-permission.list'),
+		('SUPER_ADMIN', 'system.role-permission.read'),
 		('SUPER_ADMIN', 'system.user.manage')
  )
  INSERT INTO public.role_permissions (role_id, permission_id)
