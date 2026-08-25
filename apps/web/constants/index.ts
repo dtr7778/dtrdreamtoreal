@@ -22,6 +22,8 @@ export const PUBLIC_ROUTES: Array<RoutePathType> = [...AUTH_ROUTES, "/"];
 export const DEFAULT_PAGE_INDEX: number = 1;
 export const DEFAULT_PAGE_SIZE: number = 20;
 
+export const DEFAULT_FILE_CACHE_TIMEOUT = 3600;
+
 export const breadcrumbRoutes: Array<BreadcrumbRouteType> = [
   {
     title: "Dashboard",
