@@ -1,13 +1,15 @@
-import { RouteType } from "next/dist/lib/load-custom-routes";
+import type { RouteType } from "next/dist/lib/load-custom-routes";
 
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import type {
-  PermissionDataModel,
-  RoleDataModel,
-} from "@workspace/drizzle/schemas";
+  ActionTypeEnumType,
+  PermissionLevelEnumType,
+  ResourceTypeEnumType,
+  RoleEnumType,
+} from "@workspace/drizzle/zod-db-enums";
 
-import { PermissionStrType } from "@/lib/permission";
+import { permissionSeparator } from "@/constants";
 
 export type RoutePathType = __next_route_internal_types__.RouteImpl<RouteType>;
 
@@ -40,12 +42,19 @@ export type AuthSession = {
   impersonatedBy?: string | null | undefined;
 };
 
-export type RoleType = Pick<RoleDataModel, "roleName">;
+export type RoleType = {
+  roleName: RoleEnumType;
+};
 
-export type PermissionType = Pick<
-  PermissionDataModel,
-  "name" | "level" | "resource" | "action"
->;
+export type PermissionStrType =
+  `${PermissionLevelEnumType}${typeof permissionSeparator}${ResourceTypeEnumType}${typeof permissionSeparator}${ActionTypeEnumType}`;
+
+export type PermissionType = {
+  name: PermissionStrType;
+  level: PermissionLevelEnumType;
+  resource: ResourceTypeEnumType;
+  action: ActionTypeEnumType;
+};
 
 export interface FieldError<TFieldNames> {
   fieldName: TFieldNames;

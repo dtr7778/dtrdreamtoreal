@@ -1,4 +1,3 @@
-import type { PermissionDataModel } from "@workspace/drizzle/schemas";
 import {
   ActionTypeEnumSchema,
   ActionTypeEnumType,
@@ -7,25 +6,16 @@ import {
   ResourceTypeEnumType,
 } from "@workspace/drizzle/zod-db-enums";
 
-import { PermissionType } from "@/types";
-
-const separator = ".";
-
-type PermissionDataType = Pick<
-  PermissionDataModel,
-  "name" | "level" | "resource" | "action"
->;
-
-export type PermissionStrType =
-  `${PermissionLevelEnumType}${typeof separator}${ResourceTypeEnumType}${typeof separator}${ActionTypeEnumType}`;
+import { permissionSeparator } from "@/constants";
+import { PermissionStrType, PermissionType } from "@/types";
 
 function buildPermissionMap(
-  permissions: Array<PermissionDataType | PermissionType>
+  permissions: Array<PermissionType | PermissionType>
 ): Map<string, Set<ActionTypeEnumType>> {
   const permissionMap = new Map<string, Set<ActionTypeEnumType>>();
 
   for (const p of permissions) {
-    const key = `${p.level}${separator}${p.resource}`;
+    const key = `${p.level}${permissionSeparator}${p.resource}`;
 
     if (!permissionMap.has(key)) {
       permissionMap.set(key, new Set());
@@ -45,7 +35,7 @@ function buildPermissionMap(
 }
 
 export function hasPermission(
-  userPermissions: Array<PermissionDataType>,
+  userPermissions: Array<PermissionType>,
   requiredPermissions: Array<PermissionStrType>,
   context: { userId?: string; resourceId?: string }
 ): boolean {
@@ -55,7 +45,7 @@ export function hasPermission(
   const permissionMap = buildPermissionMap(userPermissions);
 
   for (const required of requiredPermissions) {
-    const [level, resource, action] = required.split(separator) as [
+    const [level, resource, action] = required.split(permissionSeparator) as [
       PermissionLevelEnumType,
       ResourceTypeEnumType,
       ActionTypeEnumType,
@@ -72,7 +62,7 @@ export function hasPermission(
       }
     }
 
-    const key = `${level}${separator}${resource}`;
+    const key = `${level}${permissionSeparator}${resource}`;
     const actions = permissionMap.get(key);
 
     if (actions && actions.has(action)) {
