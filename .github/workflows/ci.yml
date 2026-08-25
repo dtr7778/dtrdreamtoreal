@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: "1"
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.task }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        task: [lint, typecheck, test]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/turbo-setup
+
+      - name: Dependency audit
+        if: matrix.task == 'lint'
+        run: pnpm audit --prod --audit-level=high
+
+      - name: Run ${{ matrix.task }}
+        run: pnpm turbo run ${{ matrix.task }} --filter=...[origin/${{ github.event.pull_request.base.ref }}]
+
+  build:
+    name: Build
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/turbo-setup
+
+      - name: Build
+        env:
+          SKIP_ENV_VALIDATION: true
+        run: pnpm turbo run build --filter=...[origin/${{ github.event.pull_request.base.ref }}]
+
+  summary:
+    name: Summary
+    needs: [validate, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Generate Summary
+        run: |
+          VALIDATE_STATUS="${{ needs.validate.result }}"
+          BUILD_STATUS="${{ needs.build.result }}"
+
+          validate_icon="✅"; [ "$VALIDATE_STATUS" != "success" ] && validate_icon="❌"
+          build_icon="✅"; [ "$BUILD_STATUS" != "success" ] && build_icon="❌"
+
+          {
+            echo "## CI Report"
+            echo ""
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+            echo "| Validate (lint · typecheck · test) | $validate_icon $VALIDATE_STATUS |"
+            echo "| Build | $build_icon $BUILD_STATUS |"
+            echo ""
+            echo "**PR:** #${{ github.event.pull_request.number }}"
+            echo "**Branch:** \`${{ github.event.pull_request.head.ref }}\` → **Target:** \`${{ github.event.pull_request.base.ref }}\`"
+            echo "**Commits:** \`${{ github.event.pull_request.base.sha }}\`…\`${{ github.event.pull_request.head.sha }}\`"
+            echo ""
+            echo "**Changed files:**"
+            git diff --name-only --diff-filter=ACMRT \
+              "${{ github.event.pull_request.base.sha }}" \
+              "${{ github.event.pull_request.head.sha }}" \
+              | sed 's/^/ - /' || echo " - unable to compute diff"
+            echo ""
+            echo "**Checks:** audit · lint · typecheck · test · build"
+          } >> "$GITHUB_STEP_SUMMARY"
