@@ -7,6 +7,7 @@ import {
   UserTable,
 } from "@workspace/drizzle/schemas";
 import { jsonbAgg } from "@workspace/drizzle/sql-helpers";
+import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
 
 export const roleColumnSql = jsonbAgg({
   id: RoleTable.id,
@@ -18,7 +19,7 @@ export const roleSqlSchema = selectRoleSchema
     id: true,
   })
   .extend({
-    roleName: z.string(),
+    roleName: RoleEnumSchema,
   });
 
 export const userProfileColumns = {
