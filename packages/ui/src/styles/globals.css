@@ -156,4 +156,7 @@
   .__react-hot-toast {
     @apply rounded-lg! border bg-popover! text-popover-foreground! shadow-md;
   }
+  .link {
+    @apply hover:underline;
+  }
 }
