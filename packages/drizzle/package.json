@@ -63,7 +63,9 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "catalog:",
     "tsx": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

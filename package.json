@@ -19,6 +19,7 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
+    "test": "turbo test",
     "prepare": "husky",
     "commit": "cz",
     "seed:storage": "tsx scripts/seed/storage.seed.ts",
