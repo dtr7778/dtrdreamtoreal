@@ -16,6 +16,7 @@ export const RESOURCE_TYPE = [
   "invitation",
   "lead",
   "lead_mail",
+  "feedback",
 ] as const;
 export const ACTION_TYPE = [
   "create",
