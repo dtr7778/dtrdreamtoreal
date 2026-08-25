@@ -28,6 +28,7 @@
     "./rate-limit/mock": "./tests/rate-limit.mock.ts",
     "./supabase/browser-client": "./src/services/supabase/browser-client.ts",
     "./supabase/server-client": "./src/services/supabase/server-client.ts",
+    "./supabase/client/mock": "./tests/supabase-client.mock.ts",
     "./supabase/storage": "./src/services/supabase/storage/index.ts",
     "./utils": "./src/utils/index.ts"
   },

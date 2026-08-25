@@ -18,6 +18,10 @@
       "import": "./src/drizzle-client.ts",
       "types": "./src/drizzle-client.ts"
     },
+    "./client/mock": {
+      "import": "./tests/drizzle-client.mock.ts",
+      "types": "./tests/drizzle-client.mock.ts"
+    },
     "./schemas": {
       "import": "./src/schemas/index.ts",
       "types": "./src/schemas/index.ts"
@@ -51,7 +55,10 @@
     "db:generate-dbml": "tsx ./src/generators/dbml-generator.ts",
     "db:generate-sql": "tsx ./src/generators/sql-generator.ts",
     "db:generate-full": "pnpm run db:generate && pnpm run db:generate-dbml && pnpm run db:generate-sql",
-    "db:generate-seed-sql": "tsx ./src/generators/seed-sql-generator.ts"
+    "db:generate-seed-sql": "tsx ./src/generators/seed-sql-generator.ts",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.5.0",
