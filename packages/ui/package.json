@@ -43,6 +43,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@storybook/react-vite": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@turbo/gen": "^2.9.15",
     "@types/node": "catalog:",

@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@serwist/turbopack": "^9.5.12",
+    "@storybook/react-vite": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
