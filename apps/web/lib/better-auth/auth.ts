@@ -66,6 +66,11 @@ function createBetterAuth() {
     databaseHooks: {
       user: {
         create: {
+          before: async () => {
+            throw new APIError("BAD_REQUEST", {
+              message: "Register is currently disabled",
+            });
+          },
           after: async (user) => {
             // 1. Find the default USER role
             const [defaultRole] = await db
@@ -234,6 +239,7 @@ function createBetterAuth() {
         redirectURI: `${env.NEXT_PUBLIC_SITE_URL}/api/auth/callback/google`,
         accessType: "offline",
         prompt: "select_account",
+        disableSignUp: true,
       },
     },
     user: {
@@ -289,6 +295,7 @@ function createBetterAuth() {
       autoSignIn: false,
       requireEmailVerification: true,
       resetPasswordTokenExpiresIn: 60 * 60,
+      disableSignUp: true,
       sendResetPassword: async ({ user, url }) => {
         const { success, error } = await mailProvider.sendPasswordResetMail({
           to: user.email,
