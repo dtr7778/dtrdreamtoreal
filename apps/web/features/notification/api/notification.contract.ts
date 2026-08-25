@@ -39,7 +39,22 @@ const listNotificationContract = baseContract
     })
   )
   .output(
-    apiOutputZodSchema(paginateOutputZodSchema(selectNotificationSchema))
+    apiOutputZodSchema(
+      paginateOutputZodSchema(
+        selectNotificationSchema.pick({
+          id: true,
+          category: true,
+          level: true,
+          title: true,
+          message: true,
+          data: true,
+          isRead: true,
+          readAt: true,
+          createdAt: true,
+          updatedAt: true,
+        })
+      )
+    )
   );
 export type ListNotificationContractType = InferContractRouterType<
   typeof listNotificationContract

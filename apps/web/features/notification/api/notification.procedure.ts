@@ -35,21 +35,36 @@ export const listNotificationProcedure = notificationImpl.list.handler(
         level: NotificationTable.level,
         category: NotificationTable.category,
         isRead: NotificationTable.isRead,
+        createdAt: NotificationTable.createdAt,
       },
       input
     );
 
+    const joindedQuery = context.db
+      .select({
+        id: NotificationTable.id,
+        category: NotificationTable.category,
+        level: NotificationTable.level,
+        title: NotificationTable.title,
+        message: NotificationTable.message,
+        data: NotificationTable.data,
+        isRead: NotificationTable.isRead,
+        readAt: NotificationTable.readAt,
+        createdAt: NotificationTable.createdAt,
+        updatedAt: NotificationTable.updatedAt,
+      })
+      .from(NotificationTable)
+      .where(and(eq(NotificationTable.recipientId, context.user.id), where))
+      .$dynamic();
+
     const [totalCount, notifications] = await Promise.all([
       context.db.$count(
         context.db
-          .select()
+          .select({ id: NotificationTable.id })
           .from(NotificationTable)
           .where(eq(NotificationTable.recipientId, context.user.id))
       ),
-      context.db
-        .select()
-        .from(NotificationTable)
-        .where(and(eq(NotificationTable.recipientId, context.user.id), where))
+      joindedQuery
         .orderBy(desc(NotificationTable.createdAt))
         .offset(offset)
         .limit(limit),
