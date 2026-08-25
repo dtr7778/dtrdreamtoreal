@@ -41,7 +41,7 @@ export default function UserTableRowAction({
               render={
                 <Link
                   href={{
-                    pathname: `/dashboard/admin/users/${userData.id}`,
+                    pathname: `/dashboard/users/${userData.id}`,
                     search: "tab=details",
                   }}
                 />

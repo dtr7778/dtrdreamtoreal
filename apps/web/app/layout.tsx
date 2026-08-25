@@ -1,8 +1,9 @@
 import "../server/orpc.server-client";
 
 import { Metadata, Viewport } from "next";
-import { Geist_Mono, Public_Sans } from "next/font/google";
+import { Geist_Mono, IBM_Plex_Sans, Space_Grotesk } from "next/font/google";
 
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "react-hot-toast";
 
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
@@ -17,7 +18,15 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 
 import { THEME_COLOR } from "@/constants";
 
-const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const spaceGroteskHeading = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -93,13 +102,16 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         "font-sans",
-        publicSans.variable
+        ibmPlexSans.variable,
+        spaceGroteskHeading.variable
       )}
     >
       <body>
         <ThemeProvider>
           <TooltipProvider>
-            <TanstackQueryProvider>{children}</TanstackQueryProvider>
+            <NuqsAdapter>
+              <TanstackQueryProvider>{children}</TanstackQueryProvider>
+            </NuqsAdapter>
             <Toaster
               position="top-center"
               reverseOrder={true}

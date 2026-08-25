@@ -31,7 +31,7 @@ export const breadcrumbRoutes: Array<BreadcrumbRouteType> = [
     children: [
       {
         title: "All Users",
-        path: "/dashboard/admin/users",
+        path: "/dashboard/users",
       },
       {
         title: "Settings",
