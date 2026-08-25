@@ -56,6 +56,7 @@ export default async function ProfilePage() {
 
   return (
     <DashboardShell
+      className="max-w-5xl w-full mx-auto"
       header={
         <DashboardShellHeader>
           <DashboardShellTitle>Profile</DashboardShellTitle>
@@ -107,6 +108,7 @@ export default async function ProfilePage() {
                   <TooltipTrigger
                     render={
                       <Button
+                        size="icon"
                         render={<Link href="/dashboard/settings/profile" />}
                       />
                     }
