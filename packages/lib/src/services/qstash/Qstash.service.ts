@@ -5,7 +5,7 @@ import { Client, Receiver } from "@upstash/qstash";
 import { QstashError } from "./QstashError";
 import {
   ContentType,
-  DeadLetterQueue,
+  DeadLetterRepository,
   MessageLogRepository,
   QstashLogEntry,
 } from "./QstashMessageLog.repository";
@@ -156,7 +156,7 @@ export class QstashService implements IQstashService {
   private readonly client: Client;
   private readonly receiver: Receiver;
   private readonly logs: MessageLogRepository;
-  private readonly dlq: DeadLetterQueue;
+  private readonly dlq: DeadLetterRepository;
   private readonly handlers: HandlerRegistry;
 
   constructor(qstashConfig: QstashServiceConfig) {
@@ -164,7 +164,7 @@ export class QstashService implements IQstashService {
     this.client = this.createClient();
     this.receiver = this.createReceiver();
     this.logs = new MessageLogRepository(this.config.redisClient);
-    this.dlq = new DeadLetterQueue(this.config.redisClient);
+    this.dlq = new DeadLetterRepository(this.config.redisClient);
     this.handlers = new HandlerRegistry();
   }
 
