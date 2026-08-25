@@ -1,3 +1,5 @@
+import { SerwistProvider } from "@serwist/turbopack/react";
+
 import {
   SidebarInset,
   SidebarProvider,
@@ -13,16 +15,20 @@ export default function DashboardLayout({
   children,
 }: LayoutProps<"/dashboard">) {
   return (
-    <NotificationPermissionProvider>
-      <NotificationProvider>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            <Topbar />
-            <main className="min-h-[calc(100vh-84px)] flex-1">{children}</main>
-          </SidebarInset>
-        </SidebarProvider>
-      </NotificationProvider>
-    </NotificationPermissionProvider>
+    <SerwistProvider swUrl="/serwist/sw.js">
+      <NotificationPermissionProvider>
+        <NotificationProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <Topbar />
+              <main className="min-h-[calc(100vh-84px)] flex-1">
+                {children}
+              </main>
+            </SidebarInset>
+          </SidebarProvider>
+        </NotificationProvider>
+      </NotificationPermissionProvider>
+    </SerwistProvider>
   );
 }
