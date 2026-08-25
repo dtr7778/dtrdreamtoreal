@@ -57,5 +57,12 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp": ">=0.35.0",
+      "postcss": ">=8.5.23",
+      "esbuild": ">=0.25.12"
+    }
   }
 }
