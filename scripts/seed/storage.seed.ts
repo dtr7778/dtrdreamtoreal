@@ -12,8 +12,7 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY!
 );
 
-const PUBLIC_BUCKET = "public_file_storage";
-const PRIVATE_BUCKET = "private_file_storage";
+const STORAGE_BUCKET_NAME = "file_storage";
 
 const contentTypes: Record<string, string> = {
   ".html": "text/html",
@@ -41,16 +40,28 @@ function getContentType(extension: string): string {
 
 async function main() {
   try {
-    await supabase.storage.deleteBucket(PUBLIC_BUCKET);
-    await supabase.storage.deleteBucket(PRIVATE_BUCKET);
+    await supabase.storage.deleteBucket(STORAGE_BUCKET_NAME);
 
-    await supabase.storage.createBucket(PUBLIC_BUCKET, {
+    await supabase.storage.createBucket(STORAGE_BUCKET_NAME, {
       public: true,
-      fileSizeLimit: 10 * 1024 * 1024, // 10 MB
-      allowedMimeTypes: ["image/*"],
-    });
-    await supabase.storage.createBucket(PRIVATE_BUCKET, {
-      public: false,
+      fileSizeLimit: 50 * 1024 * 1024, // 50 MB
+      allowedMimeTypes: [
+        // image
+        "image/*",
+        // PDF
+        "application/pdf",
+        // Microsoft Word
+        "application/msword", // .doc
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+        // Microsoft Excel
+        "application/vnd.ms-excel", // .xls
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+        // Text files
+        "text/plain", // .txt
+        "text/csv", // .csv
+        // Rich Text
+        "application/rtf", // .rtf
+      ],
     });
   } catch (error) {
     throw error;

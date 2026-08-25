@@ -4,11 +4,9 @@ import { and, eq } from "drizzle-orm";
 import { FileTable, InsertFile } from "@workspace/drizzle/schemas";
 import { apiResponse } from "@workspace/lib/utils";
 
-import { determineStorageType } from "@/lib/determineStorageType";
 import { resolveFileUrl } from "@/lib/resolveFileUrl";
-import { privateStorage, publicStorage } from "@/lib/storage";
+import { supabaseStorage } from "@/lib/storage";
 
-import { DEFAULT_FILE_CACHE_TIMEOUT } from "@/constants";
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { authMiddleware } from "@/server/middleware/auth.middleware";
 import { errorMiddleware } from "@/server/middleware/error.middleware";
@@ -25,11 +23,7 @@ export const uploadImpl = implement(uploadContract)
 
 export const getSignedUploadUrlProcedure =
   uploadImpl.getSignedUploadUrl.handler(async ({ input }) => {
-    const storageType = determineStorageType(input.entityType);
-
-    const storage = storageType === "public" ? publicStorage : privateStorage;
-
-    const signedUrl = await storage.getSignedUploadUrl(
+    const signedUrl = await supabaseStorage.getSignedUploadUrl(
       input.filename,
       input.path
     );
@@ -43,62 +37,30 @@ export const getSignedUploadUrlProcedure =
   });
 
 export const getSignedDownloadUrlProcedure =
-  uploadImpl.getSignedDownloadUrl.handler(async ({ input, context }) => {
-    const storageType = determineStorageType(input.entityType);
-
-    const cacheKey = `signed_url:${storageType}:${input.key}`;
-    const imageUrlCache = await context.redisClient.get<string>(cacheKey);
-
-    let signedUrl: {
-      signedUrl: string;
-      expiresAt?: Date;
-    };
-
-    if (imageUrlCache) {
-      signedUrl = {
-        signedUrl: imageUrlCache,
-        expiresAt: undefined,
-      };
-    } else {
-      const storage = storageType === "public" ? publicStorage : privateStorage;
-      signedUrl = await storage.getSignedDownloadUrl(
-        input.key,
-        input.entityType
+  uploadImpl.getSignedDownloadUrl.handler(
+    async ({ input, context, errors }) => {
+      const signedUrl = await resolveFileUrl(
+        {
+          key: input.key,
+          entityType: input.entityType,
+        },
+        { redisClient: context.redisClient }
       );
 
-      if (storageType === "private") {
-        let ttl = DEFAULT_FILE_CACHE_TIMEOUT;
-
-        if (signedUrl.expiresAt) {
-          const expiresInSeconds = Math.floor(
-            signedUrl.expiresAt.getTime() / 1000
-          );
-          const nowInSeconds = Math.floor(Date.now() / 1000);
-
-          ttl = expiresInSeconds - nowInSeconds - 60;
-
-          if (ttl < 60) ttl = 300;
-        }
-        await context.redisClient.set(cacheKey, signedUrl.signedUrl, {
-          ex: ttl,
-        });
-      } else {
-        await context.redisClient.set(cacheKey, signedUrl.signedUrl);
+      if (!signedUrl) {
+        throw errors.NOT_FOUND();
       }
-    }
 
-    return apiResponse(API_MESSAGES.UPLOAD.GET_DOWNLOAD_URL, {
-      signedUrl: signedUrl.signedUrl,
-      expiresAt: signedUrl?.expiresAt,
-    });
-  });
+      return apiResponse(API_MESSAGES.UPLOAD.GET_DOWNLOAD_URL, {
+        signedUrl,
+      });
+    }
+  );
 
 export const confirmUploadProcedure = uploadImpl.confirm.handler(
   async ({ input, context, errors }) => {
-    const storageType = determineStorageType(input.entityType);
-    const storage = storageType === "public" ? publicStorage : privateStorage;
+    const fileInfo = await supabaseStorage.find(input.key, input.path);
 
-    const fileInfo = await storage.find(input.key, input.path);
     if (!fileInfo) {
       throw errors.NOT_FOUND();
     }
@@ -114,7 +76,7 @@ export const confirmUploadProcedure = uploadImpl.confirm.handler(
     );
 
     if (!fileUrl) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR");
+      throw errors.NOT_FOUND();
     }
 
     const [newFile] = await context.db
@@ -138,17 +100,6 @@ export const confirmUploadProcedure = uploadImpl.confirm.handler(
       });
     }
 
-    if (storageType === "public") {
-      const fileDownloadUrl = await storage.getSignedDownloadUrl(
-        input.key,
-        input.path
-      );
-
-      const cacheKey = `signed_url:${storageType}:${input.key}`;
-
-      await context.redisClient.set(cacheKey, fileDownloadUrl);
-    }
-
     return apiResponse(API_MESSAGES.UPLOAD.CONFIRM_UPLOAD, {
       key: input.key,
       id: newFile.id,
@@ -168,11 +119,8 @@ export const assignFileEntityProcedure = uploadImpl.assignEntity.handler(
       throw errors.NOT_FOUND();
     }
 
-    const storageType = determineStorageType(input.entityType);
+    const isExist = await supabaseStorage.exists(input.key, input.path);
 
-    const storage = storageType === "public" ? publicStorage : privateStorage;
-
-    const isExist = await storage.exists(input.key, input.path);
     if (!isExist) {
       throw errors.NOT_FOUND();
     }
@@ -203,15 +151,12 @@ export const deleteUploadProcedure = uploadImpl.delete.handler(
       throw errors.NOT_FOUND();
     }
 
-    const storageType = determineStorageType(input.entityType);
-    const storage = storageType === "public" ? publicStorage : privateStorage;
-
-    const isExist = await storage.exists(input.key, input.path);
+    const isExist = await supabaseStorage.exists(input.key, input.path);
     if (!isExist) {
       throw errors.NOT_FOUND();
     }
 
-    await storage.delete(existFile.key, input.path);
+    await supabaseStorage.delete(existFile.key, input.path);
 
     await context.db.delete(FileTable).where(eq(FileTable.id, existFile.id));
 

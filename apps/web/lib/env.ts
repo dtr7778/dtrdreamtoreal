@@ -29,8 +29,7 @@ export const env = createEnv({
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
     SUPABASE_SECRET_KEY: z.string().min(1),
     WEB_PUSH_PRIVATE_KEY: z.string().min(1),
-    SUPABASE_PRIVATE_STORAGE_BUCKET: z.string().min(1),
-    SUPABASE_PUBLIC_STORAGE_BUCKET: z.string().min(1),
+    SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -71,8 +70,7 @@ export const env = createEnv({
           SUPABASE_SECRET_KEY: "secret",
           NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: "public_key",
           WEB_PUSH_PRIVATE_KEY: "private_key",
-          SUPABASE_PRIVATE_STORAGE_BUCKET: "private",
-          SUPABASE_PUBLIC_STORAGE_BUCKET: "public",
+          SUPABASE_STORAGE_BUCKET_NAME: "bucket",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -101,9 +99,7 @@ export const env = createEnv({
           NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY:
             process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY,
           WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY,
-          SUPABASE_PRIVATE_STORAGE_BUCKET:
-            process.env.SUPABASE_PRIVATE_STORAGE_BUCKET,
-          SUPABASE_PUBLIC_STORAGE_BUCKET:
-            process.env.SUPABASE_PUBLIC_STORAGE_BUCKET,
+          SUPABASE_STORAGE_BUCKET_NAME:
+            process.env.SUPABASE_STORAGE_BUCKET_NAME,
         },
 });

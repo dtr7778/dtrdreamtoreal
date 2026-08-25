@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { EntityTypeEnumType } from "@workspace/drizzle/zod-db-enums";
+import { FileEntityTypeEnumType } from "@workspace/drizzle/zod-db-enums";
 
 import { ProgressType } from "@/components/FileUpload";
 
@@ -30,7 +30,7 @@ export function useFileUploadToAPI({
     {
       file: File;
       path: string;
-      entityType: EntityTypeEnumType;
+      entityType: FileEntityTypeEnumType;
       entityId?: string;
     }
   >({
