@@ -1,10 +1,12 @@
-◇ injected env (6) from ../../.env // tip: ⌘ suppress logs { quiet: true }
+◇ injected env (6) from ../../.env // tip: ⌘ enable debugging { debug: true }
 CREATE TYPE "public"."ContactSubmissionStatusEnum" AS ENUM('PENDING', 'READ', 'REPLIED', 'SPAM');
 CREATE TYPE "public"."FeedbackIssueStatusEnum" AS ENUM('OPEN', 'IN_PROGRESS', 'NEEDS_INFO', 'RESOLVED', 'CLOSED');
 CREATE TYPE "public"."FeedbackIssueTypeEnum" AS ENUM('BUG', 'FEATURE_REQUEST', 'FEEDBACK', 'SUGGESTION', 'REPORT', 'OTHER');
 CREATE TYPE "public"."NotificationCategoryEnum" AS ENUM('SYSTEM', 'AUTH', 'SUPPORT', 'LEAD');
 CREATE TYPE "public"."NotificationLevelEnum" AS ENUM('INFO', 'SUCCESS', 'WARNING', 'ERROR');
 CREATE TYPE "public"."RoleEnum" AS ENUM('USER', 'SUPPORT_AGENT', 'ADMIN', 'SUPER_ADMIN');
+CREATE TYPE "public"."TaskPriorityEnum" AS ENUM('low', 'medium', 'high');
+CREATE TYPE "public"."TaskStatusEnum" AS ENUM('todo', 'in_progress', 'done', 'cancelled');
 CREATE TABLE "contact_submissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -179,6 +181,19 @@ CREATE TABLE "verifications" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "tasks" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"description" text,
+	"status" "TaskStatusEnum" DEFAULT 'todo' NOT NULL,
+	"priority" "TaskPriorityEnum" DEFAULT 'medium' NOT NULL,
+	"due_date" timestamp (3) with time zone,
+	"assigned_by" uuid,
+	"created_by" uuid NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
 ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contact_submission_reply_submission_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."contact_submissions"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contact_submission_reply_replied_by_fkey" FOREIGN KEY ("replied_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_recipient_fkey" FOREIGN KEY ("recipient_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
@@ -195,6 +210,8 @@ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_fkey" FOREIGN KEY ("user_id
 ALTER TABLE "files" ADD CONSTRAINT "files_user_fkey" FOREIGN KEY ("uploaded_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "files" ADD CONSTRAINT "files_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_assigned_by_fkey" FOREIGN KEY ("assigned_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 CREATE INDEX "contact_submission_email_idx" ON "contact_submissions" USING btree ("email");
 CREATE INDEX "contact_submission_status_idx" ON "contact_submissions" USING btree ("status");
 CREATE INDEX "contact_submission_created_at_idx" ON "contact_submissions" USING btree ("created_at");
@@ -231,3 +248,8 @@ CREATE INDEX "files_uploaded_at_idx" ON "files" USING btree ("uploaded_at");
 CREATE UNIQUE INDEX "session_token_key" ON "sessions" USING btree ("token");
 CREATE INDEX "session_user_id_idx" ON "sessions" USING btree ("user_id");
 CREATE INDEX "session_expires_at_idx" ON "sessions" USING btree ("expires_at");
+CREATE INDEX "tasks_assigned_by_idx" ON "tasks" USING btree ("assigned_by");
+CREATE INDEX "tasks_status_idx" ON "tasks" USING btree ("status");
+CREATE INDEX "tasks_priority_idx" ON "tasks" USING btree ("priority");
+CREATE INDEX "tasks_due_date_idx" ON "tasks" USING btree ("due_date");
+CREATE INDEX "tasks_created_at_idx" ON "tasks" USING btree ("created_at");

@@ -25,6 +25,7 @@ import {
 } from "../notification";
 import { UserRoleTable } from "../role-permission";
 import { SessionTable } from "../session.table";
+import { TaskTable } from "../task";
 
 export const UserTable = pgTable(
   "users",
@@ -82,6 +83,8 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   pushSubscriptions: many(PushSubscriptionTable, {
     relationName: "PushSubscriptionToUser",
   }),
+  assignedTasks: many(TaskTable, { relationName: "TaskToAssignedBy" }),
+  createdTasks: many(TaskTable, { relationName: "TaskToCreatedBy" }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

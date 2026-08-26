@@ -43,6 +43,19 @@ enum RoleEnum {
   SUPER_ADMIN
 }
 
+enum TaskPriorityEnum {
+  low
+  medium
+  high
+}
+
+enum TaskStatusEnum {
+  todo
+  in_progress
+  done
+  cancelled
+}
+
 table contact_submissions {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   name varchar(255) [not null]
@@ -311,6 +324,29 @@ table verifications {
   updated_at "timestamp (3) with time zone" [not null, default: `now()`]
 }
 
+table tasks {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  title varchar(255) [not null]
+  description text
+  status TaskStatusEnum [not null, default: 'todo']
+  priority TaskPriorityEnum [not null, default: 'medium']
+  due_date "timestamp (3) with time zone"
+  assigned_by uuid
+  created_by uuid [not null]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    assigned_by [name: 'tasks_assigned_by_idx']
+    status [name: 'tasks_status_idx']
+    priority [name: 'tasks_priority_idx']
+    due_date [name: 'tasks_due_date_idx']
+    created_at [name: 'tasks_created_at_idx']
+  }
+}
+
 ref: contact_submission_replies.submission_id > contact_submissions.id
 
 ref: contact_submission_replies.replied_by > users.id
@@ -342,3 +378,7 @@ ref: files.uploaded_by > users.id
 ref: files.deleted_by > users.id
 
 ref: sessions.user_id > users.id
+
+ref: tasks.assigned_by > users.id
+
+ref: tasks.created_by > users.id

@@ -7,6 +7,8 @@ import {
   NOTIFICATION_CATEGORY,
   NOTIFICATION_LEVEL,
   ROLES,
+  TASK_PRIORITY,
+  TASK_STATUS,
 } from "./enum-values";
 
 export const RoleEnum = pgEnum("RoleEnum", ROLES);
@@ -33,3 +35,7 @@ export const NotificationLevelEnum = pgEnum(
   "NotificationLevelEnum",
   NOTIFICATION_LEVEL
 );
+
+export const TaskStatusEnum = pgEnum("TaskStatusEnum", TASK_STATUS);
+
+export const TaskPriorityEnum = pgEnum("TaskPriorityEnum", TASK_PRIORITY);

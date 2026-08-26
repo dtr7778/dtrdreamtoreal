@@ -6,3 +6,4 @@ export * from "./account.table";
 export * from "./file.table";
 export * from "./session.table";
 export * from "./verification.table";
+export * from "./task";

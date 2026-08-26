@@ -57,3 +57,12 @@ export const NOTIFICATION_LEVEL = [
   "WARNING",
   "ERROR",
 ] as const;
+
+export const TASK_STATUS = [
+  "todo",
+  "in_progress",
+  "done",
+  "cancelled",
+] as const;
+
+export const TASK_PRIORITY = ["low", "medium", "high"] as const;
