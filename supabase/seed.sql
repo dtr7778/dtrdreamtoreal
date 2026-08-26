@@ -13,6 +13,11 @@ INSERT INTO public.permissions (name, level, resource, action, description)
 		('self.lead_mail.create', 'self', 'lead_mail', 'create', 'Send new emails to own leads'),
 		('self.lead_mail.read', 'self', 'lead_mail', 'read', 'View email content of own lead mails'),
 		('self.lead_mail.list', 'self', 'lead_mail', 'list', 'List all emails for own leads'),
+		('self.task.create', 'self', 'task', 'create', 'Create new tasks for own assignments'),
+		('self.task.read', 'self', 'task', 'read', 'View details of own tasks'),
+		('self.task.list', 'self', 'task', 'list', 'List all own tasks with filters'),
+		('self.task.update', 'self', 'task', 'update', 'Update information on own tasks'),
+		('self.task.delete', 'self', 'task', 'delete', 'Remove own tasks permanently'),
 		('system.user.create', 'system', 'user', 'create', 'Create new user accounts'),
 		('system.user.read', 'system', 'user', 'read', 'View any user"s profile information'),
 		('system.user.list', 'system', 'user', 'list', 'List all users with filters and pagination'),
@@ -44,7 +49,14 @@ INSERT INTO public.permissions (name, level, resource, action, description)
 		('system.lead_mail.update', 'system', 'lead_mail', 'update', 'Edit email records for any lead'),
 		('system.lead_mail.delete', 'system', 'lead_mail', 'delete', 'Remove email records from the system'),
 		('system.lead_mail.manage', 'system', 'lead_mail', 'manage', 'Full email management for all leads'),
-		('system.lead_mail.export', 'system', 'lead_mail', 'export', 'Export lead email data to CSV or other formats');
+		('system.lead_mail.export', 'system', 'lead_mail', 'export', 'Export lead email data to CSV or other formats'),
+		('system.task.create', 'system', 'task', 'create', 'Create new tasks in the system'),
+		('system.task.read', 'system', 'task', 'read', 'View any task's details regardless of assignment'),
+		('system.task.list', 'system', 'task', 'list', 'List all tasks across the organization'),
+		('system.task.update', 'system', 'task', 'update', 'Edit any task's information and assignments'),
+		('system.task.delete', 'system', 'task', 'delete', 'Remove tasks from the system permanently'),
+		('system.task.manage', 'system', 'task', 'manage', 'Full task administration including reassignment'),
+		('system.task.export', 'system', 'task', 'export', 'Export task data to CSV or other formats');
 
 DELETE FROM public.roles;
 INSERT INTO public.roles (role_name, description)
@@ -61,10 +73,12 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('USER', 'self.user.update'),
 		('USER', 'self.invitation.list'),
 		('USER', 'self.invitation.update'),
+		('USER', 'system.task.manage'),
 		('SUPPORT_AGENT', 'self.user.read'),
 		('SUPPORT_AGENT', 'self.user.update'),
 		('SUPPORT_AGENT', 'system.user.read'),
 		('SUPPORT_AGENT', 'system.user.list'),
+		('SUPPORT_AGENT', 'system.task.manage'),
 		('ADMIN', 'self.user.read'),
 		('ADMIN', 'self.user.update'),
 		('ADMIN', 'system.role-permission.list'),
@@ -72,11 +86,13 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('ADMIN', 'system.user.read'),
 		('ADMIN', 'system.user.list'),
 		('ADMIN', 'system.user.update'),
+		('ADMIN', 'system.task.manage'),
 		('SUPER_ADMIN', 'self.user.read'),
 		('SUPER_ADMIN', 'self.user.update'),
 		('SUPER_ADMIN', 'system.role-permission.list'),
 		('SUPER_ADMIN', 'system.role-permission.read'),
-		('SUPER_ADMIN', 'system.user.manage')
+		('SUPER_ADMIN', 'system.user.manage'),
+		('SUPER_ADMIN', 'system.task.manage')
  )
  INSERT INTO public.role_permissions (role_id, permission_id)
  SELECT r.id, p.id

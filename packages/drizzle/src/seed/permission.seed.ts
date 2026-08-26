@@ -84,6 +84,38 @@ const selfPermissions: CreatePermissionType[] = [
     action: "list",
     description: "List all emails for own leads",
   },
+
+  // Task
+  {
+    level: "self",
+    resource: "task",
+    action: "create",
+    description: "Create new tasks for own assignments",
+  },
+  {
+    level: "self",
+    resource: "task",
+    action: "read",
+    description: "View details of own tasks",
+  },
+  {
+    level: "self",
+    resource: "task",
+    action: "list",
+    description: "List all own tasks with filters",
+  },
+  {
+    level: "self",
+    resource: "task",
+    action: "update",
+    description: "Update information on own tasks",
+  },
+  {
+    level: "self",
+    resource: "task",
+    action: "delete",
+    description: "Remove own tasks permanently",
+  },
 ];
 
 const systemPermissions: CreatePermissionType[] = [
@@ -287,6 +319,50 @@ const systemPermissions: CreatePermissionType[] = [
     resource: "lead_mail",
     action: "export",
     description: "Export lead email data to CSV or other formats",
+  },
+
+  // Task
+  {
+    level: "system",
+    resource: "task",
+    action: "create",
+    description: "Create new tasks in the system",
+  },
+  {
+    level: "system",
+    resource: "task",
+    action: "read",
+    description: "View any task's details regardless of assignment",
+  },
+  {
+    level: "system",
+    resource: "task",
+    action: "list",
+    description: "List all tasks across the organization",
+  },
+  {
+    level: "system",
+    resource: "task",
+    action: "update",
+    description: "Edit any task's information and assignments",
+  },
+  {
+    level: "system",
+    resource: "task",
+    action: "delete",
+    description: "Remove tasks from the system permanently",
+  },
+  {
+    level: "system",
+    resource: "task",
+    action: "manage",
+    description: "Full task administration including reassignment",
+  },
+  {
+    level: "system",
+    resource: "task",
+    action: "export",
+    description: "Export task data to CSV or other formats",
   },
 ];
 

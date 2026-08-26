@@ -21,6 +21,7 @@ export const rolesAndPermissionData: Array<{
       "self.user.update",
       "self.invitation.list",
       "self.invitation.update", // Accept/decline invites
+      "system.task.manage",
     ],
   },
   {
@@ -33,6 +34,7 @@ export const rolesAndPermissionData: Array<{
       // Cross-org read-only user/org support
       "system.user.read",
       "system.user.list",
+      "system.task.manage",
     ],
   },
   {
@@ -49,6 +51,7 @@ export const rolesAndPermissionData: Array<{
       "system.user.read",
       "system.user.list",
       "system.user.update",
+      "system.task.manage",
     ],
   },
   {
@@ -61,6 +64,7 @@ export const rolesAndPermissionData: Array<{
       "system.role-permission.read",
 
       "system.user.manage",
+      "system.task.manage",
     ],
   },
 ];
