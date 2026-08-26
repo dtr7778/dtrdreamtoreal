@@ -27,6 +27,7 @@ export const API_MESSAGES = {
     GET_ALL: "Users loaded successfully.",
     GET_STATS: "User statistics loaded successfully.",
     GET_DETAILS: "User details loaded successfully.",
+    GET_ALL_FOR_SEARCH: "Users loaded successfully.",
     PROFILE_UPDATE: "Profile updated successfully.",
     UPDATE: "User updated successfully.",
     NOT_FOUND: "User not found.",
@@ -52,5 +53,20 @@ export const API_MESSAGES = {
     DELETE: "File deleted successfully.",
     NOT_CREATE: "Failed to create upload. Please try again.",
     NOT_FOUND: "File not found.",
+  },
+  TASK: {
+    GET_ALL: "Tasks loaded successfully.",
+    GET_DETAILS: "Task details loaded successfully.",
+    CREATE: "Task created successfully.",
+    UPDATE: "Task updated successfully.",
+    UPDATE_STATUS: "Task status updated successfully.",
+    DELETE: "Task deleted successfully.",
+    DELETE_ALL: "All selected tasks deleted successfully.",
+    NOT_FOUND: "Task not found.",
+    NOT_CREATE: "Failed to create task. Please try again.",
+    NOT_UPDATE: "Failed to update task. Please try again.",
+    NOT_ALLOWED: "You don't have permission to manage this task.",
+    ASSIGNEE_NOT_IN_ORG:
+      "The selected assignee is not a member of this organization.",
   },
 };
