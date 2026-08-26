@@ -78,42 +78,6 @@ table contact_submission_replies {
   }
 }
 
-table feedback_issues {
-  id uuid [pk, not null, default: `gen_random_uuid()`]
-  title varchar(255) [not null]
-  description text [not null]
-  type FeedbackIssueTypeEnum [not null]
-  status FeedbackIssueStatusEnum [not null, default: 'OPEN']
-  closed_at "timestamp (3) with time zone"
-  created_by_id uuid [not null]
-  created_at "timestamp (3) with time zone" [not null, default: `now()`]
-  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
-
-  indexes {
-    
-    created_by_id [name: 'feedback_issues_createdBy_idx']
-    status [name: 'feedback_issues_status_idx']
-    type [name: 'feedback_issues_type_idx']
-    created_at [name: 'feedback_issues_created_at_idx']
-  }
-}
-
-table feedback_issue_replies {
-  id uuid [pk, not null, default: `gen_random_uuid()`]
-  issue_id uuid [not null]
-  content text [not null]
-  created_by_id uuid [not null]
-  created_at "timestamp (3) with time zone" [not null, default: `now()`]
-  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
-
-  indexes {
-    
-    
-    issue_id [name: 'feedback_issue_replies_issue_idx']
-    created_by_id [name: 'feedback_issue_replies_createdBy_idx']
-  }
-}
-
 table notifications {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   recipient_id uuid [not null]
@@ -350,12 +314,6 @@ table verifications {
 ref: contact_submission_replies.submission_id > contact_submissions.id
 
 ref: contact_submission_replies.replied_by > users.id
-
-ref: feedback_issues.created_by_id > users.id
-
-ref: feedback_issue_replies.issue_id > feedback_issues.id
-
-ref: feedback_issue_replies.created_by_id > users.id
 
 ref: notifications.recipient_id > users.id
 

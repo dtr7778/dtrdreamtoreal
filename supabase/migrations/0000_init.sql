@@ -26,27 +26,6 @@ CREATE TABLE "contact_submission_replies" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "feedback_issues" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"title" varchar(255) NOT NULL,
-	"description" text NOT NULL,
-	"type" "FeedbackIssueTypeEnum" NOT NULL,
-	"status" "FeedbackIssueStatusEnum" DEFAULT 'OPEN' NOT NULL,
-	"closed_at" timestamp (3) with time zone,
-	"created_by_id" uuid NOT NULL,
-	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "feedback_issue_replies" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"issue_id" uuid NOT NULL,
-	"content" text NOT NULL,
-	"created_by_id" uuid NOT NULL,
-	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "notifications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"recipient_id" uuid NOT NULL,
@@ -201,9 +180,6 @@ CREATE TABLE "verifications" (
 --> statement-breakpoint
 ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contact_submission_reply_submission_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."contact_submissions"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contact_submission_reply_replied_by_fkey" FOREIGN KEY ("replied_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "feedback_issues" ADD CONSTRAINT "feedback_issues_createdBy_fkey" FOREIGN KEY ("created_by_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "feedback_issue_replies" ADD CONSTRAINT "feedback_issue_replies_issue_fkey" FOREIGN KEY ("issue_id") REFERENCES "public"."feedback_issues"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "feedback_issue_replies" ADD CONSTRAINT "feedback_issue_replies_createdBy_fkey" FOREIGN KEY ("created_by_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_recipient_fkey" FOREIGN KEY ("recipient_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_actor_fkey" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
@@ -223,12 +199,6 @@ CREATE INDEX "contact_submission_status_idx" ON "contact_submissions" USING btre
 CREATE INDEX "contact_submission_created_at_idx" ON "contact_submissions" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "contact_submission_reply_submission_id_idx" ON "contact_submission_replies" USING btree ("submission_id");--> statement-breakpoint
 CREATE INDEX "contact_submission_reply_replied_by_idx" ON "contact_submission_replies" USING btree ("replied_by");--> statement-breakpoint
-CREATE INDEX "feedback_issues_createdBy_idx" ON "feedback_issues" USING btree ("created_by_id");--> statement-breakpoint
-CREATE INDEX "feedback_issues_status_idx" ON "feedback_issues" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "feedback_issues_type_idx" ON "feedback_issues" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "feedback_issues_created_at_idx" ON "feedback_issues" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "feedback_issue_replies_issue_idx" ON "feedback_issue_replies" USING btree ("issue_id");--> statement-breakpoint
-CREATE INDEX "feedback_issue_replies_createdBy_idx" ON "feedback_issue_replies" USING btree ("created_by_id");--> statement-breakpoint
 CREATE INDEX "notifications_recipient_idx" ON "notifications" USING btree ("recipient_id");--> statement-breakpoint
 CREATE INDEX "notifications_recipient_read_idx" ON "notifications" USING btree ("recipient_id","is_read");--> statement-breakpoint
 CREATE INDEX "notifications_created_at_idx" ON "notifications" USING btree ("created_at");--> statement-breakpoint

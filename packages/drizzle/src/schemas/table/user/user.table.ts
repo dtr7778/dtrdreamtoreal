@@ -17,7 +17,6 @@ import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
 import { ContactSubmissionReplyTable } from "../contact";
-import { FeedbackIssueReplyTable, FeedbackIssueTable } from "../feedback";
 import { FileTable } from "../file.table";
 import {
   NotificationSettingsTable,
@@ -82,12 +81,6 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   }),
   pushSubscriptions: many(PushSubscriptionTable, {
     relationName: "PushSubscriptionToUser",
-  }),
-  feedbackIssues: many(FeedbackIssueTable, {
-    relationName: "FeedbackIssueToCreatedBy",
-  }),
-  feedbackIssueReplies: many(FeedbackIssueReplyTable, {
-    relationName: "FeedbackIssueReplyToCreatedBy",
   }),
 }));
 

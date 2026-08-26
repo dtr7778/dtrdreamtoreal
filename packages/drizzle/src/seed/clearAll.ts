@@ -7,9 +7,6 @@ export async function clearAll(db: DatabaseType) {
     await tx.delete(schema.ContactSubmissionReplyTable);
     await tx.delete(schema.ContactSubmissionTable);
 
-    await tx.delete(schema.FeedbackIssueReplyTable);
-    await tx.delete(schema.FeedbackIssueTable);
-
     await tx.delete(schema.PushSubscriptionTable);
     await tx.delete(schema.NotificationSettingsTable);
     await tx.delete(schema.NotificationTable);
