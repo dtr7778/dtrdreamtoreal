@@ -67,6 +67,7 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
     "@next/env": "^16.3.3",
     "@serwist/turbopack": "^9.5.12",
     "@storybook/react-vite": "catalog:",
@@ -83,6 +84,7 @@
     "eslint": "catalog:",
     "serwist": "^9.5.12",
     "typescript": "catalog:",
-    "vite-tsconfig-paths": "catalog:"
+    "vite-tsconfig-paths": "catalog:",
+    "zocker": "catalog:"
   }
 }
