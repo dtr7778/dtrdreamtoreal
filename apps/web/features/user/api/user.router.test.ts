@@ -22,7 +22,6 @@ import { API_MESSAGES } from "@/constants/apiMessage";
 import { getUserRolesAndPermission } from "@/features/auth/data/getUserPermission";
 import { mockSessionWithUser } from "@/tests/__mocks__/better-auth.mock";
 import { createMockHeaders } from "@/tests/__mocks__/header.mock";
-import { mockPermission, mockRole } from "@/tests/__mocks__/permission.mock";
 import { ORPCContext } from "@/types/orpc.types";
 
 import { userRouter } from "./user.router";
@@ -84,7 +83,7 @@ describe("User Router (Integration)", () => {
     return { user: user! };
   }
 
-  describe("list user procedure", () => {
+  describe("listUserProcedure", () => {
     let user: UserDataModel;
 
     beforeAll(async () => {
@@ -144,13 +143,30 @@ describe("User Router (Integration)", () => {
       vi.mocked(auth.api.getSession).mockResolvedValue(
         mockSessionWithUser({
           session: { userId: user.id },
-          user: { ...user, banned: false },
+          user,
         })
       );
 
       vi.mocked(getUserRolesAndPermission).mockResolvedValue({
-        roles: mockRole(),
-        permissions: mockPermission(),
+        roles: [
+          {
+            roleName: "SUPER_ADMIN",
+          },
+        ],
+        permissions: [
+          {
+            name: "system.user.manage",
+            level: "system",
+            resource: "user",
+            action: "manage",
+          },
+          {
+            name: "system.user.list",
+            level: "system",
+            resource: "user",
+            action: "list",
+          },
+        ],
       });
 
       const result = await call(
@@ -167,6 +183,33 @@ describe("User Router (Integration)", () => {
       expect(result.message).toBe(API_MESSAGES.USER.GET_ALL);
       expect(result.success).toBe(true);
       expect(result.data.data).toHaveLength(20);
+    });
+
+    test("should thow permission error", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue(
+        mockSessionWithUser({
+          session: { userId: user.id },
+          user,
+        })
+      );
+
+      vi.mocked(getUserRolesAndPermission).mockResolvedValue({
+        roles: [],
+        permissions: [],
+      });
+
+      await expect(
+        call(
+          userRouter.list,
+          {
+            page: 1,
+            limit: 20,
+          },
+          {
+            context: orpcContext,
+          }
+        )
+      ).rejects.toThrow(API_MESSAGES.GENERAL.FORBIDDEN);
     });
   });
 });
