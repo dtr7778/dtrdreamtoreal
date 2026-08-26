@@ -24,8 +24,8 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         title: "Tasks",
         icon: ClipboardList,
         permissions: ["system.task.manage", "system.task.list"],
-        path: "/dashboard/admin/tasks",
-        pathRegex: /^\/dashboard\/admin\/tasks(\/.*)?$/,
+        path: "/dashboard/tasks",
+        pathRegex: /^\/dashboard\/tasks(\/.*)?$/,
       },
       {
         title: "Message",
