@@ -18,6 +18,7 @@ import { jsonbAgg } from "@workspace/drizzle/sql-helpers";
 import { apiResponse } from "@workspace/lib/utils";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
+import { sendNotification } from "@/features/notification/data/sendNotification";
 import {
   authMiddleware,
   userPermissionMiddleware,
@@ -190,6 +191,18 @@ export const taskDetailsProcedure = taskImpl.details
 export const taskCreateProcedure = taskImpl.create
   .use(userPermissionMiddleware(["system.task.manage", "system.task.create"]))
   .handler(async ({ context, input }) => {
+    let assignedBy: string | null = null;
+
+    if (input.assignedBy) {
+      const [existUser] = await context.db
+        .select({ id: UserTable.id })
+        .from(UserTable)
+        .where(eq(UserTable.id, input.assignedBy))
+        .limit(1);
+      if (existUser) {
+        assignedBy = existUser.id;
+      }
+    }
     const [task] = await context.db
       .insert(TaskTable)
       .values({
@@ -198,7 +211,7 @@ export const taskCreateProcedure = taskImpl.create
         status: "todo",
         priority: input.priority,
         dueDate: input.dueDate,
-        assignedBy: input.assignedBy ?? null,
+        assignedBy: assignedBy,
         createdBy: context.user.id,
       } satisfies InsertTask)
       .returning({
@@ -215,6 +228,21 @@ export const taskCreateProcedure = taskImpl.create
     if (!task) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
         message: API_MESSAGES.TASK.NOT_CREATE,
+      });
+    }
+
+    if (assignedBy) {
+      await sendNotification({
+        database: context.db,
+        supabaseClient: context.supabaseClient,
+        payload: {
+          category: "SYSTEM",
+          title: "New Task",
+          message: "New task assigned",
+          recipientId: assignedBy,
+          actorId: context.user.id,
+          level: "INFO",
+        },
       });
     }
 
