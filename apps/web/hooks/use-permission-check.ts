@@ -1,8 +1,9 @@
 "use client";
 
-import { hasPermission, PermissionStrType } from "@/lib/permission";
+import { hasPermission } from "@/lib/permission";
 
 import { useAuthStore } from "@/stores/zustand/auth/AuthStoreContext";
+import { PermissionStrType } from "@/types";
 
 export function usePermissionCheck(permissions: Array<PermissionStrType>) {
   const userPermissions = useAuthStore((state) => state.permissions);

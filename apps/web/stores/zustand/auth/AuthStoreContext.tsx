@@ -6,6 +6,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { StoreApi, useStore } from "zustand";
 
 import { orpcTQClient } from "@/server/orpc.client";
+import { PermissionType } from "@/types";
 
 import { authStore, AuthStoreAction, AuthStoreState } from "./authStore";
 
@@ -25,7 +26,13 @@ export function AuthStoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   const [store] = useState<StoreApi<AuthStoreState & AuthStoreAction>>(() =>
-    authStore(user, session, roles, permissions, isAdminUser)
+    authStore(
+      user,
+      session,
+      roles,
+      permissions as Array<PermissionType>,
+      isAdminUser
+    )
   );
 
   return (

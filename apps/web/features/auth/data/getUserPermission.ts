@@ -65,7 +65,7 @@ export async function getUserRolesAndPermission(
 
   return {
     roles: Array.from(roleMap.values()),
-    permissions: systemRolePermissions,
+    permissions: systemRolePermissions as Array<PermissionType>,
   };
 }
 
