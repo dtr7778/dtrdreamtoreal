@@ -12,6 +12,9 @@ catalogs:
     '@date-fns/tz':
       specifier: ^1.5.0
       version: 1.5.0
+    '@faker-js/faker':
+      specifier: ^10.5.0
+      version: 10.6.0
     '@hookform/resolvers':
       specifier: ^5.9.1
       version: 5.9.1
@@ -120,6 +123,9 @@ catalogs:
     web-push:
       specifier: ^3.6.7
       version: 3.6.7
+    zocker:
+      specifier: ^3.0.0
+      version: 3.0.0
     zod:
       specifier: ^4.4.3
       version: 4.4.3
@@ -382,6 +388,9 @@ importers:
         specifier: 'catalog:'
         version: 5.0.15(@types/react@19.2.15)(immer@11.1.18)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
+      '@faker-js/faker':
+        specifier: 'catalog:'
+        version: 10.6.0
       '@next/env':
         specifier: ^16.3.3
         version: 16.3.3
@@ -433,6 +442,9 @@ importers:
       vite-tsconfig-paths:
         specifier: 'catalog:'
         version: 6.1.1(typescript@5.9.3)(vite@8.2.2(@types/node@20.19.41)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(yaml@2.9.0))
+      zocker:
+        specifier: 'catalog:'
+        version: 3.0.0(zod@4.4.3)
 
   packages/drizzle:
     dependencies:
@@ -459,7 +471,7 @@ importers:
         version: 4.4.3
     devDependencies:
       '@faker-js/faker':
-        specifier: ^10.5.0
+        specifier: 'catalog:'
         version: 10.6.0
       '@types/node':
         specifier: 'catalog:'
@@ -494,6 +506,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@20.19.41)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-istanbul@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(jsdom@30.0.1(@noble/hashes@2.3.0))(vite@8.2.2(@types/node@20.19.41)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(yaml@2.9.0))
+      zocker:
+        specifier: 'catalog:'
+        version: 3.0.0(zod@4.4.3)
 
   packages/eslint-config:
     devDependencies:
@@ -4334,6 +4349,10 @@ packages:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
+  drange@1.1.1:
+    resolution: {integrity: sha512-pYxfDYpued//QpnLIm4Avk7rsNtAtQkUES2cwAYSvD/wd2pKD71gN2Ebj3e7klzXwjocvE8c5vx/1fxwpqmSxA==}
+    engines: {node: '>=4'}
+
   drizzle-dbml-generator@0.10.0:
     resolution: {integrity: sha512-cMZq9E3U3RlmE0uBeXyc6oWJ0royOkC6HiTlc9LDeMe+W87poZTzKoNYUyAxZrs4Q1RQtob+cGKiefV4ZoI8HA==}
     peerDependencies:
@@ -6370,6 +6389,10 @@ packages:
     resolution: {integrity: sha512-h36JMxKRqrAxVD8201FrCpyeNuUY9Y5zZwujr20fFO77tpUtGa6EZzfKw/3WaiBX95fq7+MpsuMLNdSnORAwSA==}
     engines: {node: '>=14.18.0'}
 
+  randexp@0.5.3:
+    resolution: {integrity: sha512-U+5l2KrcMNOUPYvazA3h5ekF80FHTUG+87SEAmHZmolh1M+i/WyTCxVzmi+tidIa1tM4BSe8g2Y/D3loWDjj+w==}
+    engines: {node: '>=4'}
+
   range-parser@1.3.0:
     resolution: {integrity: sha512-hek2mFQpPuI4E1BBKrSto+BU3e3x4xuarsbiwr3+lf7p44juvFMV0XFWQAP3xUyqXA4RrXLIoaSUGbSt056ZMw==}
     engines: {node: '>= 0.6'}
@@ -6552,6 +6575,10 @@ packages:
   restore-cursor@5.1.0:
     resolution: {integrity: sha512-oMA2dcrw6u0YfxJQXm342bFKX/E4sG9rbTzO9ptUcR/e8A33cHuvStiYOwH7fszkZlZ1z/ta9AAoPk2F4qIOHA==}
     engines: {node: '>=18'}
+
+  ret@0.2.2:
+    resolution: {integrity: sha512-M0b3YWQs7R3Z917WRQy1HHA7Ba7D8hvZg6UE5mLykJxQVE2ju0IXbGlaHPPlkY+WN7wFP+wUMXmBFA0aV6vYGQ==}
+    engines: {node: '>=4'}
 
   reusify@1.1.0:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
@@ -7444,6 +7471,11 @@ packages:
   yoctocolors@2.2.0:
     resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
     engines: {node: '>=18'}
+
+  zocker@3.0.0:
+    resolution: {integrity: sha512-xSJz2M9AELZKzgpuuZPbTQdMv9263p/zSHDIj81B58X3334Xl6iJ/C3u6OQiOlsrWAoJSJsveBcIdz1eEPL0EA==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
 
   zod-to-json-schema@3.25.2:
     resolution: {integrity: sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA==}
@@ -10710,6 +10742,8 @@ snapshots:
 
   dotenv@17.4.2: {}
 
+  drange@1.1.1: {}
+
   drizzle-dbml-generator@0.10.0(drizzle-orm@0.45.2(@electric-sql/pglite@0.5.6)(@upstash/redis@1.38.2)(kysely@0.29.5)(postgres@3.4.9)):
     dependencies:
       drizzle-orm: 0.45.2(@electric-sql/pglite@0.5.6)(@upstash/redis@1.38.2)(kysely@0.29.5)(postgres@3.4.9)
@@ -12739,6 +12773,11 @@ snapshots:
 
   radash@12.1.1: {}
 
+  randexp@0.5.3:
+    dependencies:
+      drange: 1.1.1
+      ret: 0.2.2
+
   range-parser@1.3.0: {}
 
   raw-body@3.0.2:
@@ -12961,6 +13000,8 @@ snapshots:
     dependencies:
       onetime: 7.0.0
       signal-exit: 4.1.0
+
+  ret@0.2.2: {}
 
   reusify@1.1.0: {}
 
@@ -13973,6 +14014,12 @@ snapshots:
   yoctocolors-cjs@2.1.3: {}
 
   yoctocolors@2.2.0: {}
+
+  zocker@3.0.0(zod@4.4.3):
+    dependencies:
+      '@faker-js/faker': 10.6.0
+      randexp: 0.5.3
+      zod: 4.4.3
 
   zod-to-json-schema@3.25.2(zod@3.25.76):
     dependencies:

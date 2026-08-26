@@ -1,11 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { hashPassword } from "better-auth/crypto";
+import { zocker } from "zocker";
 
 import {
   AccountTable,
   InsertAccount,
   InsertUser,
   InsertUserRole,
+  insertUserSchema,
   RoleDataModel,
   UserDataModel,
   UserRoleTable,
@@ -50,7 +52,7 @@ const DEFAULT_USERS: Array<{
 
 // Configuration for random user generation
 const RANDOM_USER_CONFIG = {
-  BAN_PROBABILITY: 0.05,
+  BAN_PROBABILITY: 0.2,
 } as const;
 
 const DEFAULT_PASSWORD = "12345678";
@@ -89,19 +91,35 @@ function buildDefaultUsersData(
  * Creates a random user with faker-generated data
  */
 function createRandomUser(
-  roleData: RoleDataModel,
-  index: number
+  roleData: RoleDataModel
 ): InsertUser & { roleId: string } {
   const isBanned = faker.datatype.boolean(RANDOM_USER_CONFIG.BAN_PROBABILITY);
 
+  const user = zocker(insertUserSchema)
+    .supply(insertUserSchema.shape.name, faker.person.fullName())
+    .supply(
+      insertUserSchema.shape.image,
+      faker.image.personPortrait({ size: 128 })
+    )
+    .supply(insertUserSchema.shape.banned, isBanned)
+    .supply(
+      insertUserSchema.shape.banExpires,
+      isBanned ? faker.date.future() : null
+    )
+    .supply(
+      insertUserSchema.shape.banReason,
+      isBanned ? faker.lorem.sentence() : null
+    )
+    .supply(insertUserSchema.shape.timezone, faker.location.timeZone())
+    .supply(
+      insertUserSchema.shape.locale,
+      faker.location.countryCode("alpha-2")
+    )
+    .supply(insertUserSchema.shape.currency, faker.finance.currency().code)
+    .generate();
+
   return {
-    name: faker.person.fullName(),
-    email: `seed.user.${index}@example.com`,
-    emailVerified: faker.datatype.boolean(),
-    image: faker.image.personPortrait({ size: 128 }),
-    banned: isBanned,
-    banExpires: isBanned ? faker.date.future() : null,
-    banReason: isBanned ? faker.lorem.sentence() : null,
+    ...user,
     role: roleData.roleName,
     roleId: roleData.id,
   };
@@ -118,7 +136,7 @@ function buildRandomUsersData(
 
   for (let i = 0; i < remainingCount; i++) {
     const role = faker.helpers.arrayElement(roles);
-    const randomUser = createRandomUser(role, i);
+    const randomUser = createRandomUser(role);
     randomUsers.push(randomUser);
   }
 
