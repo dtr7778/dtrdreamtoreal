@@ -1,6 +1,6 @@
 import {
+  ClipboardList,
   House,
-  LifeBuoy,
   MessagesSquare,
   Settings,
   ShieldUser,
@@ -19,6 +19,13 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         icon: House,
         path: "/dashboard",
         pathRegex: /^\/dashboard$/,
+      },
+      {
+        title: "Tasks",
+        icon: ClipboardList,
+        permissions: ["system.task.manage", "system.task.list"],
+        path: "/dashboard/admin/tasks",
+        pathRegex: /^\/dashboard\/admin\/tasks(\/.*)?$/,
       },
       {
         title: "Message",
@@ -42,18 +49,6 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         ],
         path: "/dashboard/roles",
         pathRegex: /^\/dashboard\/roles$/,
-      },
-    ],
-  },
-  {
-    groupName: "Support",
-    items: [
-      {
-        title: "Support",
-        icon: LifeBuoy,
-        permissions: ["self.feedback.list"],
-        path: "/dashboard/support",
-        pathRegex: /^\/dashboard\/support(\/.*)?$/,
       },
     ],
   },
