@@ -27,7 +27,7 @@ import { errorMiddleware } from "@/server/middleware/error.middleware";
 import { privateRateLimitMiddleware } from "@/server/middleware/rateLimit.middleware";
 import { ORPCContext } from "@/types/orpc.types";
 
-import { roleColumnSql } from "../user.api-schema";
+import { roleColumnSql, userProfileColumns } from "../user.api-schema";
 import { userContract } from "./user.contract";
 
 export const userImpl = implement(userContract)
@@ -373,4 +373,26 @@ export const userDetailsProcedure = userImpl.details
       ...user.user,
       lastLogin: user.lastLogin,
     });
+  });
+
+export const listUserForSearchProcedure = userImpl.listUserForSearch
+  .use(userPermissionMiddleware(["system.user.manage", "system.user.list"]))
+  .handler(async ({ input, context }) => {
+    const { where } = buildPaginateOptions(
+      {
+        name: UserTable.name,
+        email: UserTable.email,
+      },
+      input
+    );
+
+    const members = await context.db
+      .select(userProfileColumns)
+      .from(UserTable)
+      .innerJoin(UserRoleTable, eq(UserRoleTable.userId, UserTable.id))
+      .innerJoin(RoleTable, eq(UserRoleTable.roleId, RoleTable.id))
+      .where(where)
+      .groupBy(UserTable.id);
+
+    return apiResponse(API_MESSAGES.USER.GET_ALL_FOR_SEARCH, members);
   });

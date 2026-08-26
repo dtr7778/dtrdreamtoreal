@@ -13,7 +13,7 @@ import { API_MESSAGES } from "@/constants/apiMessage";
 import { baseContract } from "@/server/orpc.contract-base";
 import { InferContractRouterType } from "@/types/orpc.types";
 
-import { roleSqlSchema } from "../user.api-schema";
+import { roleSqlSchema, userProfileSchema } from "../user.api-schema";
 import { profileUpdateSchema, roleUpdateSchema } from "../user.schema";
 
 const userBaseContract = baseContract.errors({
@@ -50,6 +50,23 @@ const listUserContract = userBaseContract
   );
 export type ListUserContractType = InferContractRouterType<
   typeof listUserContract
+>;
+
+const listUserForSearchContract = baseContract
+  .route({
+    path: "/orgs/users/search",
+    description: "List organization users for search",
+    tags,
+  })
+  .input(
+    paginateInputZodSchema<typeof selectUserSchema>({
+      searchFields: ["name", "email"],
+      orderFields: [],
+    })
+  )
+  .output(apiOutputZodSchema(z.array(userProfileSchema)));
+export type ListUserForSearchContractType = InferContractRouterType<
+  typeof listUserForSearchContract
 >;
 
 const userStatsContract = userBaseContract
@@ -145,6 +162,7 @@ export type UserDetailsContractType = InferContractRouterType<
 
 export const userContract = {
   list: listUserContract,
+  listUserForSearch: listUserForSearchContract,
   export: userDataExportContract,
   stats: userStatsContract,
   updateRole: userRoleUpdateContract,

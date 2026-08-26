@@ -32,13 +32,12 @@ export const userProfileColumns = {
 
 export const userProfileSchema = selectUserSchema
   .pick({
+    id: true,
     name: true,
     email: true,
     image: true,
   })
   .extend({
-    userId: z.uuid(),
-    orgMemberId: z.uuid(),
     roles: z.array(roleSqlSchema),
   });
 export type UserProfileType = z.infer<typeof userProfileSchema>;

@@ -1,4 +1,5 @@
 import {
+  listUserForSearchProcedure,
   listUserProcedure,
   profileUpdateProcedure,
   updateUserRoleProcedure,
@@ -10,6 +11,7 @@ import {
 
 export const userRouter = userImpl.router({
   list: listUserProcedure,
+  listUserForSearch: listUserForSearchProcedure,
   export: userDataExportProcedure,
   stats: userStatsProcedure,
   updateRole: updateUserRoleProcedure,
