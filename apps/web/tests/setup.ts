@@ -1,4 +1,4 @@
-import { afterAll, vi } from "vitest";
+import { afterAll, afterEach, vi } from "vitest";
 
 import { createMockDrizzleClient } from "@workspace/drizzle/client/mock";
 import { createMockRateLimit } from "@workspace/lib/rate-limit/mock";
@@ -28,6 +28,7 @@ vi.mock("@/lib/better-auth/auth", () => ({
   auth: {
     api: {
       getSession: vi.fn(),
+      updateUser: vi.fn(),
     },
   },
 }));
@@ -44,9 +45,12 @@ vi.mock("@/lib/supabase/browser-client", () => ({
   supabaseBrowserClient: vi.fn(createMockSupabaseClient),
 }));
 
-afterAll(() => {
-  vi.clearAllMocks();
+afterEach(() => {
   redisClient.store.clear();
   protectedRateLimit.store.clear();
   publicRateLimit.store.clear();
+});
+
+afterAll(() => {
+  vi.clearAllMocks();
 });
