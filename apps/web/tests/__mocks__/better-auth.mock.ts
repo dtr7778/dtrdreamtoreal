@@ -1,49 +1,64 @@
-import crypto from "node:crypto";
+import { faker } from "@faker-js/faker";
+import { zocker } from "zocker";
 
-import type { AuthSession, AuthUser } from "@/types";
+import {
+  selectSessionSchema,
+  selectUserSchema,
+  SessionDataModel,
+  UserDataModel,
+} from "@workspace/drizzle/schemas";
 
 export function mockAuthSession(
-  overrides: Partial<AuthSession> = {}
-): AuthSession {
+  overrides: Partial<SessionDataModel> = {}
+): SessionDataModel {
+  const session = zocker(selectSessionSchema).generate();
+
   return {
-    id: crypto.randomUUID(),
-    userId: crypto.randomUUID(),
-    token: "test",
-    ipAddress: "test",
-    userAgent: "test",
-    impersonatedBy: crypto.randomUUID(),
-    updatedAt: new Date(),
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60),
-    createdAt: new Date(),
+    ...session,
     ...overrides,
   };
 }
 
-export function mockAuthUser(overrides: Partial<AuthUser> = {}): AuthUser {
+export function mockAuthUser(
+  overrides: Partial<UserDataModel> = {}
+): UserDataModel {
+  const isBanned = faker.datatype.boolean(0.05);
+
+  const user = zocker(selectUserSchema)
+    .supply(selectUserSchema.shape.name, faker.person.fullName())
+    .supply(
+      selectUserSchema.shape.image,
+      faker.image.personPortrait({ size: 128 })
+    )
+    .supply(selectUserSchema.shape.banned, isBanned)
+    .supply(
+      selectUserSchema.shape.banExpires,
+      isBanned ? faker.date.future() : null
+    )
+    .supply(
+      selectUserSchema.shape.banReason,
+      isBanned ? faker.lorem.sentence() : null
+    )
+    .supply(selectUserSchema.shape.timezone, faker.location.timeZone())
+    .supply(
+      selectUserSchema.shape.locale,
+      faker.location.countryCode("alpha-2")
+    )
+    .supply(selectUserSchema.shape.currency, faker.finance.currency().code)
+    .generate();
+
   return {
-    id: crypto.randomUUID(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    email: "[EMAIL_ADDRESS]",
-    emailVerified: true,
-    name: "Test User",
-    image: "test",
-    banned: false,
-    role: "user",
-    banReason: null,
-    banExpires: null,
+    ...user,
     ...overrides,
   };
 }
 
-export function mockSessionWithUser(
-  overrides: {
-    session?: Partial<AuthSession>;
-    user?: Partial<AuthUser>;
-  } = {}
-) {
+export function mockSessionWithUser(overrides?: {
+  session?: Partial<SessionDataModel>;
+  user?: Partial<UserDataModel>;
+}) {
   return {
-    session: mockAuthSession(overrides.session),
-    user: mockAuthUser(overrides.user),
+    session: mockAuthSession(overrides?.session),
+    user: mockAuthUser(overrides?.user),
   };
 }
