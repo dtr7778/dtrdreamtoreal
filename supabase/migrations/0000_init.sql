@@ -124,7 +124,7 @@ CREATE TABLE "users" (
 	"email" varchar(255) NOT NULL,
 	"email_verified" boolean DEFAULT false NOT NULL,
 	"image" varchar(255),
-	"role" varchar(255),
+	"role" varchar(255) NOT NULL,
 	"banned" boolean DEFAULT false,
 	"ban_reason" varchar(255),
 	"ban_expires" timestamp (3) with time zone,

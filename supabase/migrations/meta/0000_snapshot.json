@@ -1,5 +1,5 @@
 {
-  "id": "d2b11678-616a-4f4d-a6ec-42d227856919",
+  "id": "23ff26ce-183a-4aa3-bbb0-11b5664a4b7b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1362,7 +1362,7 @@
           "name": "role",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "banned": {
           "name": "banned",

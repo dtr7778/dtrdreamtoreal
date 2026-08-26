@@ -14,6 +14,7 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
+import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
 import { ContactSubmissionReplyTable } from "../contact";
 import { FeedbackIssueReplyTable, FeedbackIssueTable } from "../feedback";
@@ -34,7 +35,7 @@ export const UserTable = pgTable(
     email: varchar("email", { length: 255 }).notNull(),
     emailVerified: boolean("email_verified").notNull().default(false),
     image: varchar("image", { length: 255 }),
-    role: varchar("role", { length: 255 }),
+    role: varchar("role", { length: 255 }).$type<RoleEnumType>().notNull(),
     banned: boolean("banned").default(false),
     banReason: varchar("ban_reason", { length: 255 }),
     banExpires: timestamp("ban_expires", { withTimezone: true, precision: 3 }),
@@ -92,14 +93,22 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
 
 export const insertUserSchema = createInsertSchema(UserTable, {
   email: z.email(),
+  image: z.url().nullable(),
+  role: RoleEnumSchema,
 }).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectUserSchema = createSelectSchema(UserTable);
+export const selectUserSchema = createSelectSchema(UserTable, {
+  email: z.email(),
+  image: z.url().nullable(),
+  role: RoleEnumSchema,
+});
 export const updateUserSchema = createUpdateSchema(UserTable, {
   email: z.email().optional(),
+  image: z.url().nullable(),
+  role: RoleEnumSchema,
 }).omit({
   id: true,
   createdAt: true,

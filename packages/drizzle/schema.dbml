@@ -237,7 +237,7 @@ table users {
   email varchar(255) [not null]
   email_verified boolean [not null, default: false]
   image varchar(255)
-  role varchar(255)
+  role varchar(255) [not null]
   banned boolean [default: false]
   ban_reason varchar(255)
   ban_expires "timestamp (3) with time zone"
@@ -273,7 +273,6 @@ table user_activities {
 
 table accounts {
   id uuid [pk, not null, default: `gen_random_uuid()`]
-  issuer text [not null]
   account_id text [not null]
   provider_id text [not null]
   access_token text
