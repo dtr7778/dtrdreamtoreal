@@ -250,7 +250,7 @@ const systemPermissions: CreatePermissionType[] = [
     level: "system",
     resource: "lead",
     action: "list",
-    description: "List all leads across the organization",
+    description: "List all leads",
   },
   {
     level: "system",
@@ -294,7 +294,7 @@ const systemPermissions: CreatePermissionType[] = [
     level: "system",
     resource: "lead_mail",
     action: "list",
-    description: "List all lead emails across the organization",
+    description: "List all lead emails",
   },
   {
     level: "system",
@@ -332,19 +332,19 @@ const systemPermissions: CreatePermissionType[] = [
     level: "system",
     resource: "task",
     action: "read",
-    description: "View any task's details regardless of assignment",
+    description: 'View any task"s details regardless of assignment',
   },
   {
     level: "system",
     resource: "task",
     action: "list",
-    description: "List all tasks across the organization",
+    description: "List all tasks",
   },
   {
     level: "system",
     resource: "task",
     action: "update",
-    description: "Edit any task's information and assignments",
+    description: 'Edit any task"s information and assignments',
   },
   {
     level: "system",
@@ -363,6 +363,50 @@ const systemPermissions: CreatePermissionType[] = [
     resource: "task",
     action: "export",
     description: "Export task data to CSV or other formats",
+  },
+
+  // Contact
+  {
+    level: "system",
+    resource: "contact",
+    action: "create",
+    description: "Create new contacts in the system",
+  },
+  {
+    level: "system",
+    resource: "contact",
+    action: "read",
+    description: 'View any contact"s details regardless of assignment',
+  },
+  {
+    level: "system",
+    resource: "contact",
+    action: "list",
+    description: "List all contacts",
+  },
+  {
+    level: "system",
+    resource: "contact",
+    action: "update",
+    description: 'Edit any contact"s information and assignments',
+  },
+  {
+    level: "system",
+    resource: "contact",
+    action: "delete",
+    description: "Remove contacts from the system permanently",
+  },
+  {
+    level: "system",
+    resource: "contact",
+    action: "manage",
+    description: "Full contact administration including reassignment",
+  },
+  {
+    level: "system",
+    resource: "contact",
+    action: "export",
+    description: "Export contact data to CSV or other formats",
   },
 ];
 

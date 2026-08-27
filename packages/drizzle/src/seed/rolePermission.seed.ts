@@ -35,6 +35,10 @@ export const rolesAndPermissionData: Array<{
       "system.user.read",
       "system.user.list",
       "system.task.manage",
+
+      // Contact permissions
+      "system.contact.read",
+      "system.contact.list",
     ],
   },
   {
@@ -52,6 +56,13 @@ export const rolesAndPermissionData: Array<{
       "system.user.list",
       "system.user.update",
       "system.task.manage",
+
+      // Contact permissions
+      "system.contact.read",
+      "system.contact.list",
+      "system.contact.create",
+      "system.contact.update",
+      "system.contact.delete",
     ],
   },
   {
@@ -65,6 +76,10 @@ export const rolesAndPermissionData: Array<{
 
       "system.user.manage",
       "system.task.manage",
+
+      // Contact permissions
+      "system.contact.manage",
+      "system.contact.export",
     ],
   },
 ];

@@ -10,6 +10,7 @@ export const RESOURCE_TYPE = [
   "lead",
   "lead_mail",
   "task",
+  "contact",
 ] as const;
 export const ACTION_TYPE = [
   "create",

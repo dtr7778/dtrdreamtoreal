@@ -38,25 +38,32 @@ INSERT INTO public.permissions (name, level, resource, action, description)
 		('system.invitation.manage', 'system', 'invitation', 'manage', 'Full invitation management including bulk operations'),
 		('system.lead.create', 'system', 'lead', 'create', 'Create new leads in the system'),
 		('system.lead.read', 'system', 'lead', 'read', 'View any lead"s details regardless of assignment'),
-		('system.lead.list', 'system', 'lead', 'list', 'List all leads across the organization'),
+		('system.lead.list', 'system', 'lead', 'list', 'List all leads'),
 		('system.lead.update', 'system', 'lead', 'update', 'Edit any lead"s information and assignments'),
 		('system.lead.delete', 'system', 'lead', 'delete', 'Remove leads from the system permanently'),
 		('system.lead.manage', 'system', 'lead', 'manage', 'Full lead administration including reassignment'),
 		('system.lead.export', 'system', 'lead', 'export', 'Export lead data to CSV or other formats'),
 		('system.lead_mail.create', 'system', 'lead_mail', 'create', 'Send emails to any lead in the system'),
 		('system.lead_mail.read', 'system', 'lead_mail', 'read', 'View email content for any lead'),
-		('system.lead_mail.list', 'system', 'lead_mail', 'list', 'List all lead emails across the organization'),
+		('system.lead_mail.list', 'system', 'lead_mail', 'list', 'List all lead emails'),
 		('system.lead_mail.update', 'system', 'lead_mail', 'update', 'Edit email records for any lead'),
 		('system.lead_mail.delete', 'system', 'lead_mail', 'delete', 'Remove email records from the system'),
 		('system.lead_mail.manage', 'system', 'lead_mail', 'manage', 'Full email management for all leads'),
 		('system.lead_mail.export', 'system', 'lead_mail', 'export', 'Export lead email data to CSV or other formats'),
 		('system.task.create', 'system', 'task', 'create', 'Create new tasks in the system'),
-		('system.task.read', 'system', 'task', 'read', 'View any task's details regardless of assignment'),
-		('system.task.list', 'system', 'task', 'list', 'List all tasks across the organization'),
-		('system.task.update', 'system', 'task', 'update', 'Edit any task's information and assignments'),
+		('system.task.read', 'system', 'task', 'read', 'View any task"s details regardless of assignment'),
+		('system.task.list', 'system', 'task', 'list', 'List all tasks'),
+		('system.task.update', 'system', 'task', 'update', 'Edit any task"s information and assignments'),
 		('system.task.delete', 'system', 'task', 'delete', 'Remove tasks from the system permanently'),
 		('system.task.manage', 'system', 'task', 'manage', 'Full task administration including reassignment'),
-		('system.task.export', 'system', 'task', 'export', 'Export task data to CSV or other formats');
+		('system.task.export', 'system', 'task', 'export', 'Export task data to CSV or other formats'),
+		('system.contact.create', 'system', 'contact', 'create', 'Create new contacts in the system'),
+		('system.contact.read', 'system', 'contact', 'read', 'View any contact"s details regardless of assignment'),
+		('system.contact.list', 'system', 'contact', 'list', 'List all contacts'),
+		('system.contact.update', 'system', 'contact', 'update', 'Edit any contact"s information and assignments'),
+		('system.contact.delete', 'system', 'contact', 'delete', 'Remove contacts from the system permanently'),
+		('system.contact.manage', 'system', 'contact', 'manage', 'Full contact administration including reassignment'),
+		('system.contact.export', 'system', 'contact', 'export', 'Export contact data to CSV or other formats');
 
 DELETE FROM public.roles;
 INSERT INTO public.roles (role_name, description)
@@ -79,6 +86,8 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('SUPPORT_AGENT', 'system.user.read'),
 		('SUPPORT_AGENT', 'system.user.list'),
 		('SUPPORT_AGENT', 'system.task.manage'),
+		('SUPPORT_AGENT', 'system.contact.read'),
+		('SUPPORT_AGENT', 'system.contact.list'),
 		('ADMIN', 'self.user.read'),
 		('ADMIN', 'self.user.update'),
 		('ADMIN', 'system.role-permission.list'),
@@ -87,12 +96,19 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('ADMIN', 'system.user.list'),
 		('ADMIN', 'system.user.update'),
 		('ADMIN', 'system.task.manage'),
+		('ADMIN', 'system.contact.read'),
+		('ADMIN', 'system.contact.list'),
+		('ADMIN', 'system.contact.create'),
+		('ADMIN', 'system.contact.update'),
+		('ADMIN', 'system.contact.delete'),
 		('SUPER_ADMIN', 'self.user.read'),
 		('SUPER_ADMIN', 'self.user.update'),
 		('SUPER_ADMIN', 'system.role-permission.list'),
 		('SUPER_ADMIN', 'system.role-permission.read'),
 		('SUPER_ADMIN', 'system.user.manage'),
-		('SUPER_ADMIN', 'system.task.manage')
+		('SUPER_ADMIN', 'system.task.manage'),
+		('SUPER_ADMIN', 'system.contact.manage'),
+		('SUPER_ADMIN', 'system.contact.export')
  )
  INSERT INTO public.role_permissions (role_id, permission_id)
  SELECT r.id, p.id
