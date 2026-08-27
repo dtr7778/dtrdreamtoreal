@@ -1,7 +1,6 @@
 import { render } from "react-email";
 
 import { QstashServiceConfig } from "@workspace/lib/qstash";
-import { formatEnumValue } from "@workspace/lib/utils";
 
 import AccountLockedMail, {
   AccountLockedMailProps,
@@ -27,21 +26,15 @@ import SuspiciousLoginMail, {
 import WelcomeUserMail, {
   WelcomeUserMailProps,
 } from "./mail-templates/auth/WelcomeUserMail";
+import ContactReplyMail, {
+  ContactReplyMailProps,
+} from "./mail-templates/ContactReplyMail";
 import ContactSubmittedMail, {
   ContactSubmittedMailProps,
 } from "./mail-templates/ContactSubmittedMail";
 import DataExportCompleteMail, {
   DataExportCompleteMailProps,
 } from "./mail-templates/DataExportCompleteMail";
-import FeedbackIssueRepliedMail, {
-  FeedbackIssueRepliedMailProps,
-} from "./mail-templates/feedback/FeedbackIssueRepliedMail";
-import FeedbackIssueStatusChangedMail, {
-  FeedbackIssueStatusChangedMailProps,
-} from "./mail-templates/feedback/FeedbackIssueStatusChangedMail";
-import FeedbackIssueSubmittedMail, {
-  FeedbackIssueSubmittedMailProps,
-} from "./mail-templates/feedback/FeedbackIssueSubmittedMail";
 import IntegrationConnectedMail, {
   IntegrationConnectedMailProps,
 } from "./mail-templates/integration/IntegrationConnectedMail";
@@ -92,14 +85,8 @@ type IntegrationErrorMailOptions = Pick<SendMailOption, "to"> &
 type ContactSubmittedEmailOptions = Pick<SendMailOption, "to"> &
   Omit<ContactSubmittedMailProps, "appName" | "supportMail">;
 
-type FeedbackIssueSubmittedEmailOptions = Pick<SendMailOption, "to"> &
-  Omit<FeedbackIssueSubmittedMailProps, "appName" | "supportMail">;
-
-type FeedbackIssueRepliedEmailOptions = Pick<SendMailOption, "to"> &
-  Omit<FeedbackIssueRepliedMailProps, "appName" | "supportMail">;
-
-type FeedbackIssueStatusChangedEmailOptions = Pick<SendMailOption, "to"> &
-  Omit<FeedbackIssueStatusChangedMailProps, "appName" | "supportMail">;
+type ContactReplyEmailOptions = Pick<SendMailOption, "to"> &
+  Omit<ContactReplyMailProps, "appName" | "supportMail">;
 
 export interface IMailService extends IQstashMailService {
   sendWelcomeUserMail(
@@ -120,14 +107,8 @@ export interface IMailService extends IQstashMailService {
   sendContactSubmittedMail(
     options: ContactSubmittedEmailOptions
   ): Promise<QstashMailResult>;
-  sendFeedbackIssueSubmittedMail(
-    options: FeedbackIssueSubmittedEmailOptions
-  ): Promise<QstashMailResult>;
-  sendFeedbackIssueRepliedMail(
-    options: FeedbackIssueRepliedEmailOptions
-  ): Promise<QstashMailResult>;
-  sendFeedbackIssueStatusChangedMail(
-    options: FeedbackIssueStatusChangedEmailOptions
+  sendContactReplyMail(
+    options: ContactReplyEmailOptions
   ): Promise<QstashMailResult>;
   sendSuspiciousLoginMail(
     options: SuspiciousLoginMailOptions
@@ -317,66 +298,13 @@ export class MailService extends QstashMailService implements IMailService {
     });
   }
 
-  public async sendFeedbackIssueSubmittedMail({
+  public async sendContactReplyMail({
     to,
     ...options
-  }: FeedbackIssueSubmittedEmailOptions): Promise<QstashMailResult> {
-    const subject = `We received your ${formatEnumValue(options.issueType)} - ${options.issueTitle}`;
-
+  }: ContactReplyEmailOptions): Promise<QstashMailResult> {
+    const subject = `New reply on your contact: ${options.subject}`;
     const element = (
-      <FeedbackIssueSubmittedMail
-        supportMail={this.mailConfig.supportMail}
-        appName={this.mailConfig.appName}
-        {...options}
-      />
-    );
-
-    const html = await render(element);
-    const text = await render(element, {
-      plainText: true,
-    });
-
-    return this.sendMail({
-      to,
-      subject,
-      text,
-      html,
-    });
-  }
-
-  public async sendFeedbackIssueRepliedMail({
-    to,
-    ...options
-  }: FeedbackIssueRepliedEmailOptions): Promise<QstashMailResult> {
-    const subject = `New reply on your ${formatEnumValue(options.issueType)}: ${options.issueTitle}`;
-    const element = (
-      <FeedbackIssueRepliedMail
-        supportMail={this.mailConfig.supportMail}
-        appName={this.mailConfig.appName}
-        {...options}
-      />
-    );
-
-    const html = await render(element);
-    const text = await render(element, {
-      plainText: true,
-    });
-
-    return this.sendMail({
-      to,
-      subject,
-      text,
-      html,
-    });
-  }
-
-  public async sendFeedbackIssueStatusChangedMail({
-    to,
-    ...options
-  }: FeedbackIssueStatusChangedEmailOptions): Promise<QstashMailResult> {
-    const subject = `Your ${formatEnumValue(options.issueType)} is now ${formatEnumValue(options.newStatus)}`;
-    const element = (
-      <FeedbackIssueStatusChangedMail
+      <ContactReplyMail
         supportMail={this.mailConfig.supportMail}
         appName={this.mailConfig.appName}
         {...options}
