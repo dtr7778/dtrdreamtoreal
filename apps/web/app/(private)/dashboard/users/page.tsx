@@ -41,7 +41,7 @@ export default async function UsersPage(props: PageProps<"/dashboard/users">) {
     })
   );
 
-  await queryclient.prefetchQuery(orpcTQClient.user.stats.queryOptions());
+  await queryclient.query(orpcTQClient.user.stats.queryOptions());
 
   return (
     <HydrateClient client={queryclient}>
