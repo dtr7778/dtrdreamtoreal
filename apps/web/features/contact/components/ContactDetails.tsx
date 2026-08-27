@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -24,6 +25,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { orpcTQClient } from "@/server/orpc.client";
 
 import { ContactStatusBadge } from "./ContactStatusBadge";
+import { ReplyCreateDialog } from "./ReplyCreateDialog";
 
 export function ContactDetails({ contactId }: { contactId: string }) {
   const { data, isLoading, isError, error } = useQuery(
@@ -67,6 +69,9 @@ export function ContactDetails({ contactId }: { contactId: string }) {
               <Card>
                 <CardHeader>
                   <CardTitle>{`Replies (${data.replies.length})`}</CardTitle>
+                  <CardAction>
+                    <ReplyCreateDialog contactId={data.id} />
+                  </CardAction>
                 </CardHeader>
                 <CardContent>
                   {data.replies.length === 0 ? (

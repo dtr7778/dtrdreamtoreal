@@ -73,5 +73,6 @@ export const API_MESSAGES = {
     GET_ALL: "Contacts loaded successfully",
     GET_DETAILS: "Contact details loaded successfully",
     NOT_FOUND: "Contact not found",
+    REPLY_CREATED: "Reply sent successfully",
   },
 };

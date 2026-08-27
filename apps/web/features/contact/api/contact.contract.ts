@@ -16,6 +16,8 @@ import { userProfileSchema } from "@/features/user/user.api-schema";
 import { baseContract } from "@/server/orpc.contract-base";
 import { InferContractRouterType } from "@/types/orpc.types";
 
+import { createReplySchema } from "../contact.schema";
+
 const contactBaseContract = baseContract.errors({
   NOT_FOUND: {
     status: 404,
@@ -62,7 +64,7 @@ export type ListContactContractType = InferContractRouterType<
   typeof listContactContract
 >;
 
-const detailsContactContract = contactBaseContract
+const contactDetailsContract = contactBaseContract
   .route({
     path: "/contact/details",
     description: "Get contact submission details",
@@ -86,11 +88,37 @@ const detailsContactContract = contactBaseContract
       })
     )
   );
-export type DetailsContactContractType = InferContractRouterType<
-  typeof detailsContactContract
+export type ContactDetailsContractType = InferContractRouterType<
+  typeof contactDetailsContract
+>;
+
+const createReplyContactContract = contactBaseContract
+  .route({
+    path: "/contact/reply",
+    description: "Create a reply to a contact submission",
+    tags,
+  })
+  .input(
+    createReplySchema.extend({
+      contactId: z.uuid(),
+    })
+  )
+  .output(
+    apiOutputZodSchema(
+      selectContactSubmissionReplySchema.pick({
+        id: true,
+        reply: true,
+        updatedAt: true,
+        createdAt: true,
+      })
+    )
+  );
+export type CreateReplyContactContractType = InferContractRouterType<
+  typeof createReplyContactContract
 >;
 
 export const contactContract = {
   list: listContactContract,
-  details: detailsContactContract,
+  details: contactDetailsContract,
+  createReply: createReplyContactContract,
 };

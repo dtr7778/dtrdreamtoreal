@@ -10,7 +10,6 @@ import {
 const statusVariantMap: Record<ContactSubmissionStatusEnumType, StatusVariant> =
   {
     PENDING: "info",
-    READ: "default",
     REPLIED: "default",
     SPAM: "error",
   };

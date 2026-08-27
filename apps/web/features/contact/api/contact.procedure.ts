@@ -1,5 +1,5 @@
 import { implement } from "@orpc/server";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import {
   buildPaginateOptions,
@@ -13,6 +13,8 @@ import {
   UserTable,
 } from "@workspace/drizzle/schemas";
 import { apiResponse } from "@workspace/lib/utils";
+
+import { mailProvider } from "@/lib/mail";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { userProfileColumns } from "@/features/user/user.api-schema";
@@ -116,11 +118,76 @@ export const detailsContactProcedure = contactImpl.details
       .innerJoin(UserRoleTable, eq(UserRoleTable.userId, UserTable.id))
       .innerJoin(RoleTable, eq(RoleTable.id, UserRoleTable.roleId))
       .where(eq(ContactSubmissionReplyTable.submissionId, contact.id))
-      .orderBy(ContactSubmissionReplyTable.createdAt)
+      .orderBy(desc(ContactSubmissionReplyTable.createdAt))
       .groupBy(ContactSubmissionReplyTable.id, UserTable.id);
 
     return apiResponse(API_MESSAGES.CONTACT.GET_DETAILS, {
       ...contact,
       replies,
+    });
+  });
+
+export const createReplyContactProcedure = contactImpl.createReply
+  .use(privateRateLimitMiddleware)
+  .use(authMiddleware)
+  .use(
+    userPermissionMiddleware(["system.contact.manage", "system.contact.update"])
+  )
+  .handler(async ({ input, errors, context }) => {
+    const [contact] = await context.db
+      .select({
+        id: ContactSubmissionTable.id,
+        name: ContactSubmissionTable.name,
+        email: ContactSubmissionTable.email,
+        subject: ContactSubmissionTable.subject,
+      })
+      .from(ContactSubmissionTable)
+      .where(eq(ContactSubmissionTable.id, input.contactId))
+      .limit(1);
+
+    if (!contact) {
+      throw errors.NOT_FOUND();
+    }
+
+    const replyData = await context.db.transaction(async (tx) => {
+      const [reply] = await tx
+        .insert(ContactSubmissionReplyTable)
+        .values({
+          submissionId: contact.id,
+          repliedBy: context.user.id,
+          reply: input.reply,
+        })
+        .returning({
+          id: ContactSubmissionReplyTable.id,
+          reply: ContactSubmissionReplyTable.reply,
+          createdAt: ContactSubmissionReplyTable.createdAt,
+          updatedAt: ContactSubmissionReplyTable.updatedAt,
+        });
+
+      if (!reply) {
+        throw errors.BAD_REQUEST();
+      }
+
+      await tx
+        .update(ContactSubmissionTable)
+        .set({ status: "REPLIED" })
+        .where(eq(ContactSubmissionTable.id, contact.id));
+
+      await mailProvider.sendContactReplyMail({
+        to: contact.email,
+        userName: contact.name,
+        subject: contact.subject,
+        replyAuthor: context.user.name,
+        replyContent: input.reply,
+      });
+
+      return reply;
+    });
+
+    return apiResponse(API_MESSAGES.CONTACT.REPLY_CREATED, {
+      id: replyData.id,
+      reply: replyData.reply,
+      createdAt: replyData.createdAt,
+      updatedAt: replyData.updatedAt,
     });
   });
