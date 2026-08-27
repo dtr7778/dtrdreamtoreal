@@ -1,5 +1,5 @@
-◇ injected env (6) from ../../.env // tip: ⌘ enable debugging { debug: true }
-CREATE TYPE "public"."ContactSubmissionStatusEnum" AS ENUM('PENDING', 'READ', 'REPLIED', 'SPAM');
+◇ injected env (6) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+CREATE TYPE "public"."ContactSubmissionStatusEnum" AS ENUM('PENDING', 'REPLIED', 'SPAM');
 CREATE TYPE "public"."FeedbackIssueStatusEnum" AS ENUM('OPEN', 'IN_PROGRESS', 'NEEDS_INFO', 'RESOLVED', 'CLOSED');
 CREATE TYPE "public"."FeedbackIssueTypeEnum" AS ENUM('BUG', 'FEATURE_REQUEST', 'FEEDBACK', 'SUGGESTION', 'REPORT', 'OTHER');
 CREATE TYPE "public"."NotificationCategoryEnum" AS ENUM('SYSTEM', 'AUTH', 'SUPPORT', 'LEAD');
@@ -41,28 +41,6 @@ CREATE TABLE "notifications" (
 	"is_read" boolean DEFAULT false NOT NULL,
 	"read_at" timestamp (3) with time zone,
 	"is_archived" boolean DEFAULT false NOT NULL,
-	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
-);
-
-CREATE TABLE "notification_settings" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"category" "NotificationCategoryEnum" NOT NULL,
-	"email_enabled" boolean DEFAULT true NOT NULL,
-	"push_enabled" boolean DEFAULT true NOT NULL,
-	"in_app_enabled" boolean DEFAULT true NOT NULL,
-	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
-);
-
-CREATE TABLE "push_subscriptions" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"endpoint" text NOT NULL,
-	"p256dh" text NOT NULL,
-	"auth" text NOT NULL,
-	"expiration_time" double precision,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
@@ -126,6 +104,28 @@ CREATE TABLE "user_activities" (
 	"login_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"logout_at" timestamp (3) with time zone,
 	"last_seen_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "notification_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"category" "NotificationCategoryEnum" NOT NULL,
+	"email_enabled" boolean DEFAULT true NOT NULL,
+	"push_enabled" boolean DEFAULT true NOT NULL,
+	"in_app_enabled" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "push_subscriptions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"endpoint" text NOT NULL,
+	"p256dh" text NOT NULL,
+	"auth" text NOT NULL,
+	"expiration_time" double precision,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE "accounts" (
@@ -198,14 +198,14 @@ ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contact_submission_repl
 ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contact_submission_reply_replied_by_fkey" FOREIGN KEY ("replied_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_recipient_fkey" FOREIGN KEY ("recipient_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_actor_fkey" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
-ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
-ALTER TABLE "push_subscriptions" ADD CONSTRAINT "push_subscription_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permission_role_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permission_permission_fkey" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_roles" ADD CONSTRAINT "fk_user_roles_role_id" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_roles" ADD CONSTRAINT "fk_user_roles_user_id" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_session_fkey" FOREIGN KEY ("session_id") REFERENCES "public"."sessions"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "push_subscriptions" ADD CONSTRAINT "push_subscription_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "files" ADD CONSTRAINT "files_user_fkey" FOREIGN KEY ("uploaded_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "files" ADD CONSTRAINT "files_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
@@ -220,9 +220,6 @@ CREATE INDEX "contact_submission_reply_replied_by_idx" ON "contact_submission_re
 CREATE INDEX "notifications_recipient_idx" ON "notifications" USING btree ("recipient_id");
 CREATE INDEX "notifications_recipient_read_idx" ON "notifications" USING btree ("recipient_id","is_read");
 CREATE INDEX "notifications_created_at_idx" ON "notifications" USING btree ("created_at");
-CREATE UNIQUE INDEX "notification_settings_user_category_key" ON "notification_settings" USING btree ("user_id","category");
-CREATE UNIQUE INDEX "push_subscription_endpoint_unique" ON "push_subscriptions" USING btree ("endpoint");
-CREATE INDEX "push_subscription_user_id" ON "push_subscriptions" USING btree ("user_id");
 CREATE UNIQUE INDEX "permission_level_resource_action_key" ON "permissions" USING btree ("level","resource","action");
 CREATE INDEX "permission_level_idx" ON "permissions" USING btree ("level");
 CREATE INDEX "permission_resource_idx" ON "permissions" USING btree ("resource");
@@ -238,6 +235,9 @@ CREATE UNIQUE INDEX "user_email_key" ON "users" USING btree ("email");
 CREATE INDEX "user_activity_user_id_idx" ON "user_activities" USING btree ("user_id");
 CREATE INDEX "user_activity_login_at_idx" ON "user_activities" USING btree ("login_at");
 CREATE INDEX "session_activity_last_seen_at_idx" ON "user_activities" USING btree ("last_seen_at");
+CREATE UNIQUE INDEX "notification_settings_user_category_key" ON "notification_settings" USING btree ("user_id","category");
+CREATE UNIQUE INDEX "push_subscription_endpoint_unique" ON "push_subscriptions" USING btree ("endpoint");
+CREATE INDEX "push_subscription_user_id" ON "push_subscriptions" USING btree ("user_id");
 CREATE UNIQUE INDEX "account_provider_account_id_key" ON "accounts" USING btree ("provider_id","account_id");
 CREATE INDEX "account_user_id_idx" ON "accounts" USING btree ("user_id");
 CREATE INDEX "files_user_idx" ON "files" USING btree ("uploaded_by");

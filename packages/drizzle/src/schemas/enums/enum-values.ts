@@ -40,7 +40,6 @@ export const FEEDBACK_ISSUE_STATUS = [
 
 export const CONTACT_SUBMISSION_STATUS = [
   "PENDING",
-  "READ",
   "REPLIED",
   "SPAM",
 ] as const;

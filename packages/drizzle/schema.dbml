@@ -1,6 +1,5 @@
 enum ContactSubmissionStatusEnum {
   PENDING
-  READ
   REPLIED
   SPAM
 }
@@ -115,39 +114,6 @@ table notifications {
   }
 }
 
-table notification_settings {
-  id uuid [pk, not null, default: `gen_random_uuid()`]
-  user_id uuid [not null]
-  category NotificationCategoryEnum [not null]
-  email_enabled boolean [not null, default: true]
-  push_enabled boolean [not null, default: true]
-  in_app_enabled boolean [not null, default: true]
-  created_at "timestamp (3) with time zone" [not null, default: `now()`]
-  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
-
-  indexes {
-    
-    (user_id, category) [name: 'notification_settings_user_category_key', unique]
-  }
-}
-
-table push_subscriptions {
-  id uuid [pk, not null, default: `gen_random_uuid()`]
-  user_id uuid [not null]
-  endpoint text [not null]
-  p256dh text [not null]
-  auth text [not null]
-  expiration_time "double precision"
-  created_at "timestamp (3) with time zone" [not null, default: `now()`]
-  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
-
-  indexes {
-    
-    endpoint [name: 'push_subscription_endpoint_unique', unique]
-    user_id [name: 'push_subscription_user_id']
-  }
-}
-
 table permissions {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   name varchar(255) [not null]
@@ -245,6 +211,39 @@ table user_activities {
     user_id [name: 'user_activity_user_id_idx']
     login_at [name: 'user_activity_login_at_idx']
     last_seen_at [name: 'session_activity_last_seen_at_idx']
+  }
+}
+
+table notification_settings {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  user_id uuid [not null]
+  category NotificationCategoryEnum [not null]
+  email_enabled boolean [not null, default: true]
+  push_enabled boolean [not null, default: true]
+  in_app_enabled boolean [not null, default: true]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    (user_id, category) [name: 'notification_settings_user_category_key', unique]
+  }
+}
+
+table push_subscriptions {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  user_id uuid [not null]
+  endpoint text [not null]
+  p256dh text [not null]
+  auth text [not null]
+  expiration_time "double precision"
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    endpoint [name: 'push_subscription_endpoint_unique', unique]
+    user_id [name: 'push_subscription_user_id']
   }
 }
 
@@ -355,10 +354,6 @@ ref: notifications.recipient_id > users.id
 
 ref: notifications.actor_id > users.id
 
-ref: notification_settings.user_id > users.id
-
-ref: push_subscriptions.user_id > users.id
-
 ref: role_permissions.role_id > roles.id
 
 ref: role_permissions.permission_id > permissions.id
@@ -370,6 +365,10 @@ ref: user_roles.user_id - users.id
 ref: user_activities.user_id - users.id
 
 ref: user_activities.session_id > sessions.id
+
+ref: notification_settings.user_id > users.id
+
+ref: push_subscriptions.user_id > users.id
 
 ref: accounts.user_id > users.id
 
