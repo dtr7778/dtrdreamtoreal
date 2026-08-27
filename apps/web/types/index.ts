@@ -1,7 +1,5 @@
 import type { RouteType } from "next/dist/lib/load-custom-routes";
 
-import type { LucideIcon } from "lucide-react";
-
 import type {
   ActionTypeEnumType,
   PermissionLevelEnumType,
@@ -79,7 +77,7 @@ export type SidebarMenuLinkType = {
   title: string;
   path: string;
   pathRegex: RegExp;
-  icon?: LucideIcon | undefined;
+  icon?: React.ReactNode | undefined;
   items?: Array<SidebarMenuLinkType> | undefined;
   permissions?: Array<PermissionStrType>;
 };

@@ -25,7 +25,7 @@ export function SidebarFooterMenu() {
             tooltip={menuLink.title}
             render={
               <Link href={{ pathname: menuLink.path }}>
-                {menuLink.icon && <menuLink.icon />}
+                {menuLink.icon && menuLink.icon}
                 <span>{menuLink.title}</span>
               </Link>
             }

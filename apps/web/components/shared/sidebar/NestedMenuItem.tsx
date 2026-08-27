@@ -45,7 +45,7 @@ export function NestedMenuItem({
           tooltip={menuLink.title}
           render={
             <Link href={{ pathname: menuLink.path }}>
-              {menuLink.icon && <menuLink.icon />}
+              {menuLink.icon && menuLink.icon}
               <span className="truncate">{menuLink.title}</span>
             </Link>
           }
@@ -66,7 +66,7 @@ export function NestedMenuItem({
             />
           }
         >
-          {menuLink.icon && <menuLink.icon />}
+          {menuLink.icon && menuLink.icon}
           <span className="truncate">{menuLink.title}</span>
           <ChevronRight className="ml-auto transition-transform group-data-open/collapsible:rotate-90" />
         </CollapsibleTrigger>

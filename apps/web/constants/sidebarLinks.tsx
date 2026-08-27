@@ -1,3 +1,5 @@
+import { ContactIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ClipboardList,
   House,
@@ -16,33 +18,40 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
     items: [
       {
         title: "Dashboard",
-        icon: House,
+        icon: <House />,
         path: "/dashboard",
         pathRegex: /^\/dashboard$/,
       },
       {
         title: "Tasks",
-        icon: ClipboardList,
+        icon: <ClipboardList />,
         permissions: ["system.task.manage", "system.task.list"],
         path: "/dashboard/tasks",
         pathRegex: /^\/dashboard\/tasks(\/.*)?$/,
       },
       {
         title: "Message",
-        icon: MessagesSquare,
+        icon: <MessagesSquare />,
         path: "/dashboard/message",
         pathRegex: /^\/dashboard\/message(\/.*)?$/,
       },
       {
+        title: "Contacts",
+        icon: <HugeiconsIcon icon={ContactIcon} />,
+        permissions: ["system.contact.manage", "system.contact.list"],
+        path: "/dashboard/contacts",
+        pathRegex: /^\/dashboard\/contacts(\/.*)?$/,
+      },
+      {
         title: "All Users",
-        icon: UsersRound,
+        icon: <UsersRound />,
         permissions: ["system.user.manage", "system.user.list"],
         path: "/dashboard/users",
         pathRegex: /^\/dashboard\/users(\/.*)?$/,
       },
       {
         title: "Roles & Permissions",
-        icon: ShieldUser,
+        icon: <ShieldUser />,
         permissions: [
           "system.role-permission.manage",
           "system.role-permission.list",
@@ -57,13 +66,13 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
 export const footerMenuLinks: Array<SidebarMenuLinkType> = [
   {
     title: "My Profile",
-    icon: User,
+    icon: <User />,
     path: "/dashboard/profile",
     pathRegex: /^\/dashboard\/profile$/,
   },
   {
     title: "Settings",
-    icon: Settings,
+    icon: <Settings />,
     path: "/dashboard/settings",
     pathRegex: /^\/dashboard\/settings$/,
   },
