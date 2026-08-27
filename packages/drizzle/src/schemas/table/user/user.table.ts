@@ -18,14 +18,12 @@ import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
 import { ContactSubmissionReplyTable } from "../contact";
 import { FileTable } from "../file.table";
-import {
-  NotificationSettingsTable,
-  NotificationTable,
-  PushSubscriptionTable,
-} from "../notification";
+import { NotificationTable } from "../notification";
 import { UserRoleTable } from "../role-permission";
 import { SessionTable } from "../session.table";
 import { TaskTable } from "../task";
+import { NotificationSettingsTable } from "./notificationSetting.table";
+import { PushSubscriptionTable } from "./pushSubscription.table";
 
 export const UserTable = pgTable(
   "users",

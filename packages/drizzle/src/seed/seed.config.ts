@@ -1,6 +1,8 @@
 export const seedConfigs = {
   targets: {
-    users: 100,
-    files: 50,
+    users: 50,
+    notifications: 200,
+    contacts: 50,
+    tasks: 20,
   },
 };

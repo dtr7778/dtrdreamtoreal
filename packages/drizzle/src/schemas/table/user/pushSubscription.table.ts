@@ -16,7 +16,7 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
-import { UserTable } from "../user";
+import { UserTable } from "./user.table";
 
 export const PushSubscriptionTable = pgTable(
   "push_subscriptions",

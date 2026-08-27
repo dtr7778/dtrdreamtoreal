@@ -15,7 +15,7 @@ import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { NotificationCategoryEnum } from "../../enums/db-enums";
-import { UserTable } from "../user";
+import { UserTable } from "./user.table";
 
 export const NotificationSettingsTable = pgTable(
   "notification_settings",
