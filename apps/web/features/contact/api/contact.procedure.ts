@@ -1,13 +1,21 @@
 import { implement } from "@orpc/server";
+import { eq } from "drizzle-orm";
 
 import {
   buildPaginateOptions,
   buildPaginationMeta,
 } from "@workspace/drizzle/paginate-query";
-import { ContactSubmissionTable } from "@workspace/drizzle/schemas";
+import {
+  ContactSubmissionReplyTable,
+  ContactSubmissionTable,
+  RoleTable,
+  UserRoleTable,
+  UserTable,
+} from "@workspace/drizzle/schemas";
 import { apiResponse } from "@workspace/lib/utils";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
+import { userProfileColumns } from "@/features/user/user.api-schema";
 import {
   authMiddleware,
   userPermissionMiddleware,
@@ -73,5 +81,46 @@ export const listContactProcedure = contactImpl.list
     return apiResponse(API_MESSAGES.CONTACT.GET_ALL, {
       meta,
       data: contacts,
+    });
+  });
+
+export const detailsContactProcedure = contactImpl.details
+  .use(privateRateLimitMiddleware)
+  .use(authMiddleware)
+  .use(
+    userPermissionMiddleware(["system.contact.manage", "system.contact.read"])
+  )
+  .handler(async ({ input, errors, context }) => {
+    const [contact] = await context.db
+      .select()
+      .from(ContactSubmissionTable)
+      .where(eq(ContactSubmissionTable.id, input.contactId))
+      .limit(1);
+
+    if (!contact) {
+      throw errors.NOT_FOUND();
+    }
+
+    const replies = await context.db
+      .select({
+        id: ContactSubmissionReplyTable.id,
+        reply: ContactSubmissionReplyTable.reply,
+        createdAt: ContactSubmissionReplyTable.createdAt,
+        repliedByUser: userProfileColumns,
+      })
+      .from(ContactSubmissionReplyTable)
+      .innerJoin(
+        UserTable,
+        eq(ContactSubmissionReplyTable.repliedBy, UserTable.id)
+      )
+      .innerJoin(UserRoleTable, eq(UserRoleTable.userId, UserTable.id))
+      .innerJoin(RoleTable, eq(RoleTable.id, UserRoleTable.roleId))
+      .where(eq(ContactSubmissionReplyTable.submissionId, contact.id))
+      .orderBy(ContactSubmissionReplyTable.createdAt)
+      .groupBy(ContactSubmissionReplyTable.id, UserTable.id);
+
+    return apiResponse(API_MESSAGES.CONTACT.GET_DETAILS, {
+      ...contact,
+      replies,
     });
   });

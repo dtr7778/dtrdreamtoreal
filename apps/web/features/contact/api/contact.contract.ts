@@ -1,6 +1,9 @@
 import z from "zod";
 
-import { selectContactSubmissionSchema } from "@workspace/drizzle/schemas";
+import {
+  selectContactSubmissionReplySchema,
+  selectContactSubmissionSchema,
+} from "@workspace/drizzle/schemas";
 import { ContactSubmissionStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
 import {
   apiOutputZodSchema,
@@ -8,8 +11,18 @@ import {
   paginateOutputZodSchema,
 } from "@workspace/lib/utils";
 
+import { API_MESSAGES } from "@/constants/apiMessage";
+import { userProfileSchema } from "@/features/user/user.api-schema";
 import { baseContract } from "@/server/orpc.contract-base";
 import { InferContractRouterType } from "@/types/orpc.types";
+
+const contactBaseContract = baseContract.errors({
+  NOT_FOUND: {
+    status: 404,
+    success: false,
+    message: API_MESSAGES.CONTACT.NOT_FOUND,
+  },
+});
 
 const tags = ["contact"] as const;
 
@@ -49,6 +62,35 @@ export type ListContactContractType = InferContractRouterType<
   typeof listContactContract
 >;
 
+const detailsContactContract = contactBaseContract
+  .route({
+    path: "/contact/details",
+    description: "Get contact submission details",
+    tags,
+  })
+  .input(z.object({ contactId: z.uuid() }))
+  .output(
+    apiOutputZodSchema(
+      selectContactSubmissionSchema.extend({
+        replies: z.array(
+          selectContactSubmissionReplySchema
+            .pick({
+              id: true,
+              reply: true,
+              createdAt: true,
+            })
+            .extend({
+              repliedByUser: userProfileSchema,
+            })
+        ),
+      })
+    )
+  );
+export type DetailsContactContractType = InferContractRouterType<
+  typeof detailsContactContract
+>;
+
 export const contactContract = {
   list: listContactContract,
+  details: detailsContactContract,
 };

@@ -1,6 +1,7 @@
+import Link from "next/link";
+
 import { CONTACT_SUBMISSION_STATUS } from "@workspace/drizzle/enum-values";
 import { formatEnumValue } from "@workspace/lib/utils";
-import { Badge } from "@workspace/ui/components/badge";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table/data-table-column-header";
 import { ColumnType } from "@workspace/ui/types/data-table";
@@ -8,19 +9,10 @@ import { ColumnType } from "@workspace/ui/types/data-table";
 import { FormatDateCell } from "@/components/format-date/FormatDateCell";
 
 import { ListContactContractType } from "../../api/contact.contract";
+import { ContactStatusBadge } from "../ContactStatusBadge";
 
 type ContactTableRowDataType =
   ListContactContractType["output"]["data"]["data"][number];
-
-const statusVariantMap: Record<
-  ContactTableRowDataType["status"],
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  PENDING: "secondary",
-  READ: "outline",
-  REPLIED: "default",
-  SPAM: "destructive",
-};
 
 export const contactTableColumn: ColumnType<ContactTableRowDataType> = [
   {
@@ -51,10 +43,13 @@ export const contactTableColumn: ColumnType<ContactTableRowDataType> = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} label="Subject" />
     ),
-    cell: ({ getValue }) => (
-      <div className="max-w-75 truncate">
+    cell: ({ getValue, row }) => (
+      <Link
+        className="max-w-75 truncate link"
+        href={{ pathname: `/dashboard/contacts/${row.original.id}` }}
+      >
         {getValue<ContactTableRowDataType["subject"]>()}
-      </div>
+      </Link>
     ),
     meta: { label: "Subject" },
     enableHiding: false,
@@ -86,11 +81,10 @@ export const contactTableColumn: ColumnType<ContactTableRowDataType> = [
       <DataTableColumnHeader column={column} label="Status" />
     ),
     cell: ({ getValue }) => {
-      const status = getValue<ContactTableRowDataType["status"]>();
       return (
-        <Badge variant={statusVariantMap[status]}>
-          {formatEnumValue(status)}
-        </Badge>
+        <ContactStatusBadge
+          status={getValue<ContactTableRowDataType["status"]>()}
+        />
       );
     },
     meta: {
