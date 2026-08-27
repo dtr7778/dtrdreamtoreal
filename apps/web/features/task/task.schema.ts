@@ -1,9 +1,6 @@
 import z from "zod";
 
-import {
-  TaskPriorityEnumSchema,
-  TaskStatusEnumSchema,
-} from "@workspace/drizzle/zod-db-enums";
+import { TaskPriorityEnumSchema } from "@workspace/drizzle/zod-db-enums";
 
 export const taskCreateSchema = z.object({
   title: z
@@ -18,7 +15,5 @@ export const taskCreateSchema = z.object({
 });
 export type TaskCreateType = z.infer<typeof taskCreateSchema>;
 
-export const taskUpdateSchema = taskCreateSchema.partial().extend({
-  status: TaskStatusEnumSchema.optional(),
-});
+export const taskUpdateSchema = taskCreateSchema.partial();
 export type TaskUpdateType = z.infer<typeof taskUpdateSchema>;

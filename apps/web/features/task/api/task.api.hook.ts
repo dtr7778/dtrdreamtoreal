@@ -67,8 +67,94 @@ export function useUpdateTask<TFieldNames>({
 
   return useMutation(
     orpcTQClient.task.update.mutationOptions({
-      onMutate: async ({ taskId, status }) => {
+      onMutate: async ({ taskId, ...inputData }) => {
         toast.loading("Updating...", { id: toastId });
+        onRequestStart?.();
+
+        await queryClient.cancelQueries({
+          queryKey: listQueryKey,
+          exact: false,
+        });
+
+        const previousData = queryClient.getQueriesData<
+          ListTaskContractType["output"]
+        >({
+          queryKey: listQueryKey,
+          exact: false,
+        });
+
+        queryClient.setQueriesData(
+          {
+            queryKey: listQueryKey,
+            exact: false,
+          },
+          (oldData: ListTaskContractType["output"]) => {
+            if (!oldData) return oldData;
+
+            return {
+              ...oldData,
+              data: {
+                meta: oldData.data.meta,
+                data: oldData.data.data.map((task) => {
+                  if (task.id === taskId) {
+                    return {
+                      ...task,
+                      ...inputData,
+                    };
+                  }
+                  return task;
+                }),
+              },
+            };
+          }
+        );
+
+        return { previousData: previousData[0]?.[1] };
+      },
+      onSuccess: async ({ message }) => {
+        toast.success(message, { id: toastId });
+
+        onSuccess?.(message);
+      },
+      onError: (error, _variables, context) => {
+        queryClient.setQueryData(listQueryKey, context?.previousData);
+
+        const { type, message, fieldErrors } =
+          formatOrpcError<TFieldNames>(error);
+
+        if (type === "validation") {
+          onValidationErrors?.(fieldErrors ?? []);
+        }
+
+        toast.error(message, { id: toastId });
+
+        onError?.(message);
+      },
+      onSettled: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: listQueryKey,
+          exact: false,
+        });
+
+        onRequestEnd?.();
+      },
+    })
+  );
+}
+
+export function useUpdateStatusTask({
+  onRequestStart,
+  onRequestEnd,
+  onSuccess,
+  onError,
+}: Omit<IApiHookInput, "onValidationErrors">) {
+  const toastId = "update_task_toast_message";
+  const queryClient = useQueryClient();
+  const listQueryKey = orpcTQClient.task.list.queryKey({ input: {} });
+
+  return useMutation(
+    orpcTQClient.task.updateStatus.mutationOptions({
+      onMutate: async ({ taskId, status }) => {
         onRequestStart?.();
 
         await queryClient.cancelQueries({
@@ -112,19 +198,12 @@ export function useUpdateTask<TFieldNames>({
         return { previousData: previousData[0]?.[1] };
       },
       onSuccess: async ({ message }) => {
-        toast.success(message, { id: toastId });
-
         onSuccess?.(message);
       },
       onError: (error, _variables, context) => {
         queryClient.setQueryData(listQueryKey, context?.previousData);
 
-        const { type, message, fieldErrors } =
-          formatOrpcError<TFieldNames>(error);
-
-        if (type === "validation") {
-          onValidationErrors?.(fieldErrors ?? []);
-        }
+        const { message } = formatOrpcError(error);
 
         toast.error(message, { id: toastId });
 

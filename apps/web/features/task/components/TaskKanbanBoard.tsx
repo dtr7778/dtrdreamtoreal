@@ -26,7 +26,7 @@ import { TimeRangeFilter } from "@/components/time-range-filter";
 import { useTableQueryState } from "@/hooks/use-table-query-state";
 import { orpcTQClient } from "@/server/orpc.client";
 
-import { useUpdateTask } from "../api/task.api.hook";
+import { useUpdateStatusTask } from "../api/task.api.hook";
 import { ListTaskContractType } from "../api/task.contract";
 import { CreateTaskDialog } from "./CreateTaskDialog";
 import { TaskKanbanCard } from "./TaskKanbanCard";
@@ -93,7 +93,7 @@ export function TaskKanbanBoard({
     })
   );
 
-  const updateTask = useUpdateTask<"status">({});
+  const updateTask = useUpdateStatusTask({});
 
   const globalSearch = useDebouncedCallback(
     (searchValue: string | null) => setSearchFilter(searchValue),

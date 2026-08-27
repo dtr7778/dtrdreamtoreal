@@ -133,7 +133,7 @@ export type TaskCreateContractType = InferContractRouterType<
 const taskUpdateContract = taskBaseContract
   .route({
     path: "/tasks/update",
-    description: "Update own task for system admins",
+    description: "Update task",
     tags,
   })
   .input(taskUpdateSchema.extend({ taskId: z.uuid() }))
@@ -155,6 +155,29 @@ export type TaskUpdateContractType = InferContractRouterType<
   typeof taskUpdateContract
 >;
 
+const taskUpdateStatusContract = taskBaseContract
+  .route({
+    path: "/tasks/update/status",
+    description: "Update task status",
+    tags,
+  })
+  .input(z.object({ taskId: z.uuid(), status: TaskStatusEnumSchema }))
+  .output(
+    apiOutputZodSchema(
+      selectTaskSchema.pick({
+        id: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+      })
+    )
+  );
+export type TaskUpdateStatusContractType = InferContractRouterType<
+  typeof taskUpdateStatusContract
+>;
+
 const taskDeleteContract = taskBaseContract
   .route({
     path: "/tasks/delete",
@@ -172,5 +195,6 @@ export const taskContract = {
   details: taskDetailsContract,
   create: taskCreateContract,
   update: taskUpdateContract,
+  updateStatus: taskUpdateStatusContract,
   delete: taskDeleteContract,
 };

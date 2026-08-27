@@ -267,7 +267,6 @@ export const taskUpdateProcedure = taskImpl.update
     if (restInput.title !== undefined) set.title = restInput.title;
     if (restInput.description !== undefined)
       set.description = restInput.description;
-    if (restInput.status !== undefined) set.status = restInput.status;
     if (restInput.priority !== undefined) set.priority = restInput.priority;
     if (restInput.dueDate !== undefined) set.dueDate = restInput.dueDate;
 
@@ -293,6 +292,41 @@ export const taskUpdateProcedure = taskImpl.update
     }
 
     return apiResponse(API_MESSAGES.TASK.UPDATE, updatedData);
+  });
+
+export const taskUpdateStatusProcedure = taskImpl.updateStatus
+  .use(userPermissionMiddleware(["system.task.manage", "system.task.update"]))
+  .handler(async ({ context, input, errors }) => {
+    const [taskData] = await context.db
+      .select({ id: TaskTable.id })
+      .from(TaskTable)
+      .where(eq(TaskTable.id, input.taskId))
+      .limit(1);
+
+    if (!taskData) throw errors.NOT_FOUND();
+
+    const [updatedData] = await context.db
+      .update(TaskTable)
+      .set({
+        status: input.status,
+      })
+      .where(eq(TaskTable.id, taskData.id))
+      .returning({
+        id: TaskTable.id,
+        status: TaskTable.status,
+        priority: TaskTable.priority,
+        dueDate: TaskTable.dueDate,
+        createdAt: TaskTable.createdAt,
+        updatedAt: TaskTable.updatedAt,
+      });
+
+    if (!updatedData) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: API_MESSAGES.TASK.NOT_UPDATE,
+      });
+    }
+
+    return apiResponse(API_MESSAGES.TASK.UPDATE_STATUS, updatedData);
   });
 
 export const taskDeleteProcedure = taskImpl.delete

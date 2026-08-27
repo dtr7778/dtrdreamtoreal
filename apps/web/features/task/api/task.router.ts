@@ -5,6 +5,7 @@ import {
   taskDetailsProcedure,
   taskImpl,
   taskUpdateProcedure,
+  taskUpdateStatusProcedure,
 } from "./task.procedure";
 
 export const taskRouter = taskImpl.router({
@@ -12,5 +13,6 @@ export const taskRouter = taskImpl.router({
   details: taskDetailsProcedure,
   create: taskCreateProcedure,
   update: taskUpdateProcedure,
+  updateStatus: taskUpdateStatusProcedure,
   delete: taskDeleteProcedure,
 });
