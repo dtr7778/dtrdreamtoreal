@@ -1,4 +1,5 @@
 import { authRouter } from "@/features/auth/api/auth.router";
+import { contactRouter } from "@/features/contact/api/contact.router";
 import { notificationRouter } from "@/features/notification/api/notification.router";
 import { roleRouter } from "@/features/role/api/role.router";
 import { taskRouter } from "@/features/task/api/task.router";
@@ -12,4 +13,5 @@ export const router = {
   user: userRouter,
   role: roleRouter,
   task: taskRouter,
+  contact: contactRouter,
 };

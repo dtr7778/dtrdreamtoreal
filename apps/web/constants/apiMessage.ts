@@ -69,4 +69,7 @@ export const API_MESSAGES = {
     ASSIGNEE_NOT_IN_ORG:
       "The selected assignee is not a member of this organization.",
   },
+  CONTACT: {
+    GET_ALL: "Contacts loaded successfully",
+  },
 };
