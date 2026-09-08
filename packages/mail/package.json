@@ -35,11 +35,12 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@workspace/lib": "workspace:*",
     "@workspace/drizzle": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "drizzle-orm": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-email": "^6.9.2",
-    "resend": "^6.22.0"
+    "resend": "catalog:"
   }
 }

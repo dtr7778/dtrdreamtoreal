@@ -27,7 +27,7 @@ export class ResendMailTransport implements IMailTransport {
         };
       }
 
-      return { success: true };
+      return { success: true, messageId: info.data.id };
     } catch (error) {
       return {
         success: false,

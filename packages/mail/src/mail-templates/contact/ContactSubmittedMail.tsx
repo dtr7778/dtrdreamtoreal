@@ -1,6 +1,6 @@
 import { Section, Text } from "react-email";
 
-import { EmailLayout } from "../shared/EmailLayout";
+import { EmailLayout } from "../../shared/EmailLayout";
 
 export interface ContactSubmittedMailProps {
   userName: string;

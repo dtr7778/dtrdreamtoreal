@@ -1,3 +1,7 @@
 export * from "./createMail.factory";
-export type { IMailService } from "./MailService";
-export type { MailCallbackPayload } from "./types";
+export type {
+  InboundEmailPayload,
+  InboundEmailResult,
+  MailCallbackPayload,
+  EmailEventPayload,
+} from "./types";
