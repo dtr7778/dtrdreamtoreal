@@ -1,5 +1,5 @@
 {
-  "id": "c525400a-4d30-4cac-9980-430dce9b2f82",
+  "id": "fe6e959e-810e-453c-b567-00be910c5dbe",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -15,33 +15,15 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
+        "contact_user_id": {
+          "name": "contact_user_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "subject": {
           "name": "subject",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "phone": {
-          "name": "phone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "company": {
-          "name": "company",
-          "type": "varchar(255)",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
@@ -53,11 +35,60 @@
         },
         "status": {
           "name": "status",
-          "type": "ContactSubmissionStatusEnum",
+          "type": "ContactStatusEnum",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'PENDING'"
+          "default": "'pending'"
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_spam": {
+          "name": "is_spam",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "spam_reason": {
+          "name": "spam_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "read_at": {
+          "name": "read_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_at": {
+          "name": "closed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -75,11 +106,11 @@
         }
       },
       "indexes": {
-        "contact_submission_email_idx": {
-          "name": "contact_submission_email_idx",
+        "contactSubmission_contactUser_idx": {
+          "name": "contactSubmission_contactUser_idx",
           "columns": [
             {
-              "expression": "email",
+              "expression": "contact_user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -90,8 +121,8 @@
           "method": "btree",
           "with": {}
         },
-        "contact_submission_status_idx": {
-          "name": "contact_submission_status_idx",
+        "contactSubmission_status_idx": {
+          "name": "contactSubmission_status_idx",
           "columns": [
             {
               "expression": "status",
@@ -105,8 +136,8 @@
           "method": "btree",
           "with": {}
         },
-        "contact_submission_created_at_idx": {
-          "name": "contact_submission_created_at_idx",
+        "contactSubmission_createdAt_idx": {
+          "name": "contactSubmission_createdAt_idx",
           "columns": [
             {
               "expression": "created_at",
@@ -121,7 +152,21 @@
           "with": {}
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "contactSubmission_contactUser_fkey": {
+          "name": "contactSubmission_contactUser_fkey",
+          "tableFrom": "contact_submissions",
+          "tableTo": "contact_users",
+          "columnsFrom": [
+            "contact_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -157,6 +202,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "message_id": {
+          "name": "message_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp (3) with time zone",
@@ -173,8 +224,8 @@
         }
       },
       "indexes": {
-        "contact_submission_reply_submission_id_idx": {
-          "name": "contact_submission_reply_submission_id_idx",
+        "contactSubmissionReply_submissionId_idx": {
+          "name": "contactSubmissionReply_submissionId_idx",
           "columns": [
             {
               "expression": "submission_id",
@@ -188,11 +239,26 @@
           "method": "btree",
           "with": {}
         },
-        "contact_submission_reply_replied_by_idx": {
-          "name": "contact_submission_reply_replied_by_idx",
+        "contactSubmissionReply_messageId_idx": {
+          "name": "contactSubmissionReply_messageId_idx",
           "columns": [
             {
-              "expression": "replied_by",
+              "expression": "message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "contactSubmissionReply_createdAt_idx": {
+          "name": "contactSubmissionReply_createdAt_idx",
+          "columns": [
+            {
+              "expression": "created_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -205,8 +271,8 @@
         }
       },
       "foreignKeys": {
-        "contact_submission_reply_submission_fkey": {
-          "name": "contact_submission_reply_submission_fkey",
+        "contactSubmissionReply_submission_fkey": {
+          "name": "contactSubmissionReply_submission_fkey",
           "tableFrom": "contact_submission_replies",
           "tableTo": "contact_submissions",
           "columnsFrom": [
@@ -216,20 +282,812 @@
             "id"
           ],
           "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contact_users": {
+      "name": "contact_users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "contact_submission_reply_replied_by_fkey": {
-          "name": "contact_submission_reply_replied_by_fkey",
-          "tableFrom": "contact_submission_replies",
-          "tableTo": "users",
+        "email": {
+          "name": "email",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company": {
+          "name": "company",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "contactUser_email_idx": {
+          "name": "contactUser_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "contactUser_name_idx": {
+          "name": "contactUser_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "contactUser_createdAt_idx": {
+          "name": "contactUser_createdAt_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contact_email_joins": {
+      "name": "contact_email_joins",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "submission_id": {
+          "name": "submission_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_id": {
+          "name": "email_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "contactEmailJoin_sumissionId_idx": {
+          "name": "contactEmailJoin_sumissionId_idx",
+          "columns": [
+            {
+              "expression": "submission_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "contactEmailJoin_emailId_idx": {
+          "name": "contactEmailJoin_emailId_idx",
+          "columns": [
+            {
+              "expression": "email_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "contactEmailJoin_submission_fkey": {
+          "name": "contactEmailJoin_submission_fkey",
+          "tableFrom": "contact_email_joins",
+          "tableTo": "contact_submissions",
           "columnsFrom": [
-            "replied_by"
+            "submission_id"
           ],
           "columnsTo": [
             "id"
           ],
           "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "no action"
+        },
+        "contactEmailJoin_email_fkey": {
+          "name": "contactEmailJoin_email_fkey",
+          "tableFrom": "contact_email_joins",
+          "tableTo": "emails",
+          "columnsFrom": [
+            "submission_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.emails": {
+      "name": "emails",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "thread_id": {
+          "name": "thread_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "direction": {
+          "name": "direction",
+          "type": "EmailDirectionEnum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "EmailStatusEnum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "resend_id": {
+          "name": "resend_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resend_message_id": {
+          "name": "resend_message_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "q_message_id": {
+          "name": "q_message_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "text_body": {
+          "name": "text_body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "html_body": {
+          "name": "html_body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "headers": {
+          "name": "headers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "email_emailThreadId_idx": {
+          "name": "email_emailThreadId_idx",
+          "columns": [
+            {
+              "expression": "thread_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "email_resendId_idx": {
+          "name": "email_resendId_idx",
+          "columns": [
+            {
+              "expression": "resend_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "email_qMessageId_idx": {
+          "name": "email_qMessageId_idx",
+          "columns": [
+            {
+              "expression": "q_message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "email_messageId_idx": {
+          "name": "email_messageId_idx",
+          "columns": [
+            {
+              "expression": "resend_message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "email_direction_idx": {
+          "name": "email_direction_idx",
+          "columns": [
+            {
+              "expression": "direction",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "email_status_idx": {
+          "name": "email_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "email_createdAt_idx": {
+          "name": "email_createdAt_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "email_emailThread_fkey": {
+          "name": "email_emailThread_fkey",
+          "tableFrom": "emails",
+          "tableTo": "email_threads",
+          "columnsFrom": [
+            "thread_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.email_attachments": {
+      "name": "email_attachments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email_id": {
+          "name": "email_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_type": {
+          "name": "content_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_id": {
+          "name": "content_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content_disposition": {
+          "name": "content_disposition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "size": {
+          "name": "size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storage_key": {
+          "name": "storage_key",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "emailAttachment_emailId_idx": {
+          "name": "emailAttachment_emailId_idx",
+          "columns": [
+            {
+              "expression": "email_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "emailAttachment_contentId_idx": {
+          "name": "emailAttachment_contentId_idx",
+          "columns": [
+            {
+              "expression": "content_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "emailAttachment_emailId_fkey": {
+          "name": "emailAttachment_emailId_fkey",
+          "tableFrom": "email_attachments",
+          "tableTo": "emails",
+          "columnsFrom": [
+            "email_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.email_recipients": {
+      "name": "email_recipients",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email_id": {
+          "name": "email_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "EmailRecipientTypeEnum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "emailRecipient_emailId_idx": {
+          "name": "emailRecipient_emailId_idx",
+          "columns": [
+            {
+              "expression": "email_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "emailRecipient_email_idx": {
+          "name": "emailRecipient_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "emailRecipient_type_idx": {
+          "name": "emailRecipient_type_idx",
+          "columns": [
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "emailRecipient_email_fkey": {
+          "name": "emailRecipient_email_fkey",
+          "tableFrom": "email_recipients",
+          "tableTo": "emails",
+          "columnsFrom": [
+            "email_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.email_threads": {
+      "name": "email_threads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "subject": {
+          "name": "subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_email": {
+          "name": "contact_email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_name": {
+          "name": "contact_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_closed": {
+          "name": "is_closed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "closed_at": {
+          "name": "closed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_by": {
+          "name": "closed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "emailThread_closedBy_idx": {
+          "name": "emailThread_closedBy_idx",
+          "columns": [
+            {
+              "expression": "closed_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "emailThread_contactEmail_idx": {
+          "name": "emailThread_contactEmail_idx",
+          "columns": [
+            {
+              "expression": "contact_email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "emailThread_isClosed_idx": {
+          "name": "emailThread_isClosed_idx",
+          "columns": [
+            {
+              "expression": "is_closed",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "emailThread_closedBy_fkey": {
+          "name": "emailThread_closedBy_fkey",
+          "tableFrom": "email_threads",
+          "tableTo": "users",
+          "columnsFrom": [
+            "closed_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1409,8 +2267,8 @@
         }
       },
       "indexes": {
-        "account_provider_account_id_key": {
-          "name": "account_provider_account_id_key",
+        "account_accountProvider_accountId_idx": {
+          "name": "account_accountProvider_accountId_idx",
           "columns": [
             {
               "expression": "provider_id",
@@ -1430,8 +2288,8 @@
           "method": "btree",
           "with": {}
         },
-        "account_user_id_idx": {
-          "name": "account_user_id_idx",
+        "account_userId_idx": {
+          "name": "account_userId_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -1447,8 +2305,8 @@
         }
       },
       "foreignKeys": {
-        "accounts_user_fkey": {
-          "name": "accounts_user_fkey",
+        "account_user_fkey": {
+          "name": "account_user_fkey",
           "tableFrom": "accounts",
           "tableTo": "users",
           "columnsFrom": [
@@ -1553,8 +2411,8 @@
         }
       },
       "indexes": {
-        "files_user_idx": {
-          "name": "files_user_idx",
+        "file_user_idx": {
+          "name": "file_user_idx",
           "columns": [
             {
               "expression": "uploaded_by",
@@ -1568,8 +2426,8 @@
           "method": "btree",
           "with": {}
         },
-        "files_deleted_by_idx": {
-          "name": "files_deleted_by_idx",
+        "file_deletedBy_idx": {
+          "name": "file_deletedBy_idx",
           "columns": [
             {
               "expression": "deleted_by",
@@ -1583,8 +2441,8 @@
           "method": "btree",
           "with": {}
         },
-        "files_entity_idx": {
-          "name": "files_entity_idx",
+        "file_entityType_idx": {
+          "name": "file_entityType_idx",
           "columns": [
             {
               "expression": "entity_type",
@@ -1604,8 +2462,8 @@
           "method": "btree",
           "with": {}
         },
-        "files_key_idx": {
-          "name": "files_key_idx",
+        "file_key_idx": {
+          "name": "file_key_idx",
           "columns": [
             {
               "expression": "key",
@@ -1619,8 +2477,8 @@
           "method": "btree",
           "with": {}
         },
-        "files_uploaded_at_idx": {
-          "name": "files_uploaded_at_idx",
+        "file_uploadedAt_idx": {
+          "name": "file_uploadedAt_idx",
           "columns": [
             {
               "expression": "uploaded_at",
@@ -1636,8 +2494,8 @@
         }
       },
       "foreignKeys": {
-        "files_user_fkey": {
-          "name": "files_user_fkey",
+        "file_user_fkey": {
+          "name": "file_user_fkey",
           "tableFrom": "files",
           "tableTo": "users",
           "columnsFrom": [
@@ -1649,8 +2507,8 @@
           "onDelete": "set null",
           "onUpdate": "cascade"
         },
-        "files_deleted_by_fkey": {
-          "name": "files_deleted_by_fkey",
+        "file_deletedBy_fkey": {
+          "name": "file_deletedBy_fkey",
           "tableFrom": "files",
           "tableTo": "users",
           "columnsFrom": [
@@ -1732,8 +2590,8 @@
         }
       },
       "indexes": {
-        "session_token_key": {
-          "name": "session_token_key",
+        "session_token_idx": {
+          "name": "session_token_idx",
           "columns": [
             {
               "expression": "token",
@@ -1747,8 +2605,8 @@
           "method": "btree",
           "with": {}
         },
-        "session_user_id_idx": {
-          "name": "session_user_id_idx",
+        "session_userId_idx": {
+          "name": "session_userId_idx",
           "columns": [
             {
               "expression": "user_id",
@@ -1762,8 +2620,8 @@
           "method": "btree",
           "with": {}
         },
-        "session_expires_at_idx": {
-          "name": "session_expires_at_idx",
+        "session_expiresAt_idx": {
+          "name": "session_expiresAt_idx",
           "columns": [
             {
               "expression": "expires_at",
@@ -1779,8 +2637,8 @@
         }
       },
       "foreignKeys": {
-        "sessions_user_fkey": {
-          "name": "sessions_user_fkey",
+        "session_user_fkey": {
+          "name": "session_user_fkey",
           "tableFrom": "sessions",
           "tableTo": "users",
           "columnsFrom": [
@@ -2036,36 +2894,64 @@
     }
   },
   "enums": {
-    "public.ContactSubmissionStatusEnum": {
-      "name": "ContactSubmissionStatusEnum",
+    "public.ContactStatusEnum": {
+      "name": "ContactStatusEnum",
       "schema": "public",
       "values": [
-        "PENDING",
-        "REPLIED",
-        "SPAM"
+        "pending",
+        "processing",
+        "replied",
+        "closed",
+        "spam"
       ]
     },
-    "public.FeedbackIssueStatusEnum": {
-      "name": "FeedbackIssueStatusEnum",
+    "public.EmailDirectionEnum": {
+      "name": "EmailDirectionEnum",
       "schema": "public",
       "values": [
-        "OPEN",
-        "IN_PROGRESS",
-        "NEEDS_INFO",
-        "RESOLVED",
-        "CLOSED"
+        "outbound",
+        "inbound",
+        "web_form"
       ]
     },
-    "public.FeedbackIssueTypeEnum": {
-      "name": "FeedbackIssueTypeEnum",
+    "public.EmailEventTypeEnum": {
+      "name": "EmailEventTypeEnum",
       "schema": "public",
       "values": [
-        "BUG",
-        "FEATURE_REQUEST",
-        "FEEDBACK",
-        "SUGGESTION",
-        "REPORT",
-        "OTHER"
+        "email.sent",
+        "email.delivered",
+        "email.delivery_delayed",
+        "email.bounced",
+        "email.complained",
+        "email.opened",
+        "email.clicked",
+        "email.unsubscribed",
+        "email.rejected"
+      ]
+    },
+    "public.EmailRecipientTypeEnum": {
+      "name": "EmailRecipientTypeEnum",
+      "schema": "public",
+      "values": [
+        "to",
+        "cc",
+        "bcc",
+        "reply_to",
+        "from",
+        "received_for"
+      ]
+    },
+    "public.EmailStatusEnum": {
+      "name": "EmailStatusEnum",
+      "schema": "public",
+      "values": [
+        "draft",
+        "queued",
+        "sent",
+        "delivered",
+        "bounced",
+        "complained",
+        "failed"
       ]
     },
     "public.NotificationCategoryEnum": {

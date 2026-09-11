@@ -1,4 +1,5 @@
 export * from "./contact";
+export * from "./email";
 export * from "./notification";
 export * from "./role-permission";
 export * from "./user";

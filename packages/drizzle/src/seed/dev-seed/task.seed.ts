@@ -15,7 +15,14 @@ export async function seedTasks(
 ): Promise<Array<TaskDataModel>> {
   console.log("🌱 Seeding tasks...");
 
-  const tasksData = zocker(insertTaskSchema)
+  const tasksData = zocker(
+    insertTaskSchema.omit({
+      title: true,
+      description: true,
+      createdBy: true,
+      assignedBy: true,
+    })
+  )
     .generateMany(seedConfigs.targets.tasks)
     .map((task) => {
       const createdUser = faker.helpers.arrayElement(users);

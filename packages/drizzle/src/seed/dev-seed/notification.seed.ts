@@ -16,7 +16,13 @@ export async function seedNotifications(
   console.log("🌱 Seeding notifications...");
 
   const notificationsData = zocker(
-    insertNotificationSchema.omit({ data: true })
+    insertNotificationSchema.omit({
+      data: true,
+      title: true,
+      message: true,
+      recipientId: true,
+      actorId: true,
+    })
   )
     .generateMany(seedConfigs.targets.notifications)
     .map((notification) => {

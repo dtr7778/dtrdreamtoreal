@@ -43,17 +43,17 @@ export const AccountTable = pgTable(
   },
   (table) => [
     foreignKey({
-      name: "accounts_user_fkey",
+      name: "account_user_fkey",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
     })
       .onDelete("cascade")
       .onUpdate("cascade"),
-    uniqueIndex("account_provider_account_id_key").on(
+    uniqueIndex("account_accountProvider_accountId_idx").on(
       table.providerId,
       table.accountId
     ),
-    index("account_user_id_idx").on(table.userId),
+    index("account_userId_idx").on(table.userId),
   ]
 );
 

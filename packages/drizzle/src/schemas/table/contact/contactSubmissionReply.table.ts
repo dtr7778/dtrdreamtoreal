@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { foreignKey, index, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import {
+  foreignKey,
+  index,
+  pgTable,
+  text,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -8,7 +15,6 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
-import { UserTable } from "../user";
 import { ContactSubmissionTable } from "./contactSubmission.table";
 
 export const ContactSubmissionReplyTable = pgTable(
@@ -18,26 +24,19 @@ export const ContactSubmissionReplyTable = pgTable(
     submissionId: uuid("submission_id").notNull(),
     repliedBy: uuid("replied_by").notNull(),
     reply: text("reply").notNull(),
+    messageId: varchar("message_id"),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },
   (table) => [
     foreignKey({
-      name: "contact_submission_reply_submission_fkey",
+      name: "contactSubmissionReply_submission_fkey",
       columns: [table.submissionId],
       foreignColumns: [ContactSubmissionTable.id],
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
-    foreignKey({
-      name: "contact_submission_reply_replied_by_fkey",
-      columns: [table.repliedBy],
-      foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
-    index("contact_submission_reply_submission_id_idx").on(table.submissionId),
-    index("contact_submission_reply_replied_by_idx").on(table.repliedBy),
+    }).onDelete("cascade"),
+    index("contactSubmissionReply_submissionId_idx").on(table.submissionId),
+    index("contactSubmissionReply_messageId_idx").on(table.messageId),
+    index("contactSubmissionReply_createdAt_idx").on(table.createdAt),
   ]
 );
 
@@ -47,12 +46,7 @@ export const ContactSubmissionReplyRelations = relations(
     submission: one(ContactSubmissionTable, {
       fields: [ContactSubmissionReplyTable.submissionId],
       references: [ContactSubmissionTable.id],
-      relationName: "ContactSubmissionReplyToContactSubmission",
-    }),
-    repliedBy: one(UserTable, {
-      fields: [ContactSubmissionReplyTable.repliedBy],
-      references: [UserTable.id],
-      relationName: "ContactSubmissionReplyToUser",
+      relationName: "ContactSubmissionReplyToSubmission",
     }),
   })
 );
@@ -69,11 +63,7 @@ export const selectContactSubmissionReplySchema = createSelectSchema(
 );
 export const updateContactSubmissionReplySchema = createUpdateSchema(
   ContactSubmissionReplyTable
-).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+).omit({ id: true, createdAt: true });
 
 export type ContactSubmissionReplyDataModel =
   typeof ContactSubmissionReplyTable.$inferSelect;

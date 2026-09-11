@@ -2,9 +2,11 @@ import z from "zod";
 
 import {
   ACTION_TYPE,
-  CONTACT_SUBMISSION_STATUS,
-  FEEDBACK_ISSUE_STATUS,
-  FEEDBACK_ISSUE_TYPE,
+  CONTACT_STATUS,
+  EMAIL_DIRECTION,
+  EMAIL_EVENT_TYPE,
+  EMAIL_RECIPIENT_TYPE,
+  EMAIL_STATUS,
   FILE_ENTITY_TYPES,
   NOTIFICATION_CATEGORY,
   NOTIFICATION_LEVEL,
@@ -30,12 +32,22 @@ export type ResourceTypeEnumType = z.infer<typeof ResourceTypeEnumSchema>;
 export const ActionTypeEnumSchema = z.enum(ACTION_TYPE);
 export type ActionTypeEnumType = z.infer<typeof ActionTypeEnumSchema>;
 
-export const ContactSubmissionStatusEnumSchema = z.enum(
-  CONTACT_SUBMISSION_STATUS
-);
-export type ContactSubmissionStatusEnumType = z.infer<
-  typeof ContactSubmissionStatusEnumSchema
+export const EmailDirectionEnumSchema = z.enum(EMAIL_DIRECTION);
+export type EmailDirectionEnumType = z.infer<typeof EmailDirectionEnumSchema>;
+
+export const EmailStatusEnumSchema = z.enum(EMAIL_STATUS);
+export type EmailStatusEnumType = z.infer<typeof EmailStatusEnumSchema>;
+
+export const EmailEventTypeEnumSchema = z.enum(EMAIL_EVENT_TYPE);
+export type EmailEventTypeEnumType = z.infer<typeof EmailEventTypeEnumSchema>;
+
+export const EmailRecipientTypeEnumSchema = z.enum(EMAIL_RECIPIENT_TYPE);
+export type EmailRecipientTypeEnumType = z.infer<
+  typeof EmailRecipientTypeEnumSchema
 >;
+
+export const ContactStatusEnumSchema = z.enum(CONTACT_STATUS);
+export type ContactStatusEnumType = z.infer<typeof ContactStatusEnumSchema>;
 
 export const NotificationCategoryEnumSchema = z.enum(NOTIFICATION_CATEGORY);
 export type NotificationCategoryEnumType = z.infer<
@@ -45,16 +57,6 @@ export type NotificationCategoryEnumType = z.infer<
 export const NotificationLevelEnumSchema = z.enum(NOTIFICATION_LEVEL);
 export type NotificationLevelEnumType = z.infer<
   typeof NotificationLevelEnumSchema
->;
-
-export const FeedbackIssueTypeEnumSchema = z.enum(FEEDBACK_ISSUE_TYPE);
-export type FeedbackIssueTypeEnumType = z.infer<
-  typeof FeedbackIssueTypeEnumSchema
->;
-
-export const FeedbackIssueStatusEnumSchema = z.enum(FEEDBACK_ISSUE_STATUS);
-export type FeedbackIssueStatusEnumType = z.infer<
-  typeof FeedbackIssueStatusEnumSchema
 >;
 
 export const TaskStatusEnumSchema = z.enum(TASK_STATUS);

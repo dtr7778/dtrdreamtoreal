@@ -22,26 +22,42 @@ export const ACTION_TYPE = [
   "export",
 ] as const;
 
-export const FEEDBACK_ISSUE_TYPE = [
-  "BUG",
-  "FEATURE_REQUEST",
-  "FEEDBACK",
-  "SUGGESTION",
-  "REPORT",
-  "OTHER",
+export const EMAIL_DIRECTION = ["outbound", "inbound", "web_form"] as const;
+export const EMAIL_STATUS = [
+  "draft",
+  "queued",
+  "sent",
+  "delivered",
+  "bounced",
+  "complained",
+  "failed",
 ] as const;
-export const FEEDBACK_ISSUE_STATUS = [
-  "OPEN",
-  "IN_PROGRESS",
-  "NEEDS_INFO",
-  "RESOLVED",
-  "CLOSED",
+export const EMAIL_EVENT_TYPE = [
+  "email.sent",
+  "email.delivered",
+  "email.delivery_delayed",
+  "email.bounced",
+  "email.complained",
+  "email.opened",
+  "email.clicked",
+  "email.unsubscribed",
+  "email.rejected",
+] as const;
+export const EMAIL_RECIPIENT_TYPE = [
+  "to",
+  "cc",
+  "bcc",
+  "reply_to",
+  "from",
+  "received_for",
 ] as const;
 
-export const CONTACT_SUBMISSION_STATUS = [
-  "PENDING",
-  "REPLIED",
-  "SPAM",
+export const CONTACT_STATUS = [
+  "pending",
+  "processing",
+  "replied",
+  "closed",
+  "spam",
 ] as const;
 
 export const NOTIFICATION_CATEGORY = [

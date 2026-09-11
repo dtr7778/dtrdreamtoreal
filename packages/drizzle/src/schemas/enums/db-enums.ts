@@ -1,9 +1,11 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
 import {
-  CONTACT_SUBMISSION_STATUS,
-  FEEDBACK_ISSUE_STATUS,
-  FEEDBACK_ISSUE_TYPE,
+  CONTACT_STATUS,
+  EMAIL_DIRECTION,
+  EMAIL_EVENT_TYPE,
+  EMAIL_RECIPIENT_TYPE,
+  EMAIL_STATUS,
   NOTIFICATION_CATEGORY,
   NOTIFICATION_LEVEL,
   ROLES,
@@ -13,19 +15,21 @@ import {
 
 export const RoleEnum = pgEnum("RoleEnum", ROLES);
 
-export const ContactSubmissionStatusEnum = pgEnum(
-  "ContactSubmissionStatusEnum",
-  CONTACT_SUBMISSION_STATUS
+export const EmailDirectionEnum = pgEnum("EmailDirectionEnum", EMAIL_DIRECTION);
+
+export const EmailStatusEnum = pgEnum("EmailStatusEnum", EMAIL_STATUS);
+
+export const EmailEventTypeEnum = pgEnum(
+  "EmailEventTypeEnum",
+  EMAIL_EVENT_TYPE
 );
 
-export const FeedbackIssueTypeEnum = pgEnum(
-  "FeedbackIssueTypeEnum",
-  FEEDBACK_ISSUE_TYPE
+export const EmailRecipientTypeEnum = pgEnum(
+  "EmailRecipientTypeEnum",
+  EMAIL_RECIPIENT_TYPE
 );
-export const FeedbackIssueStatusEnum = pgEnum(
-  "FeedbackIssueStatusEnum",
-  FEEDBACK_ISSUE_STATUS
-);
+
+export const ContactStatusEnum = pgEnum("ContactStatusEnum", CONTACT_STATUS);
 
 export const NotificationCategoryEnum = pgEnum(
   "NotificationCategoryEnum",

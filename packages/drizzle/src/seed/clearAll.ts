@@ -4,8 +4,15 @@ import * as schema from "../schemas";
 export async function clearAll(db: DatabaseType) {
   console.log("🧹 Clearing existing data...");
   await db.transaction(async (tx) => {
+    await tx.delete(schema.EmailAttachmentTable);
+    await tx.delete(schema.EmailRecipientTable);
+    await tx.delete(schema.EmailTable);
+    await tx.delete(schema.EmailThreadTable);
+
     await tx.delete(schema.TaskTable);
 
+    await tx.delete(schema.ContactEmailJoinTable);
+    await tx.delete(schema.ContactUserTable);
     await tx.delete(schema.ContactSubmissionReplyTable);
     await tx.delete(schema.ContactSubmissionTable);
 

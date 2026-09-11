@@ -16,7 +16,7 @@ import z from "zod";
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
-import { ContactSubmissionReplyTable } from "../contact";
+import { EmailThreadTable } from "../email";
 import { FileTable } from "../file.table";
 import { NotificationTable } from "../notification";
 import { UserRoleTable } from "../role-permission";
@@ -56,17 +56,15 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   accounts: many(AccountTable, {
     relationName: "AccountToUser",
   }),
-  contactReplies: many(ContactSubmissionReplyTable, {
-    relationName: "ContactSubmissionReplyToUser",
-  }),
-  uploadedFiles: many(FileTable, {
-    relationName: "FileUploadedBy",
-  }),
-  deletedFiles: many(FileTable, {
-    relationName: "FileDeletedBy",
-  }),
   roles: many(UserRoleTable, {
     relationName: "UserToUserRole",
+  }),
+  // file
+  uploadedFiles: many(FileTable, {
+    relationName: "FileUploadedToUser",
+  }),
+  deletedFiles: many(FileTable, {
+    relationName: "FileDeletedToUser",
   }),
   // notification
   notifications: many(NotificationTable, {
@@ -81,8 +79,13 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   pushSubscriptions: many(PushSubscriptionTable, {
     relationName: "PushSubscriptionToUser",
   }),
+  // task
   assignedTasks: many(TaskTable, { relationName: "TaskToAssignedBy" }),
   createdTasks: many(TaskTable, { relationName: "TaskToCreatedBy" }),
+  // email
+  closedEmailThreads: many(EmailThreadTable, {
+    relationName: "EmailThreadToClosedBy",
+  }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

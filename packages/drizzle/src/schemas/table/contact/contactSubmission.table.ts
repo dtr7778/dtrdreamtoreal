@@ -1,5 +1,15 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  foreignKey,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -8,46 +18,64 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
-import { ContactSubmissionStatusEnum } from "../../enums/db-enums";
-import { ContactSubmissionReplyTable } from "./contactSubmissionReply.table";
+import { ContactStatusEnum } from "../../enums/db-enums";
+import { ContactEmailJoinTable } from "./contactEmailJoin.table";
+import { ContactUserTable } from "./contactUser.table";
 
 export const ContactSubmissionTable = pgTable(
   "contact_submissions",
   {
     id: db_id,
-    name: varchar("name", { length: 255 }).notNull(),
-    email: varchar("email", { length: 255 }).notNull(),
-    subject: varchar("subject", { length: 255 }).notNull(),
-    phone: varchar("phone", { length: 50 }),
-    company: varchar("company", { length: 255 }),
+    contactUserId: uuid("contact_user_id").notNull(),
+    subject: varchar("subject"),
     message: text("message").notNull(),
-    status: ContactSubmissionStatusEnum("status").notNull().default("PENDING"),
+    status: ContactStatusEnum("status").notNull().default("pending"),
+
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: text("user_agent"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+    notes: text("notes"),
+
+    isSpam: boolean("is_spam").notNull().default(false),
+    spamReason: text("spam_reason"),
+
+    readAt: timestamp("read_at", { withTimezone: true, precision: 3 }),
+    closedAt: timestamp("closed_at", { withTimezone: true, precision: 3 }),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },
   (table) => [
-    index("contact_submission_email_idx").on(table.email),
-    index("contact_submission_status_idx").on(table.status),
-    index("contact_submission_created_at_idx").on(table.createdAt),
+    foreignKey({
+      name: "contactSubmission_contactUser_fkey",
+      columns: [table.contactUserId],
+      foreignColumns: [ContactUserTable.id],
+    }).onDelete("cascade"),
+    index("contactSubmission_contactUser_idx").on(table.contactUserId),
+    index("contactSubmission_status_idx").on(table.status),
+    index("contactSubmission_createdAt_idx").on(table.createdAt),
   ]
 );
 
 export const ContactSubmissionRelations = relations(
   ContactSubmissionTable,
-  ({ many }) => ({
-    replies: many(ContactSubmissionReplyTable, {
-      relationName: "ContactSubmissionReplyToContactSubmission",
+  ({ one, many }) => ({
+    contactUser: one(ContactUserTable, {
+      relationName: "ContactSubmissionToContactUser",
+      fields: [ContactSubmissionTable.contactUserId],
+      references: [ContactUserTable.id],
+    }),
+    emails: many(ContactEmailJoinTable, {
+      relationName: "ContactEmailJoinToSubmission",
     }),
   })
 );
 
 export const insertContactSubmissionSchema = createInsertSchema(
-  ContactSubmissionTable,
-  {
-    email: z.email(),
-  }
+  ContactSubmissionTable
 ).omit({
   id: true,
+  readAt: true,
+  closedAt: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -55,15 +83,8 @@ export const selectContactSubmissionSchema = createSelectSchema(
   ContactSubmissionTable
 );
 export const updateContactSubmissionSchema = createUpdateSchema(
-  ContactSubmissionTable,
-  {
-    email: z.email().optional(),
-  }
-).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+  ContactSubmissionTable
+).omit({ id: true, createdAt: true });
 
 export type ContactSubmissionDataModel =
   typeof ContactSubmissionTable.$inferSelect;

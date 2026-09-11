@@ -44,24 +44,24 @@ export const FileTable = pgTable(
   },
   (fileTable) => [
     foreignKey({
-      name: "files_user_fkey",
+      name: "file_user_fkey",
       columns: [fileTable.uploadedBy],
       foreignColumns: [UserTable.id],
     })
       .onDelete("set null")
       .onUpdate("cascade"),
     foreignKey({
-      name: "files_deleted_by_fkey",
+      name: "file_deletedBy_fkey",
       columns: [fileTable.deletedBy],
       foreignColumns: [UserTable.id],
     })
       .onDelete("set null")
       .onUpdate("cascade"),
-    index("files_user_idx").on(fileTable.uploadedBy),
-    index("files_deleted_by_idx").on(fileTable.deletedBy),
-    index("files_entity_idx").on(fileTable.entityType, fileTable.entityId),
-    index("files_key_idx").on(fileTable.key),
-    index("files_uploaded_at_idx").on(fileTable.uploadedAt),
+    index("file_user_idx").on(fileTable.uploadedBy),
+    index("file_deletedBy_idx").on(fileTable.deletedBy),
+    index("file_entityType_idx").on(fileTable.entityType, fileTable.entityId),
+    index("file_key_idx").on(fileTable.key),
+    index("file_uploadedAt_idx").on(fileTable.uploadedAt),
   ]
 );
 
@@ -69,12 +69,12 @@ export const FileRelations = relations(FileTable, ({ one }) => ({
   uploadedBy: one(UserTable, {
     fields: [FileTable.uploadedBy],
     references: [UserTable.id],
-    relationName: "FileUploadedBy",
+    relationName: "FileUploadedToUser",
   }),
   deletedBy: one(UserTable, {
     fields: [FileTable.deletedBy],
     references: [UserTable.id],
-    relationName: "FileDeletedBy",
+    relationName: "FileDeletedToUser",
   }),
 }));
 

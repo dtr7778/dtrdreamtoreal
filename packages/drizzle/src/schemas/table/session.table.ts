@@ -38,15 +38,15 @@ export const SessionTable = pgTable(
   },
   (table) => [
     foreignKey({
-      name: "sessions_user_fkey",
+      name: "session_user_fkey",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
     })
       .onDelete("cascade")
       .onUpdate("cascade"),
-    uniqueIndex("session_token_key").on(table.token),
-    index("session_user_id_idx").on(table.userId),
-    index("session_expires_at_idx").on(table.expiresAt),
+    uniqueIndex("session_token_idx").on(table.token),
+    index("session_userId_idx").on(table.userId),
+    index("session_expiresAt_idx").on(table.expiresAt),
   ]
 );
 

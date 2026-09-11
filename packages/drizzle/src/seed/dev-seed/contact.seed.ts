@@ -5,8 +5,10 @@ import {
   ContactSubmissionDataModel,
   ContactSubmissionReplyTable,
   ContactSubmissionTable,
+  ContactUserTable,
   InsertContactSubmissionReply,
   insertContactSubmissionSchema,
+  insertContactUserSchema,
   UserDataModel,
 } from "../../schemas";
 import { db } from "../seed-db-client";
@@ -17,11 +19,20 @@ export async function seedContacts(
 ): Promise<Array<ContactSubmissionDataModel>> {
   console.log("🌱 Seeding contacts...");
 
-  const contactsData = zocker(insertContactSubmissionSchema)
+  const contactUserData = zocker(
+    insertContactUserSchema.omit({
+      metadata: true,
+      name: true,
+      firstName: true,
+      lastName: true,
+      company: true,
+      phone: true,
+    })
+  )
     .generateMany(seedConfigs.targets.contacts)
-    .map((contact) => {
-      const message = faker.lorem.sentences({ min: 1, max: 3 });
-      const subject = faker.lorem.sentence({ min: 2, max: 4 });
+    .map((contactUser) => {
+      const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
       const company = faker.helpers.maybe(
         () => {
           return faker.company.name();
@@ -35,7 +46,44 @@ export async function seedContacts(
         { probability: 0.3 }
       );
 
-      return { ...contact, message, subject, company, phone };
+      return {
+        ...contactUser,
+        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
+        company,
+        phone,
+      };
+    });
+
+  const contactUsers = await db
+    .insert(ContactUserTable)
+    .values(contactUserData)
+    .returning();
+
+  const contactsData = zocker(
+    insertContactSubmissionSchema.omit({
+      metadata: true,
+      message: true,
+      subject: true,
+      userAgent: true,
+      contactUserId: true,
+    })
+  )
+    .generateMany(seedConfigs.targets.contacts)
+    .map((contact) => {
+      const contactUser = faker.helpers.arrayElement(contactUsers);
+      const userAgent = faker.lorem.sentences({ min: 1, max: 3 });
+      const message = faker.lorem.sentences({ min: 1, max: 3 });
+      const subject = faker.lorem.sentence({ min: 2, max: 4 });
+
+      return {
+        ...contact,
+        message,
+        subject,
+        userAgent,
+        contactUserId: contactUser.id,
+      };
     });
 
   const contacts = await db
