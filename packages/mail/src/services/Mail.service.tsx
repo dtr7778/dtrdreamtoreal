@@ -1,3 +1,5 @@
+import { render } from "react-email";
+
 import { QstashServiceConfig } from "@workspace/lib/qstash";
 
 import AccountLockedMail, {
@@ -24,6 +26,9 @@ import SuspiciousLoginMail, {
 import WelcomeUserMail, {
   WelcomeUserMailProps,
 } from "../mail-templates/auth/WelcomeUserMail";
+import ContactReplyMail, {
+  ContactReplyMailProps,
+} from "../mail-templates/contact/ContactReplyMail";
 import ContactSubmittedMail, {
   ContactSubmittedMailProps,
 } from "../mail-templates/contact/ContactSubmittedMail";
@@ -35,11 +40,12 @@ import IntegrationErrorMail, {
 } from "../mail-templates/integration/IntegrationErrorMail";
 import {
   IMailTransport,
+  MailServiceConfig,
   QstashMailConfig,
   QstashMailResult,
   SendMailOption,
 } from "../types";
-import { QstashMailService } from "./QstashMail.service";
+import { IQstashMailService, QstashMailService } from "./QstashMail.service";
 
 type WelcomeUserEmailOptions = Omit<
   SendMailOption,
@@ -47,37 +53,73 @@ type WelcomeUserEmailOptions = Omit<
 > &
   Omit<WelcomeUserMailProps, "appName" | "supportMail">;
 
-type EmailVerificationMailOptions = Pick<SendMailOption, "to"> &
+type EmailVerificationMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<EmailVerificationMailProps, "appName" | "supportMail">;
 
-type PasswordResetEmailOptions = Pick<SendMailOption, "to"> &
+type PasswordResetEmailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<ResetPasswordMailProps, "appName" | "supportMail">;
 
-type PasswordChangedMailOptions = Pick<SendMailOption, "to"> &
+type PasswordChangedMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<PasswordChangedMailProps, "appName" | "supportMail">;
 
-type NewDeviceLoginEmailOptions = Pick<SendMailOption, "to"> &
+type NewDeviceLoginEmailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<NewDeviceLoginMailProps, "appName" | "supportMail">;
 
-type SuspiciousLoginMailOptions = Pick<SendMailOption, "to"> &
+type SuspiciousLoginMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<SuspiciousLoginMailProps, "appName" | "supportMail">;
 
-type RoleChangedMailOptions = Pick<SendMailOption, "to"> &
+type RoleChangedMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<RoleChangedMailProps, "appName" | "supportMail">;
 
-type AccountLockedMailOptions = Pick<SendMailOption, "to"> &
+type AccountLockedMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<AccountLockedMailProps, "appName" | "supportMail">;
 
-type IntegrationConnectedMailOptions = Pick<SendMailOption, "to"> &
+type IntegrationConnectedMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<IntegrationConnectedMailProps, "appName" | "supportMail">;
 
-type IntegrationErrorMailOptions = Pick<SendMailOption, "to"> &
+type IntegrationErrorMailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<IntegrationErrorMailProps, "appName" | "supportMail">;
 
-type ContactSubmittedEmailOptions = Pick<SendMailOption, "to"> &
+type ContactSubmittedEmailOptions = Omit<
+  SendMailOption,
+  "from" | "subject" | "text" | "html"
+> &
   Omit<ContactSubmittedMailProps, "appName" | "supportMail">;
 
-export interface ISystemMailService {
+type ContactReplyEmailOptions = Omit<
+  SendMailOption,
+  "from" | "text" | "html" | "subject"
+> &
+  Omit<ContactReplyMailProps, "appName" | "supportMail">;
+
+export interface IMailService extends IQstashMailService {
   sendWelcomeUserMail(
     options: WelcomeUserEmailOptions
   ): Promise<QstashMailResult>;
@@ -121,28 +163,44 @@ export interface ISystemMailService {
   sendContactSubmittedMail(
     options: ContactSubmittedEmailOptions
   ): Promise<QstashMailResult>;
+
+  sendContactReplyMail({
+    to,
+    ...options
+  }: ContactReplyEmailOptions): Promise<QstashMailResult>;
 }
 
-export class SystemMailService
-  extends QstashMailService
-  implements ISystemMailService
-{
+export class MailService extends QstashMailService implements IMailService {
   constructor(
-    private systemMailConfig: {
-      appName: string;
-      systemMail: string;
-      supportMail: string;
-    },
+    private readonly mailConfig: MailServiceConfig,
     qstashMailConfig: QstashMailConfig,
     qstashConfig: QstashServiceConfig,
     transport: IMailTransport
   ) {
-    super(
-      transport,
-      true,
-      qstashMailConfig,
-      qstashConfig,
-      `"${systemMailConfig.appName}" <${systemMailConfig.systemMail}>`
+    super(transport, qstashMailConfig, qstashConfig);
+  }
+
+  private async sendMailTemplate(
+    from: string,
+    to: string | string[],
+    subject: string,
+    component: React.ReactNode,
+    isSystemMail: boolean = true,
+    options: Partial<SendMailOption> = {}
+  ): Promise<QstashMailResult> {
+    const html = await render(component);
+    const text = await render(component, { plainText: true });
+
+    return this.sendMail(
+      {
+        ...options,
+        from,
+        to,
+        subject,
+        text,
+        html,
+      },
+      isSystemMail
     );
   }
 
@@ -151,13 +209,15 @@ export class SystemMailService
     ...options
   }: WelcomeUserEmailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Welcome to ${this.systemMailConfig.appName}`,
+      `Welcome to ${this.mailConfig.appName}`,
       <WelcomeUserMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
       />,
+      true,
       options
     );
   }
@@ -167,13 +227,15 @@ export class SystemMailService
     ...options
   }: EmailVerificationMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Verify your email for ${this.systemMailConfig.appName}`,
+      `Verify your email for ${this.mailConfig.appName}`,
       <EmailVerificationMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -182,13 +244,15 @@ export class SystemMailService
     ...options
   }: PasswordResetEmailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Reset your password for ${this.systemMailConfig.appName}`,
+      `Reset your password for ${this.mailConfig.appName}`,
       <ResetPasswordMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -197,13 +261,15 @@ export class SystemMailService
     ...options
   }: PasswordChangedMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Password changed for ${this.systemMailConfig.appName}`,
+      `Password changed for ${this.mailConfig.appName}`,
       <PasswordChangedMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -212,13 +278,15 @@ export class SystemMailService
     ...options
   }: NewDeviceLoginEmailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `New device login detected for ${this.systemMailConfig.appName}`,
+      `New device login detected for ${this.mailConfig.appName}`,
       <NewDeviceLoginMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -227,13 +295,15 @@ export class SystemMailService
     ...options
   }: SuspiciousLoginMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Suspicious login detected for your ${this.systemMailConfig.appName} account`,
+      `Suspicious login detected for your ${this.mailConfig.appName} account`,
       <SuspiciousLoginMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -242,13 +312,15 @@ export class SystemMailService
     ...options
   }: RoleChangedMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Your role has been changed for ${this.systemMailConfig.appName}`,
+      `Your role has been changed for ${this.mailConfig.appName}`,
       <RoleChangedMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -257,13 +329,15 @@ export class SystemMailService
     ...options
   }: AccountLockedMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Your ${this.systemMailConfig.appName} account has been locked`,
+      `Your ${this.mailConfig.appName} account has been locked`,
       <AccountLockedMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -272,13 +346,15 @@ export class SystemMailService
     ...options
   }: IntegrationConnectedMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Integration connected for ${this.systemMailConfig.appName}`,
+      `Integration connected for ${this.mailConfig.appName}`,
       <IntegrationConnectedMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -287,13 +363,15 @@ export class SystemMailService
     ...options
   }: IntegrationErrorMailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `Integration error detected for ${this.systemMailConfig.appName}`,
+      `Integration error detected for ${this.mailConfig.appName}`,
       <IntegrationErrorMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
     );
   }
 
@@ -302,13 +380,35 @@ export class SystemMailService
     ...options
   }: ContactSubmittedEmailOptions): Promise<QstashMailResult> {
     return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
       to,
-      `New contact submission from ${this.systemMailConfig.appName}`,
+      `New contact submission from ${this.mailConfig.appName}`,
       <ContactSubmittedMail
-        supportMail={this.systemMailConfig.supportMail}
-        appName={this.systemMailConfig.appName}
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
         {...options}
-      />
+      />,
+      true
+    );
+  }
+
+  public async sendContactReplyMail({
+    to,
+    ...options
+  }: ContactReplyEmailOptions): Promise<QstashMailResult> {
+    return this.sendMailTemplate(
+      `${this.mailConfig.appName} <${this.mailConfig.supportMail}>`,
+      to,
+      `New reply on your contact: ${options.subject}`,
+      <ContactReplyMail
+        supportMail={this.mailConfig.supportMail}
+        appName={this.mailConfig.appName}
+        {...options}
+      />,
+      false,
+      {
+        replyTo: this.mailConfig.supportMail,
+      }
     );
   }
 }

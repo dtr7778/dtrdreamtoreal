@@ -1,19 +1,16 @@
 import { QstashServiceConfig } from "@workspace/lib/qstash";
 
 import { ResendMailTransport } from "./ResendMail.transport";
-import { SupportMailService } from "./services/SupportMail.service";
-import { SystemMailService } from "./services/SystemMail.service";
-import { QstashMailConfig } from "./types";
+import { IMailService, MailService } from "./services/Mail.service";
+import { MailServiceConfig, QstashMailConfig } from "./types";
 
-type MailConfig = QstashServiceConfig &
+type MailConfig = MailServiceConfig &
+  QstashServiceConfig &
   QstashMailConfig & {
-    appName: string;
-    systemMail: string;
-    supportMail: string;
     resendApiKey: string;
   };
 
-export function createMail(configs: MailConfig) {
+export function createMail(configs: MailConfig): IMailService {
   const qstashConfig: QstashServiceConfig = {
     redisClient: configs.redisClient,
     baseUrl: configs.baseUrl,
@@ -38,31 +35,18 @@ export function createMail(configs: MailConfig) {
     dedupWindowSeconds: configs.dedupWindowSeconds,
   };
 
+  const mailServiceConfig: MailServiceConfig = {
+    appName: configs.appName,
+    supportMail: configs.supportMail,
+    systemMail: configs.systemMail,
+  };
+
   const mailTransport = new ResendMailTransport(configs.resendApiKey);
 
-  const systemService = new SystemMailService(
-    {
-      appName: configs.appName,
-      supportMail: configs.supportMail,
-      systemMail: configs.systemMail,
-    },
+  return new MailService(
+    mailServiceConfig,
     qstashMailConfig,
     qstashConfig,
     mailTransport
   );
-
-  const supportService = new SupportMailService(
-    {
-      appName: configs.appName,
-      supportMail: configs.supportMail,
-    },
-    qstashMailConfig,
-    qstashConfig,
-    mailTransport
-  );
-
-  return {
-    system: systemService,
-    support: supportService,
-  };
 }

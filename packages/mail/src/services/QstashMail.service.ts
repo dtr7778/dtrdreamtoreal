@@ -1,19 +1,7 @@
-import { randomUUID } from "node:crypto";
-
 import { eq } from "drizzle-orm";
-import { render } from "react-email";
 import { CreateEmailOptions } from "resend";
 
-import { DatabaseType } from "@workspace/drizzle/client";
-import {
-  EmailEventTable,
-  EmailTable,
-  InsertEmailEvent,
-} from "@workspace/drizzle/schemas";
-import {
-  EmailEventTypeEnumType,
-  EmailStatusEnumType,
-} from "@workspace/drizzle/zod-db-enums";
+import { EmailTable } from "@workspace/drizzle/schemas";
 import {
   IQstashService,
   QstashService,
@@ -23,42 +11,34 @@ import { QstashError } from "@workspace/lib/qstash/error";
 
 import { MailError } from "../MailError";
 import type {
-  EmailEventPayload,
-  EventProcessResult,
   InboundEmailPayload,
   InboundEmailResult,
   MailCallbackPayload,
-  MailSendResult,
   QstashMailConfig,
   QstashMailResult,
   SendMailOption,
-  ThreadingOptions,
 } from "../types";
 import type { IMailTransport } from "../types";
-import {
-  createEmailRecord,
-  extractPrimaryRecipient,
-  normalizeRecipients,
-  updateEmailAfterSend,
-} from "./email-records";
-import { processInboundEmail } from "./inbound";
-import { updateThreadForOutbound } from "./threading";
+import { EmailService } from "./Email.service";
+import { ThreadService } from "./Thread.service";
 
 export interface IQstashMailService extends IQstashService {
-  sendMail(options: SendMailOption): Promise<QstashMailResult>;
   processMailCallback(
     payload: SendMailOption,
     context: { messageId: string }
-  ): Promise<MailSendResult>;
-  processEmailEvent(
-    payload: EmailEventPayload,
-    context: { messageId: string }
-  ): Promise<EventProcessResult>;
+  ): Promise<void>;
   processInboundEmail(
     payload: InboundEmailPayload
   ): Promise<InboundEmailResult>;
-  handleMailReceipt(messageId: string): Promise<void>;
-  retryMail(messageId: string): Promise<QstashMailResult>;
+  processMailSent(resendId: string, resendMessageId: string): Promise<void>;
+  processMailDelivered(resendId: string): Promise<void>;
+  sendMail(
+    options: SendMailOption,
+    isSystemMail?: boolean
+  ): Promise<QstashMailResult>;
+  handleMailReceipt(qMessageId: string): Promise<void>;
+  handleMailFailure(qMessageId: string): Promise<void>;
+  handleRetryMail(qMessageId: string): Promise<QstashMailResult>;
 }
 
 export abstract class QstashMailService
@@ -68,16 +48,19 @@ export abstract class QstashMailService
   protected readonly qstashMailConfig: QstashMailConfig & {
     dedupWindowSeconds: number;
   };
+  private threadService: ThreadService;
+  private emailService: EmailService;
 
   constructor(
     protected readonly mailTransport: IMailTransport,
-    protected readonly isSystemMail: boolean,
     qstashMailConfig: QstashMailConfig,
-    qstashConfig: QstashServiceConfig,
-    protected readonly fromMail: string
+    qstashConfig: QstashServiceConfig
   ) {
     super(qstashConfig);
     this.qstashMailConfig = this.normalizeQstashMailConfig(qstashMailConfig);
+
+    this.threadService = new ThreadService(qstashMailConfig.database);
+    this.emailService = new EmailService(qstashMailConfig.database);
 
     this.registerCallbackHandler<MailCallbackPayload>(
       "mail",
@@ -95,69 +78,33 @@ export abstract class QstashMailService
     };
   }
 
-  private generateMessageId(): string {
-    const uuid = randomUUID();
-    return `<${uuid}@${this.qstashMailConfig.domainName}>`;
-  }
-
-  private cleanMessageId(messageId: string): string {
-    return messageId.replace(/^<|>$/g, "");
-  }
-
-  private buildReferences(
-    existingReferences: string | null | undefined,
-    inReplyTo: string | null | undefined,
-    newMessageId: string
-  ): string {
-    const parts: string[] = [];
-
-    if (existingReferences) {
-      const ids = existingReferences
-        .split(/\s+/)
-        .map((id) => id.replace(/^<|>$/g, ""))
-        .filter(Boolean);
-      parts.push(...ids);
-    }
+  protected buildHeaders(
+    prevHeaders?: Record<string, string> | undefined,
+    inReplyTo?: string | null | undefined,
+    references?: string[] | undefined
+  ): Record<string, string> {
+    const headers: Record<string, string> = {
+      ...prevHeaders,
+    };
 
     if (inReplyTo) {
-      const parentId = inReplyTo.replace(/^<|>$/g, "");
-      if (!parts.includes(parentId)) {
-        parts.push(parentId);
-      }
+      headers["In-Reply-To"] = `<${inReplyTo}>`;
     }
 
-    parts.push(newMessageId.replace(/^<|>$/g, ""));
-
-    return parts.map((id) => `<${id}>`).join(" ");
-  }
-
-  protected buildThreadingHeaders(
-    threading?: ThreadingOptions,
-    messageId?: string
-  ): Record<string, string> {
-    const headers: Record<string, string> = {};
-
-    if (messageId) {
-      headers["Message-ID"] = messageId;
-    }
-
-    if (threading?.inReplyTo) {
-      headers["In-Reply-To"] = `<${threading.inReplyTo}>`;
-    }
-
-    if (threading?.references || threading?.inReplyTo) {
-      headers["References"] = this.buildReferences(
-        threading?.references || null,
-        threading?.inReplyTo ? `<${threading.inReplyTo}>` : null,
-        messageId || ""
-      );
+    if (references && references.length > 0) {
+      headers["References"] = references.map((ref) => `<${ref}>`).join(" ");
     }
 
     return headers;
   }
 
+  protected generateMessageId(emailId: string): string {
+    return `${emailId}@${this.qstashMailConfig.domainName}`;
+  }
+
   private generateMailDedupKey(options: SendMailOption): string {
-    const to = normalizeRecipients(options.to)
+    const to = this.emailService
+      .normalizeRecipients(options.to)
       .map((r) => r.email)
       .sort()
       .join(",");
@@ -200,141 +147,14 @@ export abstract class QstashMailService
     });
   }
 
-  private getEventToStatus(
-    eventType: EmailEventTypeEnumType
-  ): EmailStatusEnumType {
-    const obj: Record<EmailEventTypeEnumType, EmailStatusEnumType> = {
-      "email.sent": "sent",
-      "email.delivered": "delivered",
-      "email.delivery_delayed": "sent",
-      "email.bounced": "bounced",
-      "email.complained": "complained",
-      "email.opened": "delivered",
-      "email.clicked": "delivered",
-      "email.unsubscribed": "delivered",
-      "email.rejected": "failed",
-    };
-
-    return obj[eventType];
+  private cleanMessageId(messageId: string): string {
+    return messageId.replace(/^<|>$/g, "");
   }
 
-  public async processEmailEvent(
-    payload: EmailEventPayload
-  ): Promise<EventProcessResult> {
-    const { eventType, eventData } = payload;
-    const resendEmailId = eventData.email_id as string;
-
-    if (!resendEmailId) {
-      return { success: false, error: "No email_id in payload" };
-    }
-
-    const [email] = await this.qstashMailConfig.database
-      .select({
-        id: EmailTable.id,
-        resendId: EmailTable.resendId,
-        status: EmailTable.status,
-      })
-      .from(EmailTable)
-      .where(eq(EmailTable.resendId, resendEmailId))
-      .limit(1);
-
-    if (!email) {
-      return { success: false, error: "Email not found" };
-    }
-
-    const newStatus = this.getEventToStatus(eventType);
-
-    await this.qstashMailConfig.database.transaction(async (tx) => {
-      if (newStatus && email.status !== newStatus) {
-        await tx
-          .update(EmailTable)
-          .set({ status: newStatus })
-          .where(eq(EmailTable.id, email.id));
-      }
-
-      const [emailEvent] = await tx
-        .insert(EmailEventTable)
-        .values({
-          emailId: email.id,
-          eventType,
-          resendEventId: `${eventType}_${resendEmailId}`,
-          data: eventData,
-          url: (eventData.url as string) || null,
-          ip: (eventData.ip as string) || null,
-          userAgent: (eventData.user_agent as string) || null,
-          bounceReason: (eventData.bounce_reason as string) || null,
-          bounceType: (eventData.bounce_type as string) || null,
-          bounceCode: (eventData.bounce_code as string) || null,
-          occurredAt: new Date(eventData.created_at as string),
-        } satisfies InsertEmailEvent)
-        .returning({ id: EmailEventTable.id });
-
-      if (!emailEvent) {
-        throw new Error("Failed to create email event");
-      }
-
-      await this.handleEventSideEffects(
-        tx,
-        eventType,
-        emailEvent.id,
-        eventData
-      );
-    });
-
-    return { success: true, emailId: email.id, eventType, newStatus };
-  }
-
-  private async handleEventSideEffects(
-    database: DatabaseType,
-    eventType: string,
-    emailEventId: string,
-    eventData: Record<string, unknown>
-  ): Promise<void> {
-    switch (eventType) {
-      case "email.bounced":
-        await this.handleBounce(database, emailEventId, eventData);
-        break;
-    }
-  }
-
-  private async handleBounce(
-    database: DatabaseType,
-    emailEventId: string,
-    eventData: Record<string, unknown>
-  ): Promise<void> {
-    const bounceType = eventData.bounce_type as
-      | "hard"
-      | "soft"
-      | "undetermined";
-    const bounceReason = eventData.bounce_reason as string;
-    const bounceCode = eventData.bounce_code as string;
-
-    await database
-      .update(EmailEventTable)
-      .set({ bounceType, bounceCode, bounceReason })
-      .where(eq(EmailEventTable.id, emailEventId));
-  }
-
-  protected async sendMailTemplate(
-    to: SendMailOption["to"],
-    subject: string,
-    component: React.ReactNode,
-    options: Partial<SendMailOption> = {}
+  public async sendMail(
+    options: SendMailOption,
+    isSystemMail: boolean = true
   ): Promise<QstashMailResult> {
-    const html = await render(component);
-    const text = await render(component, { plainText: true });
-
-    return this.sendMail({
-      ...options,
-      from: this.fromMail,
-      to,
-      subject,
-      text,
-      html,
-    });
-  }
-
-  public async sendMail(options: SendMailOption): Promise<QstashMailResult> {
     try {
       if (!options.html && !options.text) {
         throw new MailError(
@@ -344,59 +164,73 @@ export abstract class QstashMailService
         );
       }
 
-      const primaryRecipient = extractPrimaryRecipient(options.to);
-      await this.checkRateLimit(primaryRecipient);
+      const primaryRecipient = this.emailService.extractPrimaryRecipient(
+        options.to
+      );
+      await this.checkRateLimit(primaryRecipient.email);
 
       const dedupKey = this.generateMailDedupKey(options);
       await this.checkDuplicate(dedupKey);
 
-      const messageId = this.generateMessageId();
-      const cleanMessageId = this.cleanMessageId(messageId);
-
       const { emailId, threadId, qMessageId, deduplicationId } =
         await this.qstashMailConfig.database.transaction(async (tx) => {
-          const { threadId } = await updateThreadForOutbound(tx, {
-            threadId: options.threadId,
-            subject: `Re: ${options.subject}`,
-            contactEmail: primaryRecipient,
-          });
+          let threadId: string | undefined = undefined;
 
-          const { emailId } = await createEmailRecord(tx, {
-            options,
-            threadId,
-            messageId,
-            cleanMessageId,
-            direction: "outbound",
-            buildThreadingHeaders: this.buildThreadingHeaders.bind(this),
-          });
+          if (!isSystemMail) {
+            const threadData = await this.threadService.findOrCreateThread(
+              {
+                threadId: options?.threadId,
+                subject: `Te: ${options.subject}`,
+                contactEmail: primaryRecipient.email,
+                contactName: primaryRecipient?.name,
+              },
+              tx
+            );
+
+            threadId = threadData;
+          }
+
+          const { emailId } = await this.emailService.createOutboundEmailRecord(
+            {
+              options,
+              threadId,
+            },
+            tx
+          );
+
+          const generatedMessageId = this.generateMessageId(emailId);
+          const references = options.inReplyTo
+            ? [...(options.references ?? []), options.inReplyTo]
+            : options.references;
 
           const { messageId: qMessageId, deduplicationId } =
             await this.publish<MailCallbackPayload>({
-              url: this.qstashMailConfig.callbackUrl,
               body: {
                 ...options,
-                to: options.to,
-                cc: options.cc,
-                bcc: options.bcc,
-                replyTo: options.replyTo,
-                subject: options.subject,
-                html: options.html!,
-                text: options.text!,
-                attachments: options.attachments,
-                headers: {
-                  ...options.headers,
-                  ...this.buildThreadingHeaders(options.threading, messageId),
-                },
+                headers: this.buildHeaders(
+                  {
+                    ...options.headers,
+                    "Message-ID": `<${generatedMessageId}>`,
+                  },
+                  options.inReplyTo,
+                  references
+                ),
                 emailId,
                 threadId,
-                messageId,
-                deduplicationId: "",
-                cleanMessageId,
               },
+              url: this.qstashMailConfig.callbackUrl,
               callback: this.qstashMailConfig.receiptCallbackUrl,
               failureCallback: this.qstashMailConfig.failureCallbackUrl,
               routeKey: "mail",
             });
+
+          await tx
+            .update(EmailTable)
+            .set({
+              qMessageId,
+              resendMessageId: generatedMessageId,
+            })
+            .where(eq(EmailTable.id, emailId));
 
           await Promise.all([
             this.markProcessed(dedupKey, qMessageId),
@@ -420,22 +254,34 @@ export abstract class QstashMailService
   public async processMailCallback(
     payload: MailCallbackPayload,
     context: { messageId: string }
-  ): Promise<MailSendResult> {
+  ): Promise<void> {
     try {
-      const result = await this.mailTransport.send({
-        ...payload,
+      const resendId = await this.mailTransport.send({
+        from: payload.from,
+        to: payload.to,
+        cc: payload.cc,
+        bcc: payload.bcc,
+        replyTo: payload.replyTo,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+        attachments: payload.attachments,
+        headers: payload.headers,
+        topicId: payload.topicId,
+        tags: payload.tags,
       } as CreateEmailOptions);
 
-      await updateEmailAfterSend(
-        this.qstashMailConfig.database,
-        payload.emailId,
-        result
-      );
+      await this.qstashMailConfig.database
+        .update(EmailTable)
+        .set({
+          resendId: resendId,
+        })
+        .where(eq(EmailTable.qMessageId, context.messageId));
+    } catch (err) {
+      if (err instanceof MailError || err instanceof QstashError) throw err;
 
-      return result;
-    } catch (error) {
       throw new MailError(
-        error instanceof Error ? error.message : "Unknown error occurred",
+        err instanceof Error ? err.message : "Unknown error occurred",
         "MAIL_TRANSPORT_FAILED",
         500,
         { messageId: context.messageId }
@@ -443,13 +289,31 @@ export abstract class QstashMailService
     }
   }
 
-  public async handleMailReceipt(messageId: string): Promise<void> {
-    await this.handleDeliveryReceipt(messageId, "mail");
+  public async handleMailReceipt(qMessageId: string): Promise<void> {
+    await this.handleDeliveryReceipt(qMessageId, "mail");
   }
 
-  public async retryMail(messageId: string): Promise<QstashMailResult> {
+  public async handleMailFailure(qMessageId: string): Promise<void> {
+    await this.handleFailed(qMessageId);
+    const [emailData] = await this.qstashMailConfig.database
+      .select({ id: EmailTable.id })
+      .from(EmailTable)
+      .where(eq(EmailTable.qMessageId, qMessageId))
+      .limit(1);
+
+    if (emailData) {
+      await this.qstashMailConfig.database
+        .update(EmailTable)
+        .set({
+          status: "failed",
+        })
+        .where(eq(EmailTable.id, emailData.id));
+    }
+  }
+
+  public async handleRetryMail(qMessageId: string): Promise<QstashMailResult> {
     try {
-      const result = await this.retryMessage(messageId, { routeKey: "mail" });
+      const result = await this.retryMessage(qMessageId, { routeKey: "mail" });
       return {
         success: true,
         qMessageId: result.messageId,
@@ -461,14 +325,91 @@ export abstract class QstashMailService
         err instanceof Error ? err.message : "Unknown error occurred",
         "MAIL_TRANSPORT_FAILED",
         500,
-        { messageId }
+        { messageId: qMessageId }
       );
     }
+  }
+
+  public async processMailSent(resendId: string, resendMessageId: string) {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "sent",
+        resendMessageId: this.cleanMessageId(resendMessageId),
+      },
+      this.qstashMailConfig.database
+    );
+  }
+
+  public async processMailDelivered(resendId: string) {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "delivered",
+      },
+      this.qstashMailConfig.database
+    );
   }
 
   public async processInboundEmail(
     payload: InboundEmailPayload
   ): Promise<InboundEmailResult> {
-    return processInboundEmail(this.qstashMailConfig.database, payload);
+    try {
+      let threadId: string | undefined = undefined;
+
+      const inReplyTo = payload.headers?.["in-reply-to"];
+
+      if (inReplyTo) {
+        const [originalEmail] = await this.qstashMailConfig.database
+          .select({ threadId: EmailTable.threadId })
+          .from(EmailTable)
+          .where(eq(EmailTable.resendMessageId, this.cleanMessageId(inReplyTo)))
+          .limit(1);
+
+        if (originalEmail?.threadId) {
+          threadId = originalEmail.threadId;
+        }
+      }
+
+      if (!threadId && payload.headers?.references) {
+        const referenceIds = payload.headers.references
+          .split(/\s+/)
+          .map(this.cleanMessageId)
+          .filter(Boolean);
+
+        for (const refId of referenceIds) {
+          const [email] = await this.qstashMailConfig.database
+            .select({ threadId: EmailTable.threadId })
+            .from(EmailTable)
+            .where(eq(EmailTable.resendMessageId, refId))
+            .limit(1);
+
+          if (email?.threadId) {
+            threadId = email.threadId;
+            break;
+          }
+        }
+      }
+
+      const { emailId } = await this.emailService.createInboundEmailRecord(
+        {
+          ...payload,
+          message_id: this.cleanMessageId(payload.message_id),
+          threadId,
+        },
+        this.qstashMailConfig.database
+      );
+
+      return {
+        success: true,
+        emailId,
+        threadId,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
   }
 }

@@ -1,0 +1,56 @@
+import { eq } from "drizzle-orm";
+
+import { DatabaseType } from "@workspace/drizzle/client";
+import {
+  EmailThreadTable,
+  InsertEmailThread,
+} from "@workspace/drizzle/schemas";
+
+export class ThreadService {
+  constructor(private readonly database: DatabaseType) {}
+
+  private resolveDB(database?: DatabaseType): DatabaseType {
+    return database ?? this.database;
+  }
+
+  public async findOrCreateThread(
+    params: {
+      threadId?: string;
+      subject: string;
+      contactEmail: string;
+      contactName?: string;
+    },
+    database?: DatabaseType
+  ): Promise<string> {
+    const db = this.resolveDB(database);
+
+    if (params.threadId) {
+      const [existThread] = await db
+        .select({ id: EmailThreadTable.id })
+        .from(EmailThreadTable)
+        .where(eq(EmailThreadTable.id, params.threadId))
+        .limit(1);
+
+      if (!existThread) {
+        throw new Error("Thread is not found");
+      }
+
+      return existThread.id;
+    }
+
+    const [thread] = await db
+      .insert(EmailThreadTable)
+      .values({
+        subject: params.subject,
+        contactEmail: params.contactEmail,
+        contactName: params?.contactName,
+      } satisfies InsertEmailThread)
+      .returning({ id: EmailThreadTable.id });
+
+    if (!thread) {
+      throw new Error("Failed to create thread");
+    }
+
+    return thread.id;
+  }
+}

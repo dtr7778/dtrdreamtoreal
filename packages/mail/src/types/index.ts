@@ -1,7 +1,10 @@
-import type { CreateEmailOptions } from "resend";
+import type {
+  CreateEmailOptions,
+  GetReceivingEmailResponseSuccess,
+  InboundAttachment,
+} from "resend";
 
 import { DatabaseType } from "@workspace/drizzle/client";
-import { EmailEventTypeEnumType } from "@workspace/drizzle/zod-db-enums";
 import type { IRatelimit } from "@workspace/lib/rate-limit";
 import type { ExtendedRedis } from "@workspace/lib/redis";
 
@@ -17,11 +20,13 @@ export interface QstashMailConfig {
   dedupWindowSeconds?: number;
 }
 
-export interface MailSendResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+export interface MailServiceConfig {
+  appName: string;
+  systemMail: string;
+  supportMail: string;
 }
+
+export type MailSendResult = string;
 
 export interface QstashMailResult {
   success: boolean;
@@ -36,56 +41,25 @@ export interface IMailTransport {
   send(options: CreateEmailOptions): Promise<MailSendResult>;
 }
 
-export interface ThreadingOptions {
-  inReplyTo?: string;
-  references?: string;
-  originalMessageId?: string;
-}
-
-export type SendMailOption = Omit<CreateEmailOptions, "template" | "react"> & {
-  threading?: ThreadingOptions;
-  threadId?: string;
+export type SendMailOption = Omit<
+  CreateEmailOptions,
+  "template" | "react" | "from"
+> & {
+  from: string;
+  threadId?: string | undefined;
+  inReplyTo?: string | undefined;
+  references?: string[] | undefined;
 };
 
 export type MailCallbackPayload = SendMailOption & {
-  messageId: string;
-  cleanMessageId: string;
-  deduplicationId: string;
   emailId: string;
   threadId?: string | undefined;
+  deduplicationId?: string;
 };
 
-export interface EmailEventPayload {
-  eventType: EmailEventTypeEnumType;
-  eventData: Record<string, unknown>;
-}
+export type InboundEmailAttachment = InboundAttachment;
 
-export interface EventProcessResult {
-  success: boolean;
-  emailId?: string;
-  eventType?: string;
-  newStatus?: string;
-  error?: string;
-}
-
-export interface InboundEmailAttachment {
-  filename: string;
-  content: string;
-  contentType: string;
-}
-
-export interface InboundEmailPayload {
-  from: string;
-  to: string | string[];
-  subject: string;
-  text?: string;
-  html?: string;
-  headers?: Record<string, string>;
-  messageId?: string;
-  inReplyTo?: string;
-  references?: string;
-  attachments?: InboundEmailAttachment[];
-}
+export type InboundEmailPayload = GetReceivingEmailResponseSuccess;
 
 export interface InboundEmailResult {
   success: boolean;
