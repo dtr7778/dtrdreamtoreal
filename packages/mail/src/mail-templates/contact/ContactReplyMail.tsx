@@ -3,10 +3,10 @@ import { Section, Text } from "react-email";
 import { EmailLayout } from "../../shared/EmailLayout";
 
 export interface ContactReplyMailProps {
-  userName: string;
+  userName?: string | null | undefined;
   appName: string;
   supportMail: string;
-  subject: string;
+  subject?: string | null | undefined;
   replyAuthor: string;
   replyContent: string;
 }
@@ -22,14 +22,18 @@ export default function ContactReplyMail({
   return (
     <EmailLayout
       appName={appName}
-      previewText={`New reply on your contact: ${subject}`}
+      previewText={
+        subject
+          ? `New reply on your contact: ${subject}`
+          : "New reply on your contact"
+      }
       supportMail={supportMail}
     >
-      <Text>Hello {userName},</Text>
+      <Text>{userName ? `Hello ${userName},` : "Hello"}</Text>
 
       <Text>
         <strong>{replyAuthor}</strong> has replied to your contact submission{" "}
-        <strong>{`"${subject}"`}</strong>.
+        {subject && <strong>{`"${subject}"`}</strong>}
       </Text>
 
       <Section className="bg-muted rounded-lg p-4">
