@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     "@workspace/lib",
     "@workspace/mail",
   ],
+  allowedDevOrigins: [process.env.NGROK_URL!],
   typedRoutes: true,
   reactCompiler: true,
   images: {
