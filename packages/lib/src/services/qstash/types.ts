@@ -24,11 +24,19 @@ export interface QstashServiceConfig
 }
 
 export interface QstashReceiptPayload {
+  status: number;
+  header: Record<string, unknown>;
   body: string;
-  messageId: string;
+  retried: number;
+  dlqId?: string;
   sourceMessageId: string;
+  url: string;
+  method: string;
+  sourceHeader: Record<string, unknown>;
   sourceBody: string;
+  failureCallback: string;
   maxRetries: number;
   notBefore: number;
   createdAt: number;
+  messageId: string;
 }

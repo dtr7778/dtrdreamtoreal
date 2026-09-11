@@ -1,4 +1,4 @@
-import { ExtendedRedis, HashSerializer } from "../redis";
+import { ExtendedRedis, HashSerializer } from "../../redis";
 
 export type ContentType = "json" | "text";
 
@@ -9,7 +9,7 @@ export type QstashMessageState =
   | "retrying"
   | "dead_letter";
 
-export interface QstashLogEntry {
+export interface QstashMessageLog {
   messageId: string;
   deduplicationId: string;
   state: QstashMessageState;
@@ -30,7 +30,7 @@ const TTL_SECONDS = {
   body: 86_400 * 7,
 } as const;
 
-export class MessageLogRepository {
+export class QstashMessageLogRepository {
   constructor(private readonly redis: ExtendedRedis) {}
 
   public logKey(messageId: string) {
@@ -40,7 +40,7 @@ export class MessageLogRepository {
     return `qstash:body:${messageId}`;
   }
 
-  async store(entry: QstashLogEntry, body: unknown): Promise<void> {
+  async store(entry: QstashMessageLog, body: unknown): Promise<void> {
     const logKey = this.logKey(entry.messageId);
     const bodyKey = this.bodyKey(entry.messageId);
     const serialized = HashSerializer.serialize(entry);
@@ -52,10 +52,10 @@ export class MessageLogRepository {
     await this.redis.set(bodyKey, bodyStr, { ex: TTL_SECONDS.body });
   }
 
-  async fetch(messageId: string): Promise<QstashLogEntry | null> {
+  async fetch(messageId: string): Promise<QstashMessageLog | null> {
     const data = await this.redis.hgetall(this.logKey(messageId));
     if (!data || !data.messageId) return null;
-    return HashSerializer.deserialize<QstashLogEntry>(data);
+    return HashSerializer.deserialize<QstashMessageLog>(data);
   }
 
   async fetchBody<T>(
@@ -76,7 +76,7 @@ export class MessageLogRepository {
 
   async update(
     messageId: string,
-    updates: Partial<QstashLogEntry>
+    updates: Partial<QstashMessageLog>
   ): Promise<void> {
     const key = this.logKey(messageId);
     const fields = HashSerializer.serialize(updates);
@@ -96,35 +96,5 @@ export class MessageLogRepository {
    */
   async listAllKeys(): Promise<string[]> {
     return this.redis.keys(`${this.logKey("*")}`);
-  }
-}
-
-export class DeadLetterRepository {
-  constructor(private readonly redis: ExtendedRedis) {}
-
-  public dlqSetKey() {
-    return `qstash:dlq`;
-  }
-  public dlqSortedKey() {
-    return `qstash:dlq:sorted`;
-  }
-
-  async add(messageId: string): Promise<void> {
-    await this.redis.sadd(this.dlqSetKey(), messageId);
-    await this.redis.zadd(this.dlqSortedKey(), {
-      score: Date.now(),
-      member: messageId,
-    });
-  }
-
-  async remove(messageId: string): Promise<void> {
-    await this.redis.srem(this.dlqSetKey(), messageId);
-    await this.redis.zrem(this.dlqSortedKey(), messageId);
-  }
-
-  async listIds(limit: number): Promise<string[]> {
-    return this.redis.zrange<string[]>(this.dlqSortedKey(), 0, limit - 1, {
-      rev: true,
-    });
   }
 }

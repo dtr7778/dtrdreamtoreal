@@ -3,12 +3,12 @@ import { createHash, randomUUID } from "node:crypto";
 import { Client, Receiver } from "@upstash/qstash";
 
 import { QstashError } from "./QstashError";
+import { QstashDeadLetterRepository } from "./repositories/QstashDeadLetter.repository";
 import {
   ContentType,
-  DeadLetterRepository,
-  MessageLogRepository,
-  QstashLogEntry,
-} from "./QstashMessageLog.repository";
+  QstashMessageLog,
+  QstashMessageLogRepository,
+} from "./repositories/QstashMessageLog.repository";
 import { QstashServiceConfig } from "./types";
 
 export interface QstashPublishOptions<T = unknown> {
@@ -36,7 +36,7 @@ export interface QstashPublishResult {
 }
 
 export type QstashMessage = Pick<
-  QstashLogEntry,
+  QstashMessageLog,
   | "messageId"
   | "state"
   | "deliveredAt"
@@ -46,44 +46,16 @@ export type QstashMessage = Pick<
 >;
 
 export type QstashDeadLetter = Pick<
-  QstashLogEntry,
+  QstashMessageLog,
   "messageId" | "retried" | "createdAt"
 >;
 
 export interface IQstashService {
-  updateMessage(
-    messageId: string,
-    updates: Partial<QstashLogEntry>
-  ): Promise<void>;
-  generateDedupKey(content: unknown, scope?: string): string;
-  publish<T = unknown>(
-    options: QstashPublishOptions<T>
-  ): Promise<QstashPublishResult>;
   verifySignature(
     body: string,
     signature: string,
     url?: string
   ): Promise<boolean>;
-  registerCallbackHandler<T>(
-    routeKey: string,
-    handler: QstashCallbackHandler<T>
-  ): void;
-  registerReceiptHandler(routeKey: string, handler: QstashReceiptHandler): void;
-  processCallback<T>(
-    payload: T,
-    context: { messageId: string; routeKey: string }
-  ): Promise<unknown>;
-  handleDeliveryReceipt(messageId: string, routeKey?: string): Promise<void>;
-  handleFailed(messageId: string): Promise<void>;
-  listMessages(): Promise<Array<QstashMessage>>;
-  getMessage(messageId: string): Promise<QstashMessage | null>;
-  retryMessage(
-    messageId: string,
-    overrideOptions?: Partial<QstashPublishOptions>
-  ): Promise<QstashPublishResult>;
-  listDeadLetters(limit?: number): Promise<Array<QstashDeadLetter>>;
-  clearDedupCache(key: string): Promise<void>;
-  clearStatusCache(messageId: string): Promise<void>;
   getClient(): Client;
   getReceiver(): Receiver;
 }
@@ -120,9 +92,9 @@ function errorMessage(err: unknown): string {
 }
 
 function requireLog(
-  log: QstashLogEntry | null,
+  log: QstashMessageLog | null,
   messageId: string
-): QstashLogEntry {
+): QstashMessageLog {
   if (!log) {
     throw new QstashError(
       `Message log not found: ${messageId}`,
@@ -134,7 +106,7 @@ function requireLog(
   return log;
 }
 
-function toMessageView(log: QstashLogEntry): QstashMessage {
+function toMessageView(log: QstashMessageLog): QstashMessage {
   return {
     messageId: log.messageId,
     state: log.state,
@@ -155,16 +127,16 @@ export class QstashService implements IQstashService {
 
   private readonly client: Client;
   private readonly receiver: Receiver;
-  private readonly logs: MessageLogRepository;
-  private readonly dlq: DeadLetterRepository;
+  private readonly logs: QstashMessageLogRepository;
+  private readonly dlq: QstashDeadLetterRepository;
   private readonly handlers: HandlerRegistry;
 
   constructor(qstashConfig: QstashServiceConfig) {
     this.config = this.normalizeConfig(qstashConfig);
     this.client = this.createClient();
     this.receiver = this.createReceiver();
-    this.logs = new MessageLogRepository(this.config.redisClient);
-    this.dlq = new DeadLetterRepository(this.config.redisClient);
+    this.logs = new QstashMessageLogRepository(this.config.redisClient);
+    this.dlq = new QstashDeadLetterRepository(this.config.redisClient);
     this.handlers = new HandlerRegistry();
   }
 
@@ -212,7 +184,7 @@ export class QstashService implements IQstashService {
     }
   }
 
-  public async publish<T = unknown>(
+  protected async publish<T = unknown>(
     options: QstashPublishOptions<T>
   ): Promise<QstashPublishResult> {
     const {
@@ -350,7 +322,8 @@ export class QstashService implements IQstashService {
   private dedupKey(hash: string) {
     return `qstash:dedup:${hash}`;
   }
-  public generateDedupKey(content: unknown, scope = "default"): string {
+
+  protected generateDedupKey(content: unknown, scope = "default"): string {
     const str = typeof content === "string" ? content : JSON.stringify(content);
     const hash = createHash("sha256")
       .update(`${scope}:${str}`)
@@ -359,29 +332,25 @@ export class QstashService implements IQstashService {
     return this.dedupKey(hash);
   }
 
-  public async clearDedupCache(key: string): Promise<void> {
+  protected async clearDedupCache(key: string): Promise<void> {
     await this.config.redisClient.del(key);
   }
 
-  public registerCallbackHandler<T = unknown>(
+  protected registerCallbackHandler<T = unknown>(
     routeKey: string,
     handler: QstashCallbackHandler<T>
   ): void {
     this.handlers.setCallback(routeKey, handler as QstashCallbackHandler);
   }
 
-  public registerReceiptHandler(
+  protected registerReceiptHandler(
     routeKey: string,
     handler: QstashReceiptHandler
   ): void {
     this.handlers.setReceipt(routeKey, handler);
   }
 
-  /**
-   * Processes an incoming QStash callback by dispatching to the registered
-   * handler for the given routeKey. Updates message state accordingly.
-   */
-  public async processCallback<T = unknown>(
+  protected async processCallback<T = unknown>(
     payload: T,
     context: { messageId: string; routeKey: string }
   ): Promise<unknown> {
@@ -417,7 +386,7 @@ export class QstashService implements IQstashService {
     }
   }
 
-  public async handleDeliveryReceipt(
+  protected async handleDeliveryReceipt(
     messageId: string,
     routeKey?: string
   ): Promise<void> {
@@ -444,7 +413,7 @@ export class QstashService implements IQstashService {
     }
   }
 
-  public async handleFailed(messageId: string): Promise<void> {
+  protected async handleFailed(messageId: string): Promise<void> {
     requireLog(await this.logs.fetch(messageId), messageId);
 
     await this.logs.update(messageId, {
@@ -453,7 +422,7 @@ export class QstashService implements IQstashService {
     });
   }
 
-  public async listMessages(): Promise<QstashMessage[]> {
+  protected async listMessages(): Promise<QstashMessage[]> {
     const keys = await this.logs.listAllKeys();
     const messages: QstashMessage[] = [];
 
@@ -468,12 +437,12 @@ export class QstashService implements IQstashService {
     return messages;
   }
 
-  public async getMessage(messageId: string): Promise<QstashMessage | null> {
+  protected async getMessage(messageId: string): Promise<QstashMessage | null> {
     const log = await this.logs.fetch(messageId);
     return log ? toMessageView(log) : null;
   }
 
-  public async retryMessage(
+  protected async retryMessage(
     messageId: string,
     overrideOptions?: Partial<QstashPublishOptions>
   ): Promise<QstashPublishResult> {
@@ -521,7 +490,7 @@ export class QstashService implements IQstashService {
     return result;
   }
 
-  public async listDeadLetters(
+  protected async listDeadLetters(
     limit = DEFAULTS.dlqListLimit
   ): Promise<Array<QstashDeadLetter>> {
     const messageIds = await this.dlq.listIds(limit);
@@ -541,9 +510,9 @@ export class QstashService implements IQstashService {
     return results;
   }
 
-  public async updateMessage(
+  protected async updateMessage(
     messageId: string,
-    updates: Partial<QstashLogEntry>
+    updates: Partial<QstashMessageLog>
   ): Promise<void> {
     await this.logs.update(messageId, updates);
 
@@ -552,7 +521,7 @@ export class QstashService implements IQstashService {
     }
   }
 
-  public async clearStatusCache(messageId: string): Promise<void> {
+  protected async clearStatusCache(messageId: string): Promise<void> {
     await this.logs.remove(messageId);
   }
 
