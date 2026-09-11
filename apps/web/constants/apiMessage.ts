@@ -8,6 +8,10 @@ export const API_MESSAGES = {
     QSTASH: {
       INVALID_SIGNATURE: "Invalid request signature. Access denied.",
     },
+    RESEND: {
+      BAD_REQUEST: "Bad request",
+      COMPLETED: "Successfully completed",
+    },
   },
   AUTH: {
     REQUEST_RESET_PASSWORD: "Password reset link has been sent to your email.",
