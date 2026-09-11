@@ -1,21 +1,24 @@
 import { createMail, IMailService } from "@workspace/mail";
 
+import { db } from "./db";
 import { env } from "./env";
 import { qstashHourlyRateLimit, qstashMinRateLimit } from "./rate-limit";
 import { redisClient } from "./redis-client";
 
 const globalForMail = globalThis as unknown as {
-  mailClient?: IMailService;
+  mail?: IMailService;
 };
 
-export const mailProvider =
-  globalForMail.mailClient ??
+export const mail =
+  globalForMail.mail ??
   createMail({
     appName: env.NEXT_PUBLIC_SITE_NAME,
-    supportMail: env.SUPPORT_MAIL,
-    fromEmail: env.MAIL_FROM,
-    resendApiKey: env.RESEND_API_KEY,
+    database: db,
     redisClient,
+    domainName: env.DOMAIN_NAME,
+    supportMail: env.SUPPORT_MAIL,
+    systemMail: env.SYSTEM_MAIL,
+    resendApiKey: env.RESEND_API_KEY,
     minRatelimit: qstashMinRateLimit,
     hourRatelimit: qstashHourlyRateLimit,
     callbackUrl: `${env.NEXT_PUBLIC_SITE_URL}/api/qstash/mail/callback`,
@@ -30,5 +33,5 @@ export const mailProvider =
   });
 
 if (env.NODE_ENV !== "production") {
-  globalForMail.mailClient = mailProvider;
+  globalForMail.mail = mail;
 }

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 import { MailCallbackPayload } from "@workspace/mail";
 
-import { mailProvider } from "@/lib/mail";
+import { mail } from "@/lib/mail";
 import { getQstashPayload } from "@/lib/qstash/getQstashPayload";
 import { verifyQstashSignature } from "@/lib/qstash/verifyQstashSignature";
 
@@ -15,9 +15,11 @@ export async function POST(req: NextRequest) {
 
     await verifyQstashSignature(req);
 
-    const payload = await getQstashPayload<MailCallbackPayload>(clonedReq);
+    const payload = await getQstashPayload<
+      MailCallbackPayload & { messageId: string }
+    >(clonedReq);
 
-    await mailProvider.processMailCallback(payload, {
+    await mail.processMailCallback(payload, {
       messageId: payload.messageId,
     });
 
@@ -25,6 +27,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const { message, statusCode } = formatApiError(err);
 
-    return ApiResponseJson(false, message, undefined, statusCode);
+    return ApiResponseJson(false, message, null, statusCode);
   }
 }
