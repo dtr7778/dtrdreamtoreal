@@ -3,9 +3,8 @@ import {
   foreignKey,
   index,
   pgTable,
-  text,
+  uniqueIndex,
   uuid,
-  varchar,
 } from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
@@ -15,6 +14,8 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
+import { EmailTable } from "../email";
+import { UserTable } from "../user";
 import { ContactSubmissionTable } from "./contactSubmission.table";
 
 export const ContactSubmissionReplyTable = pgTable(
@@ -23,8 +24,7 @@ export const ContactSubmissionReplyTable = pgTable(
     id: db_id,
     submissionId: uuid("submission_id").notNull(),
     repliedBy: uuid("replied_by").notNull(),
-    reply: text("reply").notNull(),
-    messageId: varchar("message_id"),
+    emailId: uuid("email_id").notNull(),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },
@@ -34,8 +34,19 @@ export const ContactSubmissionReplyTable = pgTable(
       columns: [table.submissionId],
       foreignColumns: [ContactSubmissionTable.id],
     }).onDelete("cascade"),
+    foreignKey({
+      name: "contactSubmissionReply_repliedBy_fkey",
+      columns: [table.repliedBy],
+      foreignColumns: [UserTable.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "contactSubmissionReply_emailId_fkey",
+      columns: [table.emailId],
+      foreignColumns: [EmailTable.id],
+    }).onDelete("cascade"),
     index("contactSubmissionReply_submissionId_idx").on(table.submissionId),
-    index("contactSubmissionReply_messageId_idx").on(table.messageId),
+    index("contactSubmissionReply_repliedBy_idx").on(table.repliedBy),
+    uniqueIndex("contactSubmissionReply_emailId_idx").on(table.emailId),
     index("contactSubmissionReply_createdAt_idx").on(table.createdAt),
   ]
 );
@@ -47,6 +58,16 @@ export const ContactSubmissionReplyRelations = relations(
       fields: [ContactSubmissionReplyTable.submissionId],
       references: [ContactSubmissionTable.id],
       relationName: "ContactSubmissionReplyToSubmission",
+    }),
+    user: one(UserTable, {
+      fields: [ContactSubmissionReplyTable.repliedBy],
+      references: [UserTable.id],
+      relationName: "ContactSubmissionReplyToUser",
+    }),
+    email: one(EmailTable, {
+      fields: [ContactSubmissionReplyTable.emailId],
+      references: [EmailTable.id],
+      relationName: "ContactSubmissionReplyToEmail",
     }),
   })
 );

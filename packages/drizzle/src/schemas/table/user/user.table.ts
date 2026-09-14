@@ -16,6 +16,7 @@ import z from "zod";
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
+import { ContactSubmissionReplyTable } from "../contact";
 import { EmailThreadTable } from "../email";
 import { FileTable } from "../file.table";
 import { NotificationTable } from "../notification";
@@ -85,6 +86,9 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   // email
   closedEmailThreads: many(EmailThreadTable, {
     relationName: "EmailThreadToClosedBy",
+  }),
+  contactReplies: many(ContactSubmissionReplyTable, {
+    relationName: "ContactSubmissionReplyToUser",
   }),
 }));
 

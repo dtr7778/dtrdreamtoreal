@@ -4,5 +4,6 @@ export const seedConfigs = {
     notifications: 200,
     contacts: 50,
     tasks: 20,
+    companies: 20,
   },
 };

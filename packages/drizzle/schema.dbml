@@ -1,3 +1,12 @@
+enum AddressTypeEnum {
+  billing
+  shipping
+  office
+  home
+  work
+  other
+}
+
 enum ContactStatusEnum {
   pending
   processing
@@ -64,6 +73,21 @@ enum RoleEnum {
   SUPER_ADMIN
 }
 
+enum SocialMediaPlatfromTypeEnum {
+  X
+  linkedin
+  facebook
+  instagram
+  youtube
+  tiktok
+  other
+}
+
+enum SocialMediaTypeEnum {
+  person
+  company
+}
+
 enum TaskPriorityEnum {
   low
   medium
@@ -79,9 +103,10 @@ enum TaskStatusEnum {
 
 table contact_submissions {
   id uuid [pk, not null, default: `gen_random_uuid()`]
+  email_thread_id uuid [not null]
   contact_user_id uuid [not null]
   subject varchar
-  message text [not null]
+  message varchar [not null]
   status ContactStatusEnum [not null, default: 'pending']
   ip_address varchar(45)
   user_agent text
@@ -96,7 +121,9 @@ table contact_submissions {
 
   indexes {
     
-    contact_user_id [name: 'contactSubmission_contactUser_idx']
+    
+    contact_user_id [name: 'contactSubmission_contactUserId_idx']
+    email_thread_id [name: 'contactSubmission_emailThreadId_idx', unique]
     status [name: 'contactSubmission_status_idx']
     created_at [name: 'contactSubmission_createdAt_idx']
   }
@@ -106,15 +133,17 @@ table contact_submission_replies {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   submission_id uuid [not null]
   replied_by uuid [not null]
-  reply text [not null]
-  message_id varchar
+  email_id uuid [not null]
   created_at "timestamp (3) with time zone" [not null, default: `now()`]
   updated_at "timestamp (3) with time zone" [not null, default: `now()`]
 
   indexes {
     
+    
+    
     submission_id [name: 'contactSubmissionReply_submissionId_idx']
-    message_id [name: 'contactSubmissionReply_messageId_idx']
+    replied_by [name: 'contactSubmissionReply_repliedBy_idx']
+    email_id [name: 'contactSubmissionReply_emailId_idx', unique]
     created_at [name: 'contactSubmissionReply_createdAt_idx']
   }
 }
@@ -135,20 +164,6 @@ table contact_users {
     email [name: 'contactUser_email_idx', unique]
     name [name: 'contactUser_name_idx']
     created_at [name: 'contactUser_createdAt_idx']
-  }
-}
-
-table contact_email_joins {
-  id uuid [pk, not null, default: `gen_random_uuid()`]
-  submission_id uuid [not null]
-  email_id uuid [not null]
-  created_at "timestamp (3) with time zone" [not null, default: `now()`]
-
-  indexes {
-    
-    
-    submission_id [name: 'contactEmailJoin_sumissionId_idx']
-    email_id [name: 'contactEmailJoin_emailId_idx']
   }
 }
 
@@ -231,6 +246,130 @@ table email_threads {
     closed_by [name: 'emailThread_closedBy_idx']
     contact_email [name: 'emailThread_contactEmail_idx']
     is_closed [name: 'emailThread_isClosed_idx']
+  }
+}
+
+table companies {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  name varchar(255) [not null]
+  legal_name varchar(255)
+  website varchar(500)
+  industry varchar(100)
+  employ_size varchar(50)
+  email varchar(255)
+  phone varchar(50)
+  description text
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    name [name: 'companies_name_idx']
+  }
+}
+
+table company_addresses {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  company_id uuid [not null]
+  address_id uuid [not null]
+  is_primary boolean [not null, default: true]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    company_id [name: 'companyAddress_companyId_idx']
+    address_id [name: 'companyAddress_addressId_idx']
+  }
+}
+
+table company_email_threads {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  company_id uuid [not null]
+  email_thread_id uuid [not null]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    company_id [name: 'companyEmailThread_companyId_idx']
+    email_thread_id [name: 'companyEmailThread_emailThreadId_idx']
+  }
+}
+
+table company_socials {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  company_id uuid [not null]
+  social_media_id uuid [not null]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    company_id [name: 'companySocial_companyId_idx']
+    social_media_id [name: 'companySocial_socialMediaId_idx']
+  }
+}
+
+table employees {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  company_id uuid [not null]
+  first_name varchar [not null]
+  middle_name varchar
+  last_name varchar
+  email varchar(256)
+  phone varchar(50)
+  job_title varchar(256)
+  department varchar(100)
+  website varchar(500)
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    company_id [name: 'employee_companyId_idx']
+  }
+}
+
+table employee_addresses {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  employee_id uuid [not null]
+  address_id uuid [not null]
+  is_primary boolean [not null, default: true]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    employee_id [name: 'employeeAddress_employeeId_idx']
+    address_id [name: 'employeeAddress_addressId_idx']
+  }
+}
+
+table employee_email_threads {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  employee_id uuid [not null]
+  email_thread_id uuid [not null]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    employee_id [name: 'employeeEmailThread_employeeId_idx']
+    email_thread_id [name: 'employeeEmailThread_emailThreadId_idx']
+  }
+}
+
+table employee_socials {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  employee_id uuid [not null]
+  social_media_id uuid [not null]
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    employee_id [name: 'employeeSocial_employeeId_idx']
+    social_media_id [name: 'employeeSocial_socialMediaId_idx']
   }
 }
 
@@ -413,6 +552,22 @@ table accounts {
   }
 }
 
+table addresses {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  type AddressTypeEnum [not null, default: 'other']
+  street_line_1 varchar(255) [not null]
+  street_line_2 varchar(255)
+  city varchar(100) [not null]
+  state varchar(100)
+  zip_code varchar(20) [not null]
+  country varchar(100) [not null]
+  latitude "numeric(9, 6)"
+  longitude "numeric(9, 6)"
+  notes text
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+}
+
 table files {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   key varchar(512) [not null]
@@ -458,6 +613,22 @@ table sessions {
   }
 }
 
+table social_media {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  type SocialMediaTypeEnum [not null]
+  platform SocialMediaPlatfromTypeEnum [not null]
+  username varchar(256) [not null]
+  url varchar [not null]
+  display_name varchar(256)
+  notes text
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    username [name: 'socialMedia_userName_idx']
+  }
+}
+
 table verifications {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   identifier text [not null]
@@ -490,13 +661,15 @@ table tasks {
   }
 }
 
+ref: email_threads.id - contact_submissions.email_thread_id
+
 ref: contact_submissions.contact_user_id > contact_users.id
 
 ref: contact_submission_replies.submission_id - contact_submissions.id
 
-ref: contact_email_joins.submission_id > contact_submissions.id
+ref: contact_submission_replies.replied_by > users.id
 
-ref: contact_email_joins.submission_id > emails.id
+ref: emails.id - contact_submission_replies.email_id
 
 ref: emails.thread_id > email_threads.id
 
@@ -505,6 +678,32 @@ ref: email_attachments.email_id > emails.id
 ref: email_recipients.email_id > emails.id
 
 ref: email_threads.closed_by > users.id
+
+ref: company_addresses.company_id > companies.id
+
+ref: company_addresses.company_id > addresses.id
+
+ref: company_email_threads.company_id > companies.id
+
+ref: company_email_threads.email_thread_id > email_threads.id
+
+ref: company_socials.company_id > companies.id
+
+ref: company_socials.social_media_id > social_media.id
+
+ref: employees.company_id > companies.id
+
+ref: employee_addresses.employee_id > employees.id
+
+ref: employee_addresses.employee_id > addresses.id
+
+ref: employee_email_threads.employee_id > employees.id
+
+ref: employee_email_threads.email_thread_id > email_threads.id
+
+ref: employee_socials.employee_id > employees.id
+
+ref: employee_socials.employee_id > social_media.id
 
 ref: notifications.recipient_id > users.id
 

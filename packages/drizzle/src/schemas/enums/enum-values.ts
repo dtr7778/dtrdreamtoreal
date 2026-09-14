@@ -82,3 +82,24 @@ export const TASK_STATUS = [
 ] as const;
 
 export const TASK_PRIORITY = ["low", "medium", "high"] as const;
+
+export const ADDRESS_TYPE = [
+  "billing",
+  "shipping",
+  "office",
+  "home",
+  "work",
+  "other",
+] as const;
+
+export const SOCIAL_MEDIA_PLATFROM_TYPE = [
+  "X",
+  "linkedin",
+  "facebook",
+  "instagram",
+  "youtube",
+  "tiktok",
+  "other",
+] as const;
+
+export const SOCIAL_MEDIA_TYPE = ["person", "company"] as const;

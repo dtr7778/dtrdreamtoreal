@@ -18,7 +18,7 @@ import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { EmailDirectionEnum, EmailStatusEnum } from "../../enums/db-enums";
-import { ContactEmailJoinTable } from "../contact/contactEmailJoin.table";
+import { ContactSubmissionReplyTable } from "../contact";
 import { EmailAttachmentTable } from "./emailAttachment.table";
 import { EmailRecipientTable } from "./emailRecipient.table";
 import { EmailThreadTable } from "./emailThread.table";
@@ -77,8 +77,10 @@ export const EmailRelations = relations(EmailTable, ({ one, many }) => ({
   attachments: many(EmailAttachmentTable, {
     relationName: "EmailAttachmentToEmail",
   }),
-  contactSubmissions: many(ContactEmailJoinTable, {
-    relationName: "ContactEmailJoinToEmail",
+  contactReply: one(ContactSubmissionReplyTable, {
+    fields: [EmailTable.id],
+    references: [ContactSubmissionReplyTable.emailId],
+    relationName: "ContactSubmissionReplyToEmail",
   }),
 }));
 

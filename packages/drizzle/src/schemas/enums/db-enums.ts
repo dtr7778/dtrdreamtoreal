@@ -1,6 +1,7 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
 import {
+  ADDRESS_TYPE,
   CONTACT_STATUS,
   EMAIL_DIRECTION,
   EMAIL_EVENT_TYPE,
@@ -9,6 +10,8 @@ import {
   NOTIFICATION_CATEGORY,
   NOTIFICATION_LEVEL,
   ROLES,
+  SOCIAL_MEDIA_PLATFROM_TYPE,
+  SOCIAL_MEDIA_TYPE,
   TASK_PRIORITY,
   TASK_STATUS,
 } from "./enum-values";
@@ -43,3 +46,15 @@ export const NotificationLevelEnum = pgEnum(
 export const TaskStatusEnum = pgEnum("TaskStatusEnum", TASK_STATUS);
 
 export const TaskPriorityEnum = pgEnum("TaskPriorityEnum", TASK_PRIORITY);
+
+export const AddressTypeEnum = pgEnum("AddressTypeEnum", ADDRESS_TYPE);
+
+export const SocialMediaPlatfromTypeEnum = pgEnum(
+  "SocialMediaPlatfromTypeEnum",
+  SOCIAL_MEDIA_PLATFROM_TYPE
+);
+
+export const SocialMediaTypeEnum = pgEnum(
+  "SocialMediaTypeEnum",
+  SOCIAL_MEDIA_TYPE
+);

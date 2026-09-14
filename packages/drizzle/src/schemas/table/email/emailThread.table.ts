@@ -16,6 +16,9 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
+import { ContactSubmissionTable } from "../contact";
+import { CompanyEmailThreadTable } from "../employee/companyEmailThread.table";
+import { EmployeeEmailThreadTable } from "../employee/employeeEmailThread.table";
 import { UserTable } from "../user";
 import { EmailTable } from "./email.table";
 
@@ -58,6 +61,17 @@ export const EmailThreadRelations = relations(
       relationName: "EmailThreadToClosedBy",
     }),
     emails: many(EmailTable, { relationName: "EmailToEmailThread" }),
+    companies: many(CompanyEmailThreadTable, {
+      relationName: "CompanyEmailThreadToEmailThread",
+    }),
+    employees: many(EmployeeEmailThreadTable, {
+      relationName: "EmployeeEmailThreadToEmailThread",
+    }),
+    contactSubmission: one(ContactSubmissionTable, {
+      relationName: "ContactSubmissionToEmailThread",
+      references: [ContactSubmissionTable.emailThreadId],
+      fields: [EmailThreadTable.id],
+    }),
   })
 );
 

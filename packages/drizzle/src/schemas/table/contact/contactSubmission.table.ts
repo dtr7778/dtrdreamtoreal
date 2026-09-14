@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -19,16 +20,17 @@ import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { ContactStatusEnum } from "../../enums/db-enums";
-import { ContactEmailJoinTable } from "./contactEmailJoin.table";
+import { EmailThreadTable } from "../email";
 import { ContactUserTable } from "./contactUser.table";
 
 export const ContactSubmissionTable = pgTable(
   "contact_submissions",
   {
     id: db_id,
+    emailThreadId: uuid("email_thread_id").notNull(),
     contactUserId: uuid("contact_user_id").notNull(),
     subject: varchar("subject"),
-    message: text("message").notNull(),
+    message: varchar("message").notNull(),
     status: ContactStatusEnum("status").notNull().default("pending"),
 
     ipAddress: varchar("ip_address", { length: 45 }),
@@ -50,7 +52,13 @@ export const ContactSubmissionTable = pgTable(
       columns: [table.contactUserId],
       foreignColumns: [ContactUserTable.id],
     }).onDelete("cascade"),
-    index("contactSubmission_contactUser_idx").on(table.contactUserId),
+    foreignKey({
+      name: "contactSubmission_emailThread_fkey",
+      columns: [table.emailThreadId],
+      foreignColumns: [EmailThreadTable.id],
+    }).onDelete("cascade"),
+    index("contactSubmission_contactUserId_idx").on(table.contactUserId),
+    uniqueIndex("contactSubmission_emailThreadId_idx").on(table.emailThreadId),
     index("contactSubmission_status_idx").on(table.status),
     index("contactSubmission_createdAt_idx").on(table.createdAt),
   ]
@@ -58,14 +66,16 @@ export const ContactSubmissionTable = pgTable(
 
 export const ContactSubmissionRelations = relations(
   ContactSubmissionTable,
-  ({ one, many }) => ({
+  ({ one }) => ({
+    emailThread: one(EmailThreadTable, {
+      relationName: "ContactSubmissionToEmailThread",
+      fields: [ContactSubmissionTable.emailThreadId],
+      references: [EmailThreadTable.id],
+    }),
     contactUser: one(ContactUserTable, {
       relationName: "ContactSubmissionToContactUser",
       fields: [ContactSubmissionTable.contactUserId],
       references: [ContactUserTable.id],
-    }),
-    emails: many(ContactEmailJoinTable, {
-      relationName: "ContactEmailJoinToSubmission",
     }),
   })
 );

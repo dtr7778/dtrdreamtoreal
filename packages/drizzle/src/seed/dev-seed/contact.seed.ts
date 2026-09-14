@@ -3,20 +3,21 @@ import { zocker } from "zocker";
 
 import {
   ContactSubmissionDataModel,
-  ContactSubmissionReplyTable,
   ContactSubmissionTable,
   ContactUserTable,
-  InsertContactSubmissionReply,
+  EmailTable,
+  EmailThreadTable,
   insertContactSubmissionSchema,
   insertContactUserSchema,
-  UserDataModel,
+  InsertEmail,
+  InsertEmailThread,
 } from "../../schemas";
 import { db } from "../seed-db-client";
 import { seedConfigs } from "../seed.config";
 
-export async function seedContacts(
-  users: Array<UserDataModel>
-): Promise<Array<ContactSubmissionDataModel>> {
+export async function seedContacts(): Promise<
+  Array<ContactSubmissionDataModel>
+> {
   console.log("🌱 Seeding contacts...");
 
   const contactUserData = zocker(
@@ -45,12 +46,14 @@ export async function seedContacts(
         },
         { probability: 0.3 }
       );
+      const email = faker.internet.email({ firstName, lastName });
 
       return {
         ...contactUser,
         name: `${firstName} ${lastName}`,
         firstName,
         lastName,
+        email,
         company,
         phone,
       };
@@ -60,6 +63,32 @@ export async function seedContacts(
     .insert(ContactUserTable)
     .values(contactUserData)
     .returning();
+
+  const emailThreadsData: Array<InsertEmailThread> = contactUsers.map(
+    (contactUser) => {
+      return {
+        contactEmail: contactUser.email,
+        contactName: contactUser.name,
+        subject: `Te: ${faker.lorem.sentence({ min: 2, max: 4 })}`,
+      } satisfies InsertEmailThread;
+    }
+  );
+
+  const emailThreads = await db
+    .insert(EmailThreadTable)
+    .values(emailThreadsData)
+    .returning();
+
+  const emailsData: Array<InsertEmail> = emailThreads.map((emailThread) => {
+    return {
+      direction: "outbound",
+      status: "delivered",
+      threadId: emailThread.id,
+      subject: "New contact submitted",
+    } satisfies InsertEmail;
+  });
+
+  await db.insert(EmailTable).values(emailsData);
 
   const contactsData = zocker(
     insertContactSubmissionSchema.omit({
@@ -71,14 +100,16 @@ export async function seedContacts(
     })
   )
     .generateMany(seedConfigs.targets.contacts)
-    .map((contact) => {
+    .map((contact, idx) => {
       const contactUser = faker.helpers.arrayElement(contactUsers);
+      const emailThread = emailThreads[idx]!;
       const userAgent = faker.lorem.sentences({ min: 1, max: 3 });
       const message = faker.lorem.sentences({ min: 1, max: 3 });
       const subject = faker.lorem.sentence({ min: 2, max: 4 });
 
       return {
         ...contact,
+        emailThreadId: emailThread.id,
         message,
         subject,
         userAgent,
@@ -90,22 +121,6 @@ export async function seedContacts(
     .insert(ContactSubmissionTable)
     .values(contactsData)
     .returning();
-
-  const replysData: Array<InsertContactSubmissionReply> = Array.from({
-    length: 100,
-  }).map(() => {
-    const user = faker.helpers.arrayElement(users);
-    const contact = faker.helpers.arrayElement(contacts);
-    const reply = faker.lorem.sentences({ min: 1, max: 4 });
-
-    return {
-      reply,
-      repliedBy: user.id,
-      submissionId: contact.id,
-    };
-  });
-
-  await db.insert(ContactSubmissionReplyTable).values(replysData);
 
   console.log(`✅ ${contacts.length} Contact seeded`);
 

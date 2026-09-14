@@ -1,4 +1,5 @@
-◇ injected env (6) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (6) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+CREATE TYPE "public"."AddressTypeEnum" AS ENUM('billing', 'shipping', 'office', 'home', 'work', 'other');
 CREATE TYPE "public"."ContactStatusEnum" AS ENUM('pending', 'processing', 'replied', 'closed', 'spam');
 CREATE TYPE "public"."EmailDirectionEnum" AS ENUM('outbound', 'inbound', 'web_form');
 CREATE TYPE "public"."EmailEventTypeEnum" AS ENUM('email.sent', 'email.delivered', 'email.delivery_delayed', 'email.bounced', 'email.complained', 'email.opened', 'email.clicked', 'email.unsubscribed', 'email.rejected');
@@ -7,13 +8,16 @@ CREATE TYPE "public"."EmailStatusEnum" AS ENUM('draft', 'queued', 'sent', 'deliv
 CREATE TYPE "public"."NotificationCategoryEnum" AS ENUM('SYSTEM', 'AUTH', 'SUPPORT', 'LEAD');
 CREATE TYPE "public"."NotificationLevelEnum" AS ENUM('INFO', 'SUCCESS', 'WARNING', 'ERROR');
 CREATE TYPE "public"."RoleEnum" AS ENUM('USER', 'SUPPORT_AGENT', 'ADMIN', 'SUPER_ADMIN');
+CREATE TYPE "public"."SocialMediaPlatfromTypeEnum" AS ENUM('X', 'linkedin', 'facebook', 'instagram', 'youtube', 'tiktok', 'other');
+CREATE TYPE "public"."SocialMediaTypeEnum" AS ENUM('person', 'company');
 CREATE TYPE "public"."TaskPriorityEnum" AS ENUM('low', 'medium', 'high');
 CREATE TYPE "public"."TaskStatusEnum" AS ENUM('todo', 'in_progress', 'done', 'cancelled');
 CREATE TABLE "contact_submissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"email_thread_id" uuid NOT NULL,
 	"contact_user_id" uuid NOT NULL,
 	"subject" varchar,
-	"message" text NOT NULL,
+	"message" varchar NOT NULL,
 	"status" "ContactStatusEnum" DEFAULT 'pending' NOT NULL,
 	"ip_address" varchar(45),
 	"user_agent" text,
@@ -31,8 +35,7 @@ CREATE TABLE "contact_submission_replies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"submission_id" uuid NOT NULL,
 	"replied_by" uuid NOT NULL,
-	"reply" text NOT NULL,
-	"message_id" varchar,
+	"email_id" uuid NOT NULL,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
@@ -48,13 +51,6 @@ CREATE TABLE "contact_users" (
 	"metadata" jsonb,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
-);
-
-CREATE TABLE "contact_email_joins" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"submission_id" uuid NOT NULL,
-	"email_id" uuid NOT NULL,
-	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE "emails" (
@@ -106,6 +102,79 @@ CREATE TABLE "email_threads" (
 	"closed_by" uuid,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "companies" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"legal_name" varchar(255),
+	"website" varchar(500),
+	"industry" varchar(100),
+	"employ_size" varchar(50),
+	"email" varchar(255),
+	"phone" varchar(50),
+	"description" text,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "company_addresses" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"company_id" uuid NOT NULL,
+	"address_id" uuid NOT NULL,
+	"is_primary" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "company_email_threads" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"company_id" uuid NOT NULL,
+	"email_thread_id" uuid NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "company_socials" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"company_id" uuid NOT NULL,
+	"social_media_id" uuid NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "employees" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"company_id" uuid NOT NULL,
+	"first_name" varchar NOT NULL,
+	"middle_name" varchar,
+	"last_name" varchar,
+	"email" varchar(256),
+	"phone" varchar(50),
+	"job_title" varchar(256),
+	"department" varchar(100),
+	"website" varchar(500),
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "employee_addresses" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"employee_id" uuid NOT NULL,
+	"address_id" uuid NOT NULL,
+	"is_primary" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "employee_email_threads" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"employee_id" uuid NOT NULL,
+	"email_thread_id" uuid NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "employee_socials" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"employee_id" uuid NOT NULL,
+	"social_media_id" uuid NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE "notifications" (
@@ -223,6 +292,22 @@ CREATE TABLE "accounts" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "addresses" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"type" "AddressTypeEnum" DEFAULT 'other' NOT NULL,
+	"street_line_1" varchar(255) NOT NULL,
+	"street_line_2" varchar(255),
+	"city" varchar(100) NOT NULL,
+	"state" varchar(100),
+	"zip_code" varchar(20) NOT NULL,
+	"country" varchar(100) NOT NULL,
+	"latitude" numeric(9, 6),
+	"longitude" numeric(9, 6),
+	"notes" text,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"key" varchar(512) NOT NULL,
@@ -251,6 +336,18 @@ CREATE TABLE "sessions" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "social_media" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"type" "SocialMediaTypeEnum" NOT NULL,
+	"platform" "SocialMediaPlatfromTypeEnum" NOT NULL,
+	"username" varchar(256) NOT NULL,
+	"url" varchar NOT NULL,
+	"display_name" varchar(256),
+	"notes" text,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "verifications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"identifier" text NOT NULL,
@@ -274,13 +371,27 @@ CREATE TABLE "tasks" (
 );
 
 ALTER TABLE "contact_submissions" ADD CONSTRAINT "contactSubmission_contactUser_fkey" FOREIGN KEY ("contact_user_id") REFERENCES "public"."contact_users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "contact_submissions" ADD CONSTRAINT "contactSubmission_emailThread_fkey" FOREIGN KEY ("email_thread_id") REFERENCES "public"."email_threads"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contactSubmissionReply_submission_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."contact_submissions"("id") ON DELETE cascade ON UPDATE no action;
-ALTER TABLE "contact_email_joins" ADD CONSTRAINT "contactEmailJoin_submission_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."contact_submissions"("id") ON DELETE cascade ON UPDATE no action;
-ALTER TABLE "contact_email_joins" ADD CONSTRAINT "contactEmailJoin_email_fkey" FOREIGN KEY ("submission_id") REFERENCES "public"."emails"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contactSubmissionReply_repliedBy_fkey" FOREIGN KEY ("replied_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "contact_submission_replies" ADD CONSTRAINT "contactSubmissionReply_emailId_fkey" FOREIGN KEY ("email_id") REFERENCES "public"."emails"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "emails" ADD CONSTRAINT "email_emailThread_fkey" FOREIGN KEY ("thread_id") REFERENCES "public"."email_threads"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "email_attachments" ADD CONSTRAINT "emailAttachment_emailId_fkey" FOREIGN KEY ("email_id") REFERENCES "public"."emails"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "email_recipients" ADD CONSTRAINT "emailRecipient_email_fkey" FOREIGN KEY ("email_id") REFERENCES "public"."emails"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "email_threads" ADD CONSTRAINT "emailThread_closedBy_fkey" FOREIGN KEY ("closed_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "company_addresses" ADD CONSTRAINT "companyAddress_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_addresses" ADD CONSTRAINT "companyAddress_addressId_fkey" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_email_threads" ADD CONSTRAINT "companyEmailThread_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_email_threads" ADD CONSTRAINT "companyEmailThread_emailThreadId_fkey" FOREIGN KEY ("email_thread_id") REFERENCES "public"."email_threads"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_socials" ADD CONSTRAINT "companySocial_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_socials" ADD CONSTRAINT "companySocial_socialMediaId_fkey" FOREIGN KEY ("social_media_id") REFERENCES "public"."social_media"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employees" ADD CONSTRAINT "employee_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employee_addresses" ADD CONSTRAINT "employeeAddress_employeeId_fkey" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employee_addresses" ADD CONSTRAINT "employeeAddress_addressId_fkey" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employee_email_threads" ADD CONSTRAINT "employeeEmailThread_employeeId_fkey" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employee_email_threads" ADD CONSTRAINT "employeeEmailThread_emailThreadId_fkey" FOREIGN KEY ("email_thread_id") REFERENCES "public"."email_threads"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employee_socials" ADD CONSTRAINT "employeeSocial_employeeId_fkey" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employee_socials" ADD CONSTRAINT "employeeSocial_socialMediaId_fkey" FOREIGN KEY ("social_media_id") REFERENCES "public"."social_media"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_recipient_fkey" FOREIGN KEY ("recipient_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_actor_fkey" FOREIGN KEY ("actor_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permission_role_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE cascade;
@@ -297,17 +408,17 @@ ALTER TABLE "files" ADD CONSTRAINT "file_deletedBy_fkey" FOREIGN KEY ("deleted_b
 ALTER TABLE "sessions" ADD CONSTRAINT "session_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_assigned_by_fkey" FOREIGN KEY ("assigned_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
-CREATE INDEX "contactSubmission_contactUser_idx" ON "contact_submissions" USING btree ("contact_user_id");
+CREATE INDEX "contactSubmission_contactUserId_idx" ON "contact_submissions" USING btree ("contact_user_id");
+CREATE UNIQUE INDEX "contactSubmission_emailThreadId_idx" ON "contact_submissions" USING btree ("email_thread_id");
 CREATE INDEX "contactSubmission_status_idx" ON "contact_submissions" USING btree ("status");
 CREATE INDEX "contactSubmission_createdAt_idx" ON "contact_submissions" USING btree ("created_at");
 CREATE INDEX "contactSubmissionReply_submissionId_idx" ON "contact_submission_replies" USING btree ("submission_id");
-CREATE INDEX "contactSubmissionReply_messageId_idx" ON "contact_submission_replies" USING btree ("message_id");
+CREATE INDEX "contactSubmissionReply_repliedBy_idx" ON "contact_submission_replies" USING btree ("replied_by");
+CREATE UNIQUE INDEX "contactSubmissionReply_emailId_idx" ON "contact_submission_replies" USING btree ("email_id");
 CREATE INDEX "contactSubmissionReply_createdAt_idx" ON "contact_submission_replies" USING btree ("created_at");
 CREATE UNIQUE INDEX "contactUser_email_idx" ON "contact_users" USING btree ("email");
 CREATE INDEX "contactUser_name_idx" ON "contact_users" USING btree ("name");
 CREATE INDEX "contactUser_createdAt_idx" ON "contact_users" USING btree ("created_at");
-CREATE INDEX "contactEmailJoin_sumissionId_idx" ON "contact_email_joins" USING btree ("submission_id");
-CREATE INDEX "contactEmailJoin_emailId_idx" ON "contact_email_joins" USING btree ("email_id");
 CREATE INDEX "email_emailThreadId_idx" ON "emails" USING btree ("thread_id");
 CREATE UNIQUE INDEX "email_resendId_idx" ON "emails" USING btree ("resend_id");
 CREATE UNIQUE INDEX "email_qMessageId_idx" ON "emails" USING btree ("q_message_id");
@@ -323,6 +434,20 @@ CREATE INDEX "emailRecipient_type_idx" ON "email_recipients" USING btree ("type"
 CREATE INDEX "emailThread_closedBy_idx" ON "email_threads" USING btree ("closed_by");
 CREATE INDEX "emailThread_contactEmail_idx" ON "email_threads" USING btree ("contact_email");
 CREATE INDEX "emailThread_isClosed_idx" ON "email_threads" USING btree ("is_closed");
+CREATE INDEX "companies_name_idx" ON "companies" USING btree ("name");
+CREATE INDEX "companyAddress_companyId_idx" ON "company_addresses" USING btree ("company_id");
+CREATE INDEX "companyAddress_addressId_idx" ON "company_addresses" USING btree ("address_id");
+CREATE INDEX "companyEmailThread_companyId_idx" ON "company_email_threads" USING btree ("company_id");
+CREATE INDEX "companyEmailThread_emailThreadId_idx" ON "company_email_threads" USING btree ("email_thread_id");
+CREATE INDEX "companySocial_companyId_idx" ON "company_socials" USING btree ("company_id");
+CREATE INDEX "companySocial_socialMediaId_idx" ON "company_socials" USING btree ("social_media_id");
+CREATE INDEX "employee_companyId_idx" ON "employees" USING btree ("company_id");
+CREATE INDEX "employeeAddress_employeeId_idx" ON "employee_addresses" USING btree ("employee_id");
+CREATE INDEX "employeeAddress_addressId_idx" ON "employee_addresses" USING btree ("address_id");
+CREATE INDEX "employeeEmailThread_employeeId_idx" ON "employee_email_threads" USING btree ("employee_id");
+CREATE INDEX "employeeEmailThread_emailThreadId_idx" ON "employee_email_threads" USING btree ("email_thread_id");
+CREATE INDEX "employeeSocial_employeeId_idx" ON "employee_socials" USING btree ("employee_id");
+CREATE INDEX "employeeSocial_socialMediaId_idx" ON "employee_socials" USING btree ("social_media_id");
 CREATE INDEX "notifications_recipient_idx" ON "notifications" USING btree ("recipient_id");
 CREATE INDEX "notifications_recipient_read_idx" ON "notifications" USING btree ("recipient_id","is_read");
 CREATE INDEX "notifications_created_at_idx" ON "notifications" USING btree ("created_at");
@@ -354,6 +479,7 @@ CREATE INDEX "file_uploadedAt_idx" ON "files" USING btree ("uploaded_at");
 CREATE UNIQUE INDEX "session_token_idx" ON "sessions" USING btree ("token");
 CREATE INDEX "session_userId_idx" ON "sessions" USING btree ("user_id");
 CREATE INDEX "session_expiresAt_idx" ON "sessions" USING btree ("expires_at");
+CREATE INDEX "socialMedia_userName_idx" ON "social_media" USING btree ("username");
 CREATE INDEX "tasks_assigned_by_idx" ON "tasks" USING btree ("assigned_by");
 CREATE INDEX "tasks_status_idx" ON "tasks" USING btree ("status");
 CREATE INDEX "tasks_priority_idx" ON "tasks" USING btree ("priority");

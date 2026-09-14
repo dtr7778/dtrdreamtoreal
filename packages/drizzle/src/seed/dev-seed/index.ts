@@ -3,7 +3,9 @@ import { seedPermission } from "../permission.seed";
 import { seedRolePermission } from "../rolePermission.seed";
 import { seedRoles } from "../roles.seed";
 import { db } from "../seed-db-client";
+import { seedCompanies } from "./company.seed";
 import { seedContacts } from "./contact.seed";
+import { seedEmployees } from "./employee.seed";
 import { seedNotifications } from "./notification.seed";
 import { seedTasks } from "./task.seed";
 import { seedUsers } from "./user.seed";
@@ -19,7 +21,12 @@ async function main() {
 
   const users = await seedUsers(roles);
 
-  const contacts = await seedContacts(users);
+  const companies = await seedCompanies();
+
+  const employees = await seedEmployees(companies);
+
+  const contacts = await seedContacts();
+
   const notifications = await seedNotifications(users);
   const tasks = await seedTasks(users);
 
@@ -29,6 +36,8 @@ async function main() {
   console.log(`Permissions: ${permissions.length}`);
   console.log(`Roles and Permissions: ${rolesAndPermissions.length}`);
   console.log(`Users: ${users.length}`);
+  console.log(`Companies: ${companies.length}`);
+  console.log(`Employees: ${employees.length}`);
   console.log(`Contacts: ${contacts.length}`);
   console.log(`Notifications: ${notifications.length}`);
   console.log(`Tasks: ${tasks.length}`);

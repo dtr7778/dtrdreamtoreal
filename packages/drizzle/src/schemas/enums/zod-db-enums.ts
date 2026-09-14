@@ -2,6 +2,7 @@ import z from "zod";
 
 import {
   ACTION_TYPE,
+  ADDRESS_TYPE,
   CONTACT_STATUS,
   EMAIL_DIRECTION,
   EMAIL_EVENT_TYPE,
@@ -13,6 +14,8 @@ import {
   PERMISSION_LEVEL,
   RESOURCE_TYPE,
   ROLES,
+  SOCIAL_MEDIA_PLATFROM_TYPE,
+  SOCIAL_MEDIA_TYPE,
   TASK_PRIORITY,
   TASK_STATUS,
 } from "./enum-values";
@@ -64,3 +67,16 @@ export type TaskStatusEnumType = z.infer<typeof TaskStatusEnumSchema>;
 
 export const TaskPriorityEnumSchema = z.enum(TASK_PRIORITY);
 export type TaskPriorityEnumType = z.infer<typeof TaskPriorityEnumSchema>;
+
+export const AddressTypeEnumSchema = z.enum(ADDRESS_TYPE);
+export type AddressTypeEnumType = z.infer<typeof AddressTypeEnumSchema>;
+
+export const SocialMediaPlatfromTypeEnumSchema = z.enum(
+  SOCIAL_MEDIA_PLATFROM_TYPE
+);
+export type SocialMediaPlatfromTypeEnumType = z.infer<
+  typeof SocialMediaPlatfromTypeEnumSchema
+>;
+
+export const SocialMediaTypeEnumSchema = z.enum(SOCIAL_MEDIA_TYPE);
+export type SocialMediaTypeEnumType = z.infer<typeof SocialMediaTypeEnumSchema>;
