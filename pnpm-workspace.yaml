@@ -43,6 +43,7 @@ catalog:
   react-dom: 19.2.4
   react-hook-form: ^7.86.0
   resend: ^6.24.0
+  tsup: ^8.5.1
   tsx: ^4.23.12
   typescript: ^5
   ua-parser-js: ^2.0.10
