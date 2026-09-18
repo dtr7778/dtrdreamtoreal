@@ -13,7 +13,8 @@
     "**/dist/**": true,
     "**/node_modules/**": true,
     "**/.next/**": true,
-    "**/coverage/**": true
+    "**/coverage/**": true,
+    "**/routeTree.gen.ts": true
   },
 
   // 2. Prevent search indexing from crawling build artifacts
@@ -22,7 +23,8 @@
     "**/dist": true,
     "**/.turbo": true,
     "**/.next": true,
-    "**/pnpm-lock.yaml": true
+    "**/pnpm-lock.yaml": true,
+    "**/routeTree.gen.ts": true
   },
 
   // 3. Native "Auto Rename Tag"
@@ -36,5 +38,9 @@
 
   // 5. Limits TypeScript memory
   "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
-  "js/ts.tsserver.maxMemory": 2048
+  "js/ts.tsserver.maxMemory": 2048,
+
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true
+  }
 }

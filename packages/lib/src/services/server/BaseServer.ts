@@ -26,6 +26,7 @@ import {
 import { helmetMiddleware } from "./middlewares/helmet.middleware";
 import { rateLimitMiddleware } from "./middlewares/rateLimit.middleware";
 import { ControllerLoader } from "./services";
+import { CronJobService } from "./services/CronJob.service";
 import { OpenApiLoader } from "./services/OpenApiLoader.service";
 import type {
   ClassConstructor,
@@ -44,6 +45,7 @@ export interface BaseServerConfig {
   title: string;
   container: Container;
   controllerClasses: readonly ClassConstructor[];
+  cronJobClasses?: readonly ClassConstructor[];
   version: string;
   basePath?: string;
   corsConfig: CorsConfig;
@@ -103,6 +105,11 @@ export abstract class BaseServer implements IBaseServer {
       dependencyContainer: config.container,
       controllerClasses: config.controllerClasses,
     });
+
+    if (config?.cronJobClasses) {
+      const cronScheduler = new CronJobService(config.container);
+      cronScheduler.loadAllJobs(config.cronJobClasses);
+    }
 
     this.init();
 

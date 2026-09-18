@@ -25,7 +25,11 @@
     "SUPABASE_STORAGE_BUCKET_NAME",
     "RESEND_INBOUND_WEBHOOK_SECRET",
     "RESEND_OUTBOUND_WEBHOOK_SECRET",
-    "NGROK_URL"
+    "NGROK_URL",
+    "BACKEND_PORT",
+    "CSRF_TOKEN",
+    "API_LOG_LEVEL",
+    "CORS_ORIGIN"
   ],
   "tasks": {
     "build": {

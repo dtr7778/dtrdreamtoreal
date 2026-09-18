@@ -20,6 +20,7 @@
   },
   "exports": {
     "./types": "./src/types/index.ts",
+    "./logger": "./src/services/logger/index.ts",
     "./redis": "./src/services/redis/index.ts",
     "./redis/mock": "./tests/redis.mock.ts",
     "./qstash": "./src/services/qstash/index.ts",
