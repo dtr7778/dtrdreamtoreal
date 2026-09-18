@@ -15,6 +15,7 @@ import {
   InsertEmployeeSocial,
   InsertSocialMedia,
   SocialMediaTable,
+  UserDataModel,
 } from "../../schemas";
 import { SocialMediaPlatfromTypeEnumSchema } from "../../schemas/enums/zod-db-enums";
 import { db } from "../seed-db-client";
@@ -101,7 +102,8 @@ const JOB_TITLES: Record<string, string[]> = {
 };
 
 export async function seedEmployees(
-  companies: Array<CompanyDataModel>
+  companies: Array<CompanyDataModel>,
+  users: Array<UserDataModel>
 ): Promise<Array<EmployeeDataModel>> {
   console.log("🌱 Seeding employees...");
 
@@ -117,6 +119,7 @@ export async function seedEmployees(
         const jobTitle = faker.helpers.arrayElement(
           JOB_TITLES[department] ?? ["Employee"]
         );
+        const createdBy = faker.helpers.arrayElement(users);
 
         return {
           ...employee,
@@ -136,6 +139,7 @@ export async function seedEmployees(
           website: faker.helpers.maybe(() => faker.internet.url(), {
             probability: 0.4,
           }),
+          createdBy: createdBy.id,
         };
       });
   });

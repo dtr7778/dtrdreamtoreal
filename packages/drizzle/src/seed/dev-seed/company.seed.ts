@@ -13,22 +13,27 @@ import {
   InsertCompanySocial,
   InsertSocialMedia,
   SocialMediaTable,
+  UserDataModel,
 } from "../../schemas";
 import { SocialMediaPlatfromTypeEnumSchema } from "../../schemas/enums/zod-db-enums";
 import { db } from "../seed-db-client";
 import { seedConfigs } from "../seed.config";
 
-export async function seedCompanies(): Promise<Array<CompanyDataModel>> {
+export async function seedCompanies(
+  users: Array<UserDataModel>
+): Promise<Array<CompanyDataModel>> {
   console.log("🌱 Seeding companies...");
 
   const companiesData = zocker(insertCompanySchema)
     .generateMany(seedConfigs.targets.companies)
     .map((company) => {
+      const createdBy = faker.helpers.arrayElement(users);
       return {
         ...company,
         name: faker.company.name(),
         legalName: faker.company.name(),
         phone: faker.phone.number({ style: "national" }),
+        createdBy: createdBy.id,
         employSize: faker.helpers.arrayElement([
           "1-10",
           "11-50",

@@ -21,9 +21,9 @@ async function main() {
 
   const users = await seedUsers(roles);
 
-  const companies = await seedCompanies();
+  const companies = await seedCompanies(users);
 
-  const employees = await seedEmployees(companies);
+  const employees = await seedEmployees(companies, users);
 
   const contacts = await seedContacts();
 

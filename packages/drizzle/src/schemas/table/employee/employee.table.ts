@@ -91,6 +91,7 @@ export const updateEmployeeSchema = createUpdateSchema(EmployeeTable, {
   email: z.email().optional(),
 }).omit({
   id: true,
+  createdBy: true,
   createdAt: true,
   updatedAt: true,
 });
