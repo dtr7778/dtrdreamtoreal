@@ -63,9 +63,16 @@
   },
   "pnpm": {
     "overrides": {
-      "sharp": ">=0.35.0",
+      "sharp": ">=0.35.4",
       "postcss": ">=8.5.23",
-      "esbuild": ">=0.25.12"
+      "esbuild": ">=0.25.12",
+      "browserslist": ">=4.28.7",
+      "fast-uri": ">=3.1.6",
+      "js-yaml": ">=4.3.2",
+      "qs": ">=6.16.0",
+      "baseline-browser-mapping": ">=2.11.0",
+      "hono": ">=4.13.5",
+      "next": ">=16.3.3"
     },
     "onlyBuiltDependencies": [
       "@swc/core",
