@@ -17,6 +17,7 @@
   "exports": {
     "./base": "./base.js",
     "./next-js": "./next.js",
+    "./express-js": "./express.js",
     "./react-internal": "./react-internal.js"
   },
   "devDependencies": {
