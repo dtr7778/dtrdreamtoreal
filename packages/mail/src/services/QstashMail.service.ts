@@ -8,8 +8,8 @@ import {
   QstashServiceConfig,
 } from "@workspace/lib/qstash";
 import { QstashError } from "@workspace/lib/qstash/error";
+import { MailError } from "@workspace/lib/utils";
 
-import { MailError } from "../MailError";
 import type {
   InboundEmailPayload,
   InboundEmailResult,
