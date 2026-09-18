@@ -11,12 +11,8 @@ import {
 } from "date-fns";
 import { CalendarDays, CalendarRange, ChevronDown, X } from "lucide-react";
 
-import {
-  formatDateWithTimezone,
-  formatEnumValue,
-  RangeSearchEnum,
-  RangeSearchEnumSchema,
-} from "@workspace/lib/utils";
+import { formatDateWithTimezone, formatEnumValue } from "@workspace/lib/utils";
+import { RangeSearchEnum, RangeSearchEnumSchema } from "@workspace/lib/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,

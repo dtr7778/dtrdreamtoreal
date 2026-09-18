@@ -1,22 +1,20 @@
 import z from "zod";
 
 import {
-  selectContactSubmissionReplySchema,
   selectContactSubmissionSchema,
+  selectContactUserSchema,
 } from "@workspace/drizzle/schemas";
-import { ContactSubmissionStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
+import { ContactStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
 import {
   apiOutputZodSchema,
   paginateInputZodSchema,
   paginateOutputZodSchema,
-} from "@workspace/lib/utils";
+} from "@workspace/lib/zod";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { userProfileSchema } from "@/features/user/user.api-schema";
 import { baseContract } from "@/server/orpc.contract-base";
 import { InferContractRouterType } from "@/types/orpc.types";
-
-import { createReplySchema } from "../contact.schema";
 
 const contactBaseContract = baseContract.errors({
   NOT_FOUND: {
@@ -28,7 +26,7 @@ const contactBaseContract = baseContract.errors({
 
 const tags = ["contact"] as const;
 
-const listContactContract = baseContract
+const listContactContract = contactBaseContract
   .route({
     path: "/contact/list",
     description: "List of all contact",
@@ -39,24 +37,29 @@ const listContactContract = baseContract
       searchFields: ["subject"],
       orderFields: ["createdAt"],
       filter: z.object({
-        status: ContactSubmissionStatusEnumSchema.optional(),
+        status: ContactStatusEnumSchema.optional(),
       }),
     })
   )
   .output(
     apiOutputZodSchema(
       paginateOutputZodSchema(
-        selectContactSubmissionSchema.pick({
-          id: true,
-          name: true,
-          email: true,
-          subject: true,
-          phone: true,
-          company: true,
-          status: true,
-          createdAt: true,
-          updatedAt: true,
-        })
+        selectContactSubmissionSchema
+          .pick({
+            id: true,
+            subject: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+          })
+          .extend({
+            contactUser: selectContactUserSchema.pick({
+              name: true,
+              email: true,
+              phone: true,
+              company: true,
+            }),
+          })
       )
     )
   );
@@ -64,61 +67,64 @@ export type ListContactContractType = InferContractRouterType<
   typeof listContactContract
 >;
 
-const contactDetailsContract = contactBaseContract
+const detailsContactContract = contactBaseContract
   .route({
-    path: "/contact/details",
-    description: "Get contact submission details",
+    method: "GET",
+    path: "/contact/{contactId}",
+    description: "Get contact details",
     tags,
   })
-  .input(z.object({ contactId: z.uuid() }))
+  .input(z.object({ contactId: z.string() }))
   .output(
     apiOutputZodSchema(
-      selectContactSubmissionSchema.extend({
-        replies: z.array(
-          selectContactSubmissionReplySchema
-            .pick({
-              id: true,
-              reply: true,
-              createdAt: true,
-            })
-            .extend({
+      selectContactSubmissionSchema
+        .pick({
+          id: true,
+          subject: true,
+          status: true,
+          message: true,
+          createdAt: true,
+          updatedAt: true,
+        })
+        .extend({
+          name: selectContactUserSchema.shape.name,
+          email: selectContactUserSchema.shape.email,
+          phone: selectContactUserSchema.shape.phone,
+          company: selectContactUserSchema.shape.company,
+          replies: z.array(
+            z.object({
+              id: z.string(),
+              reply: z.string(),
+              createdAt: z.date(),
               repliedByUser: userProfileSchema,
             })
-        ),
-      })
+          ),
+        })
     )
   );
-export type ContactDetailsContractType = InferContractRouterType<
-  typeof contactDetailsContract
+export type DetailsContactContractType = InferContractRouterType<
+  typeof detailsContactContract
 >;
 
 const createReplyContactContract = contactBaseContract
   .route({
-    path: "/contact/reply",
-    description: "Create a reply to a contact submission",
+    path: "/contact/{contactId}/reply",
+    description: "Create a reply to a contact",
     tags,
   })
   .input(
-    createReplySchema.extend({
-      contactId: z.uuid(),
+    z.object({
+      contactId: z.string(),
+      reply: z.string(),
     })
   )
-  .output(
-    apiOutputZodSchema(
-      selectContactSubmissionReplySchema.pick({
-        id: true,
-        reply: true,
-        updatedAt: true,
-        createdAt: true,
-      })
-    )
-  );
+  .output(apiOutputZodSchema(z.null()));
 export type CreateReplyContactContractType = InferContractRouterType<
   typeof createReplyContactContract
 >;
 
 export const contactContract = {
   list: listContactContract,
-  details: contactDetailsContract,
+  details: detailsContactContract,
   createReply: createReplyContactContract,
 };

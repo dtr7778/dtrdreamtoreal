@@ -1,6 +1,6 @@
 import { parseAsStringEnum } from "nuqs/server";
 
-import { ContactSubmissionStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
+import { ContactStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
 
 import { createRangeFilterServer } from "@/lib/nuqs/rangeFilter.server";
 import { tableQuerySearchParams } from "@/lib/nuqs/tableQuerySearchParams";
@@ -28,9 +28,7 @@ export default async function ContactPage(
 
   const filters = await tableQuerySearchParams({
     ...createRangeFilterServer(),
-    status: parseAsStringEnum(
-      ContactSubmissionStatusEnumSchema.options
-    ).withOptions({
+    status: parseAsStringEnum(ContactStatusEnumSchema.options).withOptions({
       clearOnDefault: true,
     }),
   })(props.searchParams);

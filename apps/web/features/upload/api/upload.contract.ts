@@ -2,7 +2,7 @@ import z from "zod";
 
 import { insertFileSchema } from "@workspace/drizzle/schemas";
 import { FileEntityTypeEnumSchema } from "@workspace/drizzle/zod-db-enums";
-import { apiOutputZodSchema } from "@workspace/lib/utils";
+import { apiOutputZodSchema } from "@workspace/lib/zod";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { baseContract } from "@/server/orpc.contract-base";

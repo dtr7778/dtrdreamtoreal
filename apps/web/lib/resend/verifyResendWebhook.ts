@@ -1,4 +1,4 @@
-import { MailError } from "@workspace/mail/error";
+import { MailError } from "@workspace/lib/utils";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 

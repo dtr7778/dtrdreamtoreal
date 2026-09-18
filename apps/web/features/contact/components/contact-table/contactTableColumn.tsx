@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CONTACT_SUBMISSION_STATUS } from "@workspace/drizzle/enum-values";
+import { ContactStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
 import { formatEnumValue } from "@workspace/lib/utils";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { DataTableColumnHeader } from "@workspace/ui/components/data-table/data-table-column-header";
@@ -56,21 +56,22 @@ export const contactTableColumn: ColumnType<ContactTableRowDataType> = [
     enableSorting: false,
   },
   {
-    id: "name",
-    accessorKey: "name",
+    id: "contactUser",
+    accessorKey: "contactUser",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} label="Submitted user" />
     ),
-    cell: ({ getValue, row }) => (
-      <div className="leading-tight">
-        <div className="font-medium">
-          {getValue<ContactTableRowDataType["name"]>()}
+    cell: ({ getValue }) => {
+      const contactUser = getValue<ContactTableRowDataType["contactUser"]>();
+      return (
+        <div className="leading-tight">
+          <div className="font-medium">{`${contactUser.name}`}</div>
+          <div className="truncate text-muted-foreground">
+            {contactUser.email}
+          </div>
         </div>
-        <div className="truncate text-muted-foreground">
-          {row.original.email}
-        </div>
-      </div>
-    ),
+      );
+    },
     meta: { label: "Submitted user" },
     enableSorting: false,
   },
@@ -90,7 +91,7 @@ export const contactTableColumn: ColumnType<ContactTableRowDataType> = [
     meta: {
       label: "Status",
       variant: "select",
-      options: CONTACT_SUBMISSION_STATUS.map((status) => ({
+      options: ContactStatusEnumSchema.options.map((status) => ({
         label: formatEnumValue(status),
         value: status,
       })),

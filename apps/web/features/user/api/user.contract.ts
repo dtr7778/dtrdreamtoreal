@@ -7,7 +7,7 @@ import {
   exportDataOutputZodSchema,
   paginateInputZodSchema,
   paginateOutputZodSchema,
-} from "@workspace/lib/utils";
+} from "@workspace/lib/zod";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { baseContract } from "@/server/orpc.contract-base";

@@ -3,8 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { parseAsStringEnum } from "nuqs";
 
-import { ContactSubmissionStatusEnumSchema } from "@workspace/drizzle/zod-db-enums";
-import type { ContactSubmissionStatusEnumType } from "@workspace/drizzle/zod-db-enums";
+import {
+  ContactStatusEnumSchema,
+  ContactStatusEnumType,
+} from "@workspace/drizzle/zod-db-enums";
 import { DataTableEmpty } from "@workspace/ui/components/data-table/data-table-empty";
 import { DataTableGlobalSearch } from "@workspace/ui/components/data-table/data-table-global-search";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table/DataTableSkeleton";
@@ -26,9 +28,7 @@ export function ContactManagementTable({
   "use no memo";
   const { filters, setFilters, setSearchFilter } = useTableQueryState({
     additionalKeys: {
-      status: parseAsStringEnum(
-        ContactSubmissionStatusEnumSchema.options
-      ).withOptions({
+      status: parseAsStringEnum(ContactStatusEnumSchema.options).withOptions({
         clearOnDefault: true,
       }),
     },
@@ -95,7 +95,9 @@ export function ContactManagementTable({
                 order: newFilters?.order ?? null,
                 orderField: newFilters?.orderField ?? null,
                 status: newFilters?.filter?.status
-                  ? ((newFilters.filter.status as string[])[0] as ContactSubmissionStatusEnumType | null) ?? null
+                  ? (((
+                      newFilters.filter.status as string[]
+                    )[0] as ContactStatusEnumType | null) ?? null)
                   : null,
               });
             }}

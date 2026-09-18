@@ -11,7 +11,7 @@ export const redisClient: ExtendedRedis =
   createRedisClient({
     url: env.REDIS_REST_URL,
     token: env.REDIS_REST_TOKEN,
-  }).getClient();
+  });
 
 if (env.NODE_ENV !== "production") {
   globalForRedis.redisClient = redisClient;

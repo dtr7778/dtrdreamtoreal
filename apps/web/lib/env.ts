@@ -44,6 +44,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.url().min(1),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: z.string().min(1),
     NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: z.string().min(1),
+    NEXT_PUBLIC_BACKEND_URL: z.url().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -77,6 +78,7 @@ export const env = createEnv({
           NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: "public_key",
           WEB_PUSH_PRIVATE_KEY: "private_key",
           SUPABASE_STORAGE_BUCKET_NAME: "bucket",
+          NEXT_PUBLIC_BACKEND_URL: "http://localhost:8000/api/v1",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -112,5 +114,6 @@ export const env = createEnv({
           WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY,
           SUPABASE_STORAGE_BUCKET_NAME:
             process.env.SUPABASE_STORAGE_BUCKET_NAME,
+          NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
         },
 });

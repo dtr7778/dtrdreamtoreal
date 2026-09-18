@@ -1,6 +1,5 @@
 import { QstashError } from "@workspace/lib/qstash/error";
-import { ServiceError } from "@workspace/lib/utils";
-import { MailError } from "@workspace/mail/error";
+import { MailError, ServiceError } from "@workspace/lib/utils";
 
 export interface FormattedError {
   message: string;

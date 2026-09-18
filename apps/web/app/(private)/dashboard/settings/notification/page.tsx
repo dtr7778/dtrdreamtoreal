@@ -10,9 +10,7 @@ export const metadata = {
 export default async function NotificationPage() {
   const queryclient = getQueryClient();
 
-  await queryclient.prefetchQuery(
-    orpcTQClient.notification.settings.queryOptions()
-  );
+  await queryclient.query(orpcTQClient.notification.settings.queryOptions());
 
   return (
     <HydrateClient client={queryclient}>

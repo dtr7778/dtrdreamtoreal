@@ -1,4 +1,4 @@
-import { ContactSubmissionStatusEnumType } from "@workspace/drizzle/zod-db-enums";
+import { ContactStatusEnumType } from "@workspace/drizzle/zod-db-enums";
 import { formatEnumValue } from "@workspace/lib/utils";
 import {
   Status,
@@ -7,21 +7,22 @@ import {
   StatusVariant,
 } from "@workspace/ui/components/status";
 
-const statusVariantMap: Record<ContactSubmissionStatusEnumType, StatusVariant> =
-  {
-    PENDING: "info",
-    REPLIED: "default",
-    SPAM: "error",
-  };
+const statusVariantMap: Record<ContactStatusEnumType, StatusVariant> = {
+  pending: "warning",
+  processing: "info",
+  replied: "success",
+  closed: "default",
+  spam: "error",
+};
 
 export function ContactStatusBadge({
   status,
 }: {
-  status: ContactSubmissionStatusEnumType;
+  status: ContactStatusEnumType;
 }) {
   return (
     <Status variant={statusVariantMap[status] || "default"}>
-      {status === "PENDING" && <StatusIndicator />}
+      {status === "pending" && <StatusIndicator />}
       <StatusLabel>{formatEnumValue(status)}</StatusLabel>
     </Status>
   );

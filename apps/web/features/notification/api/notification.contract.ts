@@ -12,7 +12,7 @@ import {
   apiOutputZodSchema,
   paginateInputZodSchema,
   paginateOutputZodSchema,
-} from "@workspace/lib/utils";
+} from "@workspace/lib/zod";
 
 import { baseContract } from "@/server/orpc.contract-base";
 import { InferContractRouterType } from "@/types/orpc.types";

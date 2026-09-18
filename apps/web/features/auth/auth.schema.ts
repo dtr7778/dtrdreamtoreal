@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { emailField, passwordField } from "@workspace/lib/utils";
+import { emailField, passwordField } from "@workspace/lib/zod";
 
 import { env } from "@/lib/env";
 
