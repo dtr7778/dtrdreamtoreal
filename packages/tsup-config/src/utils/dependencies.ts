@@ -5,7 +5,7 @@ export interface PackageDeps {
 
 export function getPackageDeps(
   dependencies: Record<string, string>,
-  internalScope: string = "@movingaccelerator",
+  internalScope: string = "@workspace"
 ): PackageDeps {
   const deps = Object.keys(dependencies);
 

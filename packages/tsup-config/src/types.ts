@@ -1,5 +1,6 @@
-import type { Options } from "tsup";
 import type { Dirent } from "node:fs";
+
+import type { defineConfig, Options } from "tsup";
 
 export interface CopyDirectoryOptions {
   source: string;
@@ -40,3 +41,5 @@ export interface BuildConfigOptions extends Partial<Options> {
   /** Custom onSuccess callback */
   onBuildSuccess?: () => void | Promise<void>;
 }
+
+export type OutputOptions = ReturnType<typeof defineConfig>;

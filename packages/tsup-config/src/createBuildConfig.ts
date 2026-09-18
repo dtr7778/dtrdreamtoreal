@@ -1,5 +1,8 @@
-import { defineConfig } from "tsup";
 import { resolve } from "node:path";
+
+import { defineConfig } from "tsup";
+
+import type { BuildConfigOptions, OutputOptions } from "./types";
 import {
   copyAssets,
   getEntryFile,
@@ -7,11 +10,8 @@ import {
   setupGracefulShutdown,
   startServer,
 } from "./utils";
-import { BuildConfigOptions } from "./types";
 
-export function createBuildConfig(
-  userOptions: BuildConfigOptions,
-): ReturnType<typeof defineConfig> {
+export function createBuildConfig(options: BuildConfigOptions): OutputOptions {
   const {
     entry,
     isDev,
@@ -19,12 +19,12 @@ export function createBuildConfig(
     target = "node24",
     aliases = { "@": resolve(process.cwd(), "src") },
     dependencies,
-    internalScope = "@movingaccelerator",
+    internalScope = "@workspace",
     copyAssets: assetsToCopy = [],
     autoRestart = true,
     onBuildSuccess,
     ...restOptions
-  } = userOptions;
+  } = options;
 
   // Parse dependencies if package.json is provided
   let internalPackages: string[] = [];
