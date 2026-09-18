@@ -9,7 +9,6 @@
       "email": "saiful.islam.rafi.88@gmail.com"
     }
   ],
-  "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -33,7 +32,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@types/node": "catalog:",
