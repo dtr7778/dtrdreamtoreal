@@ -2,18 +2,18 @@
 
 ## Corpus Check
 
-- 725 files · ~181,400 words
+- 725 files · ~181,414 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 
-- 4084 nodes · 8997 edges · 238 communities (184 shown, 43 thin omitted)
+- 4091 nodes · 8989 edges · 225 communities (173 shown, 41 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
 
-- Built from commit: `e8740427`
+- Built from commit: `663e0425`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,47 +22,47 @@
 - email.table.ts
 - eslint-config/package.json
 - web/package.json
-- sendNotification.ts
-- SelectField.tsx
+- api/orpc/[[...rest]]/route.ts
+- cn
 - FileUpload.tsx
 - mail/package.json
 - Qstash.service.ts
 - field.tsx
-- upload.contract.ts
-- contactSubmission.table.ts
-- User.controller.ts
-- card.tsx
+- date-filter.tsx
+- emailThread.table.ts
+- di-container.ts
+- UpdateNotificationForm.tsx
 - BaseServer.ts
 - dependencies
-- cn
-- ContactDetails.tsx
 - tags/index.tsx
+- orpc.client.ts
+- User.controller.ts
 - userTableColumn.tsx
-- dev-seed/index.ts
+- user.seed.ts
 - Mail.service.tsx
 - NotificationManagement.tsx
 - backend/package.json
-- slider-filter.tsx
+- drawer.tsx
 - dashboard/profile/page.tsx
 - devDependencies
 - zod-db-enums.ts
 - ui/package.json
 - ClassConstructor
-- spinner.tsx
+- DashboardShellHeader.tsx
 - useAuthStore
-- EmailLayout.tsx
-- drizzle-zod
-- user.procedure.ts
+- faceted-filter.tsx
+- db_created_at
+- upload.procedure.ts
 - TaskKanbanBoard.tsx
-- UserBannedCell.tsx
-- contracts/user.contract.ts
+- badge.tsx
+- zod
 - api/user.contract.ts
 - RouteHandlerFactory.service.ts
 - DevPanelContext.tsx
-- sidebar.stories.tsx
+- sidebar.tsx
 - Parameter.decorators.ts
 - task.procedure.ts
-- mail.ts
+- QstashError
 - NotificationProvider.tsx
 - package.json
 - QstashService
@@ -72,10 +72,10 @@
 - Storage.service.ts
 - constants/index.ts
 - date-time-picker.tsx
-- schemas/index.ts
-- devDependencies
+- auth.ts
+- role.procedure.ts
 - dependencies
-- contact.contract.ts
+- upload.contract.ts
 - server/types.ts
 - QstashMailService
 - tasks
@@ -85,31 +85,31 @@
 - ui/components.json
 - auth.middleware.ts
 - buildPaginateOptions.ts
-- input-group.tsx
+- lib/utils.ts
 - vitest-config/package.json
 - compilerOptions
 - web/components.json
-- DataTableSkeleton.tsx
+- mail.ts
 - task.contract.ts
 - devDependencies
 - devDependencies
 - upstashRateLimit.service.ts
 - apiClient.ts
 - contract/package.json
-- sidebar.tsx
+- data-table-slider-filter.tsx
 - devDependencies
-- time-range-filter/index.tsx
+- button.tsx
 - AppBreadcrumb.tsx
 - notification.contract.ts
-- NotificationPanel.tsx
-- src/utils/index.ts
+- slider.stories.tsx
+- ServiceError
 - compilerOptions
 - compilerOptions
 - NestedMenuItem.tsx
 - QstashMessageLogRepository
 - tasks
-- auth.ts
-- lib/utils.ts
+- lib/env.ts
+- slider-filter.tsx
 - app/layout.tsx
 - rules
 - scripts
@@ -121,31 +121,28 @@
 - compilerOptions
 - scripts
 - devDependencies
-- DatabaseType
+- EmailService
 - compilerOptions
 - exports
 - zod/index.ts
-- data-table-global-search.tsx
-- UpdateNotificationForm.tsx
+- ContactManagementTable.tsx
+- button.stories.tsx
 - orpc.types.ts
 - web/tests/setup.ts
 - user.table.ts
 - compilerOptions
 - devDependencies
-- detectDevice.ts
-- getAuthUser.ts
+- NotificationPermissionProvider.tsx
+- getAuthUserWithRolesAndPermissionsCache
 - Graphify Skill
 - express.d.ts
 - scripts
-- NotificationPermissionProvider.tsx
-- QstashDeadLetterRepository
+- LinkButton.tsx
 - dependencies
-- push-notification.ts
 - web/tsconfig.json
-- notificationSetting.table.ts
 - typescript-config/package.json
 - parameter.utils.ts
-- SidebarMainMenu.tsx
+- web/types/index.ts
 - exports
 - scripts
 - Site Logo SVG (Isometric DTR 3D Text)
@@ -174,7 +171,7 @@
 - .oxlintrc.json
 - ProcedureApiUtils
 - switch.stories.tsx
-- db-utils.ts
+- drizzle-zod
 - exports
 - SearchableSelector.tsx
 - lib/src/types/index.ts
@@ -185,15 +182,12 @@
 - overrides
 - sql-generator.ts
 - drizzle/tsconfig.json
-- tabs.tsx
-- devDependencies
-- CreateTaskDialog.tsx
 - storage.seed.ts
 - dependencies
 - ui/postcss.config.mjs
-- csv.ts
+- user.procedure.ts
 - scripts
-- web/types/index.ts
+- formatOrpcError
 - ./ui
 - App.tsx
 - next-image.tsx
@@ -209,7 +203,6 @@
 - Turbo Setup Action
 - BFS Traversal
 - publishConfig
-- notification.table.ts
 - useLocalStorage
 - post-commit
 - dependencies
@@ -232,19 +225,13 @@
 - Docker Compose Dev
 - DTR - Dream To Real README
 - src/types.ts
-- exports
-- QstashMessageLog.repository.ts
 - ./enum-values
 - devDependencies
 - contract/tsconfig.json
 - dependencies.ts
-- baseZodSchema.ts
 - post-checkout
-- scripts
-- publishConfig
 - tsup-config/package.json
-- formatDate.ts
-- button.tsx
+- auth.schema.ts
 - README.md
 
 ## God Nodes (most connected - your core abstractions)
@@ -266,18 +253,18 @@
   apps/web/app/layout.tsx → packages/ui/src/lib/utils.ts
 - `TaskKanbanCardSkeleton()` --calls--> `cn()` [EXTRACTED]
   apps/web/features/task/components/TaskKanbanSkeleton.tsx → packages/ui/src/lib/utils.ts
-- `columns` --calls--> `formatEnumValue()` [EXTRACTED]
-  apps/web/features/task/components/TaskKanbanBoard.tsx → packages/lib/src/utils/formatEnum.ts
 - `SendNotificationProps` --references--> `DatabaseType` [EXTRACTED]
   apps/web/features/notification/data/sendNotification.ts → packages/drizzle/src/drizzle-client.ts
 - `ORPCContext` --references--> `DatabaseType` [EXTRACTED]
   apps/web/types/orpc.types.ts → packages/drizzle/src/drizzle-client.ts
+- `ORPCContext` --references--> `ExtendedRedis` [EXTRACTED]
+  apps/web/types/orpc.types.ts → packages/lib/src/services/redis/types.ts
 
 ## Import Cycles
 
 - 3-file cycle: `packages/drizzle/src/schemas/table/address.table.ts -> packages/drizzle/src/schemas/table/employee/index.ts -> packages/drizzle/src/schemas/table/employee/employeeAddress.table.ts -> packages/drizzle/src/schemas/table/address.table.ts`
-- 3-file cycle: `packages/drizzle/src/schemas/table/employee/companySocial.table.ts -> packages/drizzle/src/schemas/table/socialMedia.table.ts -> packages/drizzle/src/schemas/table/employee/index.ts -> packages/drizzle/src/schemas/table/employee/companySocial.table.ts`
 - 3-file cycle: `packages/drizzle/src/schemas/table/address.table.ts -> packages/drizzle/src/schemas/table/employee/index.ts -> packages/drizzle/src/schemas/table/employee/companyAddress.table.ts -> packages/drizzle/src/schemas/table/address.table.ts`
+- 3-file cycle: `packages/drizzle/src/schemas/table/employee/companySocial.table.ts -> packages/drizzle/src/schemas/table/socialMedia.table.ts -> packages/drizzle/src/schemas/table/employee/index.ts -> packages/drizzle/src/schemas/table/employee/companySocial.table.ts`
 - 3-file cycle: `packages/drizzle/src/schemas/table/employee/employeeSocial.table.ts -> packages/drizzle/src/schemas/table/socialMedia.table.ts -> packages/drizzle/src/schemas/table/employee/index.ts -> packages/drizzle/src/schemas/table/employee/employeeSocial.table.ts`
 - 3-file cycle: `packages/drizzle/src/schemas/table/account.table.ts -> packages/drizzle/src/schemas/table/user/index.ts -> packages/drizzle/src/schemas/table/user/user.table.ts -> packages/drizzle/src/schemas/table/account.table.ts`
 - 3-file cycle: `packages/drizzle/src/schemas/table/file.table.ts -> packages/drizzle/src/schemas/table/user/index.ts -> packages/drizzle/src/schemas/table/user/user.table.ts -> packages/drizzle/src/schemas/table/file.table.ts`
@@ -305,37 +292,37 @@
 - **DTR Favicon Generation Pipeline** — apps_web_public_sitelogo_svg, apps_web_app_icon0_svg, apps_web_app_icon1_png, apps_web_app_apple_icon_png [INFERRED 0.85]
 - **DTR Logo PWA Icon Set** — apps_web_public_icons_icon_48x48_png, apps_web_public_icons_icon_72x72_png, apps_web_public_icons_icon_96x96_png, apps_web_public_icons_icon_128x128_png, apps_web_public_icons_icon_144x144_png, apps_web_public_icons_icon_152x152_png, apps_web_public_icons_icon_192x192_png, apps_web_public_icons_icon_256x256_png, apps_web_public_icons_icon_384x384_png, apps_web_public_icons_icon_512x512_png [INFERRED 0.95]
 
-## Communities (238 total, 43 thin omitted)
+## Communities (225 total, 41 thin omitted)
 
 ### Community 0 - "email.table.ts"
 
-Cohesion: 0.08
-Nodes (29): EmailDirectionEnum, EmailRecipientTypeEnum, EmailStatusEnum, EmailDataModel, EmailRelations, EmailTable, InsertEmail, insertEmailSchema (+21 more)
+Cohesion: 0.06
+Nodes (38): EmailDirectionEnum, EmailRecipientTypeEnum, EmailStatusEnum, ContactSubmissionReplyDataModel, ContactSubmissionReplyRelations, ContactSubmissionReplyTable, InsertContactSubmissionReply, insertContactSubmissionReplySchema (+30 more)
 
 ### Community 1 - "eslint-config/package.json"
 
-Cohesion: 0.09
-Nodes (25): config, expressEslintConfig, nextJsConfig, author, contributors, license, name, private (+17 more)
+Cohesion: 0.05
+Nodes (43): config, expressEslintConfig, nextJsConfig, author, contributors, devDependencies, eslint, eslint-config-prettier (+35 more)
 
 ### Community 2 - "web/package.json"
 
 Cohesion: 0.05
-Nodes (36): author, contributors, license, name, private, publishConfig, access, type (+28 more)
+Nodes (40): author, contributors, eslint, @supabase/supabase-js, typescript, @workspace/eslint-config, @workspace/typescript-config, @workspace/vitest-config (+32 more)
 
-### Community 3 - "sendNotification.ts"
+### Community 3 - "api/orpc/[[...rest]]/route.ts"
 
-Cohesion: 0.05
-Nodes (39): DELETE, GET, HEAD, PATCH, POST, PUT, runtime, DELETE (+31 more)
+Cohesion: 0.08
+Nodes (23): DELETE, GET, HEAD, PATCH, POST, PUT, runtime, DELETE (+15 more)
 
-### Community 4 - "SelectField.tsx"
+### Community 4 - "cn"
 
-Cohesion: 0.14
-Nodes (18): SelectField(), SelectFieldProps, SelectFieldRender(), SelectFieldRenderProps, SelectContent(), SelectGroup(), SelectItem(), SelectLabel() (+10 more)
+Cohesion: 0.07
+Nodes (47): DataTableActionBar(), DataTableActionBarAction(), DataTableActionBarActionProps, DataTableActionBarProps, DataTableActionBarSelectionProps, DataTableProps, DataTablePagination(), DataTablePaginationProps (+39 more)
 
 ### Community 5 - "FileUpload.tsx"
 
-Cohesion: 0.06
-Nodes (40): PerfEntry, PerformancePanel(), DefaultFilePreview(), DefaultPlaceholder(), FileUpload, FileUploadProps, FileUploadRef, FileUploadValidation (+32 more)
+Cohesion: 0.07
+Nodes (38): PerfEntry, PerformancePanel(), DefaultFilePreview(), DefaultPlaceholder(), FileUpload, FileUploadProps, FileUploadRef, FileUploadValidation (+30 more)
 
 ### Community 6 - "mail/package.json"
 
@@ -349,28 +336,28 @@ Nodes (15): DEFAULTS, HandlerRegistry, IQstashService, QstashCallbackHandler, Qs
 
 ### Community 8 - "field.tsx"
 
-Cohesion: 0.04
-Nodes (60): RESET_PASSWORD_PATH, forgetPasswordSchema, ForgetPasswordType, loginSchema, LoginType, magicLinkSchema, MagicLinkType, registerSchema (+52 more)
-
-### Community 9 - "upload.contract.ts"
-
-Cohesion: 0.13
-Nodes (14): assignFileEntityContract, AssignFileEntityContractType, confirmUploadContract, ConfirmUploadContractType, deleteUploadContract, DeleteUploadContractType, getSignedDownloadUrlContract, GetSignedDownloadUrlContractType (+6 more)
-
-### Community 10 - "contactSubmission.table.ts"
-
 Cohesion: 0.07
-Nodes (29): ContactStatusEnum, ContactSubmissionDataModel, ContactSubmissionRelations, ContactSubmissionTable, InsertContactSubmission, insertContactSubmissionSchema, SelectContactSubmission, selectContactSubmissionSchema (+21 more)
+Nodes (33): FileUploadField(), UserBannedType, RememberMe(), RememberMeProps, UserBannedFormProps, Checkbox(), Checked, Disabled (+25 more)
 
-### Community 11 - "User.controller.ts"
+### Community 9 - "date-filter.tsx"
 
-Cohesion: 0.11
-Nodes (18): CONTAINER_TYPES, container, env, main(), IUserController, UserController, UserCronService, Server (+10 more)
+Cohesion: 0.10
+Nodes (25): buttonVariants, Calendar(), CalendarDayButton(), CalendarProps, meta, MultipleMonths, Single, Story (+17 more)
 
-### Community 12 - "card.tsx"
+### Community 10 - "emailThread.table.ts"
 
-Cohesion: 0.12
-Nodes (21): metadata, metadata, metadata, metadata, metadata, metadata, metadata, authErrors (+13 more)
+Cohesion: 0.08
+Nodes (28): ContactStatusEnum, ContactSubmissionDataModel, ContactSubmissionRelations, ContactSubmissionTable, InsertContactSubmission, insertContactSubmissionSchema, SelectContactSubmission, selectContactSubmissionSchema (+20 more)
+
+### Community 11 - "di-container.ts"
+
+Cohesion: 0.23
+Nodes (8): CONTAINER_TYPES, container, env, main(), UserCronService, Server, CronJobClass, express
+
+### Community 12 - "UpdateNotificationForm.tsx"
+
+Cohesion: 0.08
+Nodes (35): metadata, metadata, metadata, metadata, metadata, metadata, metadata, authErrors (+27 more)
 
 ### Community 13 - "BaseServer.ts"
 
@@ -382,55 +369,55 @@ Nodes (12): LoggerConfig, LoggerType, BaseServer, BaseServerConfig, IBaseServer,
 Cohesion: 0.05
 Nodes (43): dependencies, axios, better-auth, @better-auth/drizzle-adapter, date-fns, drizzle-orm, @hookform/resolvers, @hugeicons/core-free-icons (+35 more)
 
-### Community 15 - "cn"
+### Community 15 - "tags/index.tsx"
 
-Cohesion: 0.11
-Nodes (36): Command(), CommandDialog(), CommandEmpty(), CommandGroup(), CommandInput(), CommandItem(), CommandList(), CommandSeparator() (+28 more)
+Cohesion: 0.06
+Nodes (49): Command(), CommandDialog(), CommandEmpty(), CommandGroup(), CommandInput(), CommandItem(), CommandList(), CommandSeparator() (+41 more)
 
-### Community 16 - "ContactDetails.tsx"
+### Community 16 - "orpc.client.ts"
 
-Cohesion: 0.15
+Cohesion: 0.16
 Nodes (25): ContactDetailsPage(), metadata, ContactPage(), metadata, NotificationPage(), metadata, RolesPage(), metadata (+17 more)
 
-### Community 17 - "tags/index.tsx"
+### Community 17 - "User.controller.ts"
 
 Cohesion: 0.12
-Nodes (24): TagsFieldProps, TagsFieldRenderProps, TagType, Tags(), TagsContent(), TagsContentProps, TagsContext, TagsContextType (+16 more)
+Nodes (14): IUserController, UserController, TestServer, Controller, Get, inject, createMockRedisClient(), store (+6 more)
 
 ### Community 18 - "userTableColumn.tsx"
 
 Cohesion: 0.09
 Nodes (33): ListContactContractType, ContactTable(), ContactTableProps, contactTableColumn, ContactTableRowDataType, ListRoleContractType, PermissionsCell(), RoleTable() (+25 more)
 
-### Community 19 - "dev-seed/index.ts"
+### Community 19 - "user.seed.ts"
 
-Cohesion: 0.12
-Nodes (30): generatePermissionsSql(), generateRolePermissionSql(), generateRolesSql(), main(), PermissionDataModel, InsertRole, RoleDataModel, RolePermissionDataModel (+22 more)
+Cohesion: 0.06
+Nodes (58): statement, systemAc, SystemAction, SystemPermissionStatement, SystemResource, systemRoles, generatePermissionsSql(), generateRolePermissionSql() (+50 more)
 
 ### Community 20 - "Mail.service.tsx"
 
-Cohesion: 0.06
-Nodes (36): AccountLockedMail(), AccountLockedMailProps, EmailVerificationMail(), EmailVerificationMailProps, NewDeviceLoginMail(), NewDeviceLoginMailProps, PasswordChangedMail(), PasswordChangedMailProps (+28 more)
+Cohesion: 0.10
+Nodes (42): AccountLockedMail(), AccountLockedMailProps, EmailVerificationMail(), EmailVerificationMailProps, NewDeviceLoginMail(), NewDeviceLoginMailProps, PasswordChangedMail(), PasswordChangedMailProps (+34 more)
 
 ### Community 21 - "NotificationManagement.tsx"
 
 Cohesion: 0.14
-Nodes (21): ExportData(), ContactManagementTable(), NotificationManagement(), RoleManagementTable(), UserManagementTable(), useTableQueryState(), QueryStateBoundaryProps, DataTableEmpty() (+13 more)
+Nodes (22): useNotificationMarkAsRead(), ListNotificationContractType, CATEGORY_CONFIG, LEVEL_CONFIG, NotificationItem(), NotificationItemProps, timeAgo(), NotificationManagement() (+14 more)
 
 ### Community 22 - "backend/package.json"
 
 Cohesion: 0.09
-Nodes (22): author, contributors, files, license, name, private, publishConfig, access (+14 more)
+Nodes (21): author, contributors, files, license, name, private, publishConfig, access (+13 more)
 
-### Community 23 - "slider-filter.tsx"
+### Community 23 - "drawer.tsx"
 
-Cohesion: 0.06
-Nodes (46): DataTableDateFilter(), DataTableDateFilterProps, parseFilterValue(), parseIsoDate(), DateFilter(), DateFilterContent(), DateFilterTrigger(), DateFilterTriggerProps (+38 more)
+Cohesion: 0.16
+Nodes (16): Drawer(), DrawerClose(), DrawerContent(), DrawerContext, DrawerContextProps, DrawerDescription(), DrawerFooter(), DrawerHeader() (+8 more)
 
 ### Community 24 - "dashboard/profile/page.tsx"
 
-Cohesion: 0.13
-Nodes (25): metadata, ProfilePage(), metadata, UserDetailsPage(), TabNavigation(), TabNavigationContent(), TabNavigationList(), TabNavigationProps (+17 more)
+Cohesion: 0.09
+Nodes (35): metadata, ProfilePage(), metadata, UserDetailsPage(), TabNavigation(), TabNavigationContent(), TabNavigationList(), TabNavigationProps (+27 more)
 
 ### Community 25 - "devDependencies"
 
@@ -439,63 +426,63 @@ Nodes (18): devDependencies, cross-env, dotenv, eslint, reflect-metadata, source
 
 ### Community 26 - "zod-db-enums.ts"
 
-Cohesion: 0.06
-Nodes (46): PushPayload, serwist, WorkerGlobalScope, permissionSeparator, PermissionStrType, EmailEventTypeEnum, RoleEnum, ACTION_TYPE (+38 more)
+Cohesion: 0.08
+Nodes (38): PushPayload, serwist, WorkerGlobalScope, EmailEventTypeEnum, ACTION_TYPE, ADDRESS_TYPE, CONTACT_STATUS, EMAIL_DIRECTION (+30 more)
 
 ### Community 27 - "ui/package.json"
 
-Cohesion: 0.06
-Nodes (34): author, contributors, date-fns, eslint, react, react-dom, @storybook/react-vite, @types/node (+26 more)
+Cohesion: 0.05
+Nodes (36): author, contributors, date-fns, eslint, react, react-dom, @storybook/react-vite, @types/node (+28 more)
 
 ### Community 28 - "ClassConstructor"
 
 Cohesion: 0.13
 Nodes (18): ControllerInfos, IControllerLoaderConfiguration, RouteInfos, MetadataExtractorService, MiddlewareResolverService, RouteHandlerFactoryService, RouterFactoryService, ClassConstructor (+10 more)
 
-### Community 29 - "spinner.tsx"
+### Community 29 - "DashboardShellHeader.tsx"
 
-Cohesion: 0.07
-Nodes (22): DashboardShellDescriptionSkeleton(), DashboardShellTitleSkeleton(), DashboardShellSkeleton(), DashboardShellSkeletonProps, ButtonSkeleton(), buttonVariants, Default, Icon (+14 more)
+Cohesion: 0.11
+Nodes (11): DashboardShellHeader(), DashboardShellDescriptionSkeleton(), DashboardShellTitleSkeleton(), DashboardShellSkeleton(), DashboardShellSkeletonProps, DataTableSkeleton(), Spinner(), Default (+3 more)
 
 ### Community 30 - "useAuthStore"
 
+Cohesion: 0.09
+Nodes (26): TopbarUser(), TimeRangeFilter(), MonthRange, MonthRangeSelect(), MonthRangeSelectProps, RangeGrid(), RangeGridItem, RangeGridProps (+18 more)
+
+### Community 31 - "faceted-filter.tsx"
+
 Cohesion: 0.13
-Nodes (20): TimeRangeFilter(), MonthRange, MonthRangeSelect(), MonthRangeSelectProps, RangeGrid(), RangeGridItem, RangeGridProps, WeekRange (+12 more)
+Nodes (18): SearchableSelector(), ButtonProps, FacetedFilter(), FacetedFilterContent(), FacetedFilterContentProps, FacetedFilterProps, FacetedFilterTrigger(), FacetedFilterTriggerProps (+10 more)
 
-### Community 31 - "EmailLayout.tsx"
-
-Cohesion: 0.49
-Nodes (6): EmailButton(), EmailHeading(), EmailInfoCard(), EmailLayout(), EmailLink(), react-email
-
-### Community 32 - "drizzle-zod"
+### Community 32 - "db_created_at"
 
 Cohesion: 0.03
-Nodes (98): db_created_at, AddressTypeEnum, SocialMediaPlatfromTypeEnum, SocialMediaTypeEnum, SocialMediaPlatfromTypeEnumSchema, AddressDataModel, AddressRelations, AddressTable (+90 more)
+Nodes (89): db_created_at, AddressTypeEnum, SocialMediaPlatfromTypeEnum, SocialMediaTypeEnum, SocialMediaPlatfromTypeEnumSchema, AddressDataModel, AddressRelations, AddressTable (+81 more)
 
-### Community 33 - "user.procedure.ts"
+### Community 33 - "upload.procedure.ts"
 
-Cohesion: 0.13
-Nodes (31): DEFAULT_FILE_CACHE_TIMEOUT, listNotificationProcedure, markAsReadProcedure, notificationImpl, settingsDetailsProcedure, subscribePushNotificationProcedure, unsubscribePushNotificationProcedure, updateSettingsProcedure (+23 more)
+Cohesion: 0.25
+Nodes (11): DEFAULT_FILE_CACHE_TIMEOUT, assignFileEntityProcedure, confirmUploadProcedure, deleteUploadProcedure, getSignedDownloadUrlProcedure, getSignedUploadUrlProcedure, uploadImpl, resolveFileUrl() (+3 more)
 
 ### Community 34 - "TaskKanbanBoard.tsx"
 
-Cohesion: 0.08
-Nodes (28): useUpdateStatusTask(), ListTaskContractType, columns, TaskItem, TaskKanbanBoard(), TaskKanbanCard(), TaskKanbanCardSkeleton(), TaskKanbanSkeleton() (+20 more)
+Cohesion: 0.06
+Nodes (36): useUpdateStatusTask(), ListTaskContractType, TaskItem, TaskKanbanBoard(), TaskKanbanCard(), TaskKanbanCardSkeleton(), TaskKanbanSkeleton(), createRangeFilterClient() (+28 more)
 
-### Community 35 - "UserBannedCell.tsx"
+### Community 35 - "badge.tsx"
 
-Cohesion: 0.29
-Nodes (8): UserBannedCell(), UserBannedProps, HoverCard(), HoverCardContent(), HoverCardTrigger(), Default, meta, Story
+Cohesion: 0.15
+Nodes (14): TaskPriorityBadge(), UserBannedProps, TaskPriorityEnumType, Badge(), badgeVariants, meta, Primary, Story (+6 more)
 
-### Community 36 - "contracts/user.contract.ts"
+### Community 36 - "zod"
 
-Cohesion: 0.19
-Nodes (9): apiClient, instance, contracts, ContractsType, listUserContract, userContract, UserContractType, createContract() (+1 more)
+Cohesion: 0.17
+Nodes (10): apiClient, instance, contracts, ContractsType, listUserContract, userContract, UserContractType, createContract() (+2 more)
 
 ### Community 37 - "api/user.contract.ts"
 
 Cohesion: 0.09
-Nodes (24): listUserContract, listUserForSearchContract, ListUserForSearchContractType, profileUpdateContract, ProfileUpdateContractType, tags, userBaseContract, userContract (+16 more)
+Nodes (21): listUserContract, listUserForSearchContract, ListUserForSearchContractType, profileUpdateContract, ProfileUpdateContractType, tags, userBaseContract, userContract (+13 more)
 
 ### Community 38 - "RouteHandlerFactory.service.ts"
 
@@ -507,10 +494,10 @@ Nodes (9): ApiErrorFilter, ApiResponse, notFoundHandler(), ExceptionHandlerServi
 Cohesion: 0.14
 Nodes (22): AuthPanel(), ConsoleDevPanel(), filters, FilterType, LOG_BADGE_STYLES, orig, DevPanelBody(), DevPanelContext (+14 more)
 
-### Community 40 - "sidebar.stories.tsx"
+### Community 40 - "sidebar.tsx"
 
-Cohesion: 0.13
-Nodes (16): AppSidebar(), AppSidebarProps, SidebarFooterMenu(), SidebarLogo(), Topbar(), SidebarContent(), SidebarFooter(), SidebarHeader() (+8 more)
+Cohesion: 0.10
+Nodes (35): AppSidebar(), AppSidebarProps, SettingsSidebar(), SidebarFooterMenu(), SidebarLogo(), footerMenuLinks, settingsMenuLinks, sidebarMenuLinks (+27 more)
 
 ### Community 41 - "Parameter.decorators.ts"
 
@@ -519,13 +506,13 @@ Nodes (15): REFLECT_KEYS, ICronJobClassOptions, ICronJobConfigs, Body(), createP
 
 ### Community 42 - "task.procedure.ts"
 
-Cohesion: 0.17
-Nodes (15): sendNotification(), taskContract, AssignedUser, AssignedUserRole, AssignedUserRoleJoin, CreatedUser, CreatedUserRole, CreatedUserRoleJoin (+7 more)
+Cohesion: 0.13
+Nodes (24): listNotificationProcedure, markAsReadProcedure, notificationImpl, settingsDetailsProcedure, subscribePushNotificationProcedure, unsubscribePushNotificationProcedure, updateSettingsProcedure, sendNotification() (+16 more)
 
-### Community 43 - "mail.ts"
+### Community 43 - "QstashError"
 
-Cohesion: 0.20
-Nodes (17): POST(), POST(), POST(), POST(), POST(), API_MESSAGES, globalForMail, mail (+9 more)
+Cohesion: 0.22
+Nodes (15): POST(), POST(), POST(), POST(), POST(), mail, getQstashPayload(), verifyQstashSignature() (+7 more)
 
 ### Community 44 - "NotificationProvider.tsx"
 
@@ -535,12 +522,12 @@ Nodes (15): NotificationProvider(), chimeSound(), getAudioContext(), NOTIFICATIO
 ### Community 45 - "package.json"
 
 Cohesion: 0.08
-Nodes (25): author, contributors, eslint, @storybook/addon-vitest, @supabase/supabase-js, typescript, vitest, @vitest/browser-playwright (+17 more)
+Nodes (25): author, contributors, eslint, @supabase/supabase-js, typescript, @workspace/eslint-config, @workspace/typescript-config, @workspace/vitest-config (+17 more)
 
 ### Community 46 - "QstashService"
 
 Cohesion: 0.11
-Nodes (5): createQstashClient(), errorMessage(), QstashService, requireLog(), toMessageView()
+Nodes (4): errorMessage(), QstashService, requireLog(), toMessageView()
 
 ### Community 47 - "QstashMailResult"
 
@@ -565,32 +552,32 @@ Nodes (10): getStorageInstance(), BaseStorageService, createStorage(), IStorageS
 ### Community 51 - "constants/index.ts"
 
 Cohesion: 0.09
-Nodes (27): manifest(), metadata, GoogleIcon(), LinkButton(), LinkButtonProps, AUTH_ROUTES, BACKGROUND_COLOR, DEFAULT_AUTH_PATH (+19 more)
+Nodes (23): manifest(), metadata, GoogleIcon(), AUTH_ROUTES, BACKGROUND_COLOR, breadcrumbRoutes, DEFAULT_AUTH_PATH, PUBLIC_ROUTES (+15 more)
 
 ### Community 52 - "date-time-picker.tsx"
 
-Cohesion: 0.07
-Nodes (28): ButtonProps, Calendar(), CalendarDayButton(), CalendarProps, meta, MultipleMonths, Single, Story (+20 more)
+Cohesion: 0.11
+Nodes (14): CalendarCompProps, DateTimeDayButton(), DateTimePicker(), DateTimePickerContent(), DateTimePickerContentProps, DateTimePickerProps, DateTimePickerTriggerProps, MONTH_NAMES (+6 more)
 
-### Community 53 - "schemas/index.ts"
+### Community 53 - "auth.ts"
 
-Cohesion: 0.09
-Nodes (27): listRoleProcedure, roleImpl, roleRouter, roleColumnSql, roleSqlSchema, userProfileColumns, userProfileSchema, UserProfileType (+19 more)
+Cohesion: 0.11
+Nodes (25): { GET, POST }, getAuthUser(), getAuthUserCache, getAuthUserWithRolesAndPermissions(), getUserRolesAndPermission(), getUserRolesAndPermissionCache, createUserActivity(), auth (+17 more)
 
-### Community 54 - "devDependencies"
+### Community 54 - "role.procedure.ts"
 
-Cohesion: 0.14
-Nodes (14): devDependencies, eslint, eslint-config-prettier, @eslint/js, eslint-plugin-only-warn, eslint-plugin-react, eslint-plugin-react-hooks, eslint-plugin-turbo (+6 more)
+Cohesion: 0.17
+Nodes (14): authRouter, contactRouter, notificationRouter, listRoleProcedure, roleImpl, roleRouter, uploadRouter, userRouter (+6 more)
 
 ### Community 55 - "dependencies"
 
 Cohesion: 0.08
 Nodes (26): dependencies, @base-ui/react, class-variance-authority, clsx, cmdk, date-fns, @dnd-kit/core, @dnd-kit/sortable (+18 more)
 
-### Community 56 - "contact.contract.ts"
+### Community 56 - "upload.contract.ts"
 
-Cohesion: 0.10
-Nodes (23): authContract, authMetadataContract, AuthMetadataContractType, requestResetPasswordContract, RequestResetPasswordContractType, tags, userBanContract, UserBanContractType (+15 more)
+Cohesion: 0.05
+Nodes (42): API_MESSAGES, authContract, authMetadataContract, AuthMetadataContractType, requestResetPasswordContract, RequestResetPasswordContractType, tags, userBanContract (+34 more)
 
 ### Community 57 - "server/types.ts"
 
@@ -614,8 +601,8 @@ Nodes (19): import, import, types, types, exports, ./client, ./client/mock, ./pa
 
 ### Community 62 - "lib/package.json"
 
-Cohesion: 0.06
-Nodes (30): author, contributors, date-fns, eslint, @supabase/supabase-js, @types/node, typescript, vitest (+22 more)
+Cohesion: 0.05
+Nodes (37): author, contributors, date-fns, eslint, @supabase/supabase-js, @types/node, typescript, vitest (+29 more)
 
 ### Community 63 - "ui/components.json"
 
@@ -624,18 +611,18 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 
 ### Community 64 - "auth.middleware.ts"
 
-Cohesion: 0.10
-Nodes (31): authImpl, authMetadataProcedure, requestResetPasswordProcedure, userBanProcedure, contactContract, contactImpl, createReplyContactProcedure, detailsContactProcedure (+23 more)
+Cohesion: 0.13
+Nodes (26): authImpl, authMetadataProcedure, requestResetPasswordProcedure, userBanProcedure, contactImpl, createReplyContactProcedure, detailsContactProcedure, listContactProcedure (+18 more)
 
 ### Community 65 - "buildPaginateOptions.ts"
 
-Cohesion: 0.10
-Nodes (27): MetaPagination(), MetaPaginationProps, buildFilterWhere(), buildOrderBy(), buildSearchWhere(), buildWhere(), DateRangeFilter, FilterValue (+19 more)
+Cohesion: 0.11
+Nodes (28): MetaPagination(), MetaPaginationProps, buildFilterWhere(), buildOrderBy(), buildPaginateOptions(), buildSearchWhere(), buildWhere(), DateRangeFilter (+20 more)
 
-### Community 66 - "input-group.tsx"
+### Community 66 - "lib/utils.ts"
 
-Cohesion: 0.07
-Nodes (30): DataTableFacetedFilter(), DataTableFacetedFilterProps, DataTableFilterItemProps, DataTableSliderFilter(), DataTableSliderFilterProps, RangeValue, SliderMeta, SliderUtils (+22 more)
+Cohesion: 0.06
+Nodes (36): DataTableFilterItemProps, DataTableFilterItems(), DataTableGlobalSearchProps, TextareaFieldProps, TextareaFieldRenderProps, InputGroup(), InputGroupAddon(), inputGroupAddonVariants (+28 more)
 
 ### Community 67 - "vitest-config/package.json"
 
@@ -652,15 +639,15 @@ Nodes (19): compilerOptions, allowArbitraryExtensions, allowImportingTsExtension
 Cohesion: 0.10
 Nodes (19): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+11 more)
 
-### Community 70 - "DataTableSkeleton.tsx"
+### Community 70 - "mail.ts"
 
-Cohesion: 0.19
-Nodes (16): DataTableProps, DataTablePagination(), DataTablePaginationSkeleton(), DataTableSkeletonProps, Default, meta, Story, Table() (+8 more)
+Cohesion: 0.18
+Nodes (11): redisSecondaryStorage, globalForMail, globalForQstash, qstashClient, protectedRateLimit, publicRateLimit, qstashHourlyRateLimit, qstashMinRateLimit (+3 more)
 
 ### Community 71 - "task.contract.ts"
 
-Cohesion: 0.12
-Nodes (18): listTasksContract, tags, taskBaseContract, taskCreateContract, TaskCreateContractType, taskDeleteContract, TaskDeleteContractType, taskDetailsContract (+10 more)
+Cohesion: 0.11
+Nodes (19): listTasksContract, tags, taskBaseContract, taskContract, taskCreateContract, TaskCreateContractType, taskDeleteContract, TaskDeleteContractType (+11 more)
 
 ### Community 72 - "devDependencies"
 
@@ -674,8 +661,8 @@ Nodes (20): devDependencies, commitizen, @commitlint/cli, @commitlint/config-con
 
 ### Community 74 - "upstashRateLimit.service.ts"
 
-Cohesion: 0.20
-Nodes (10): createRatelimit(), RatelimitFactoryConfig, Duration, GetRemainingResponse, IRatelimit, RatelimitAlgorithm, RatelimitResponse, WindowUnit (+2 more)
+Cohesion: 0.19
+Nodes (11): createRatelimit(), RatelimitFactoryConfig, Duration, GetRemainingResponse, IRatelimit, RatelimitAlgorithm, RatelimitResponse, WindowUnit (+3 more)
 
 ### Community 75 - "apiClient.ts"
 
@@ -684,43 +671,43 @@ Nodes (15): ApiClient, CallApiOptions, createApiClient(), createApiClientInterna
 
 ### Community 77 - "contract/package.json"
 
-Cohesion: 0.08
-Nodes (23): author, contributors, dependencies, axios, @tanstack/react-query, @workspace/drizzle, @workspace/lib, zod (+15 more)
+Cohesion: 0.09
+Nodes (22): author, contributors, dependencies, axios, @tanstack/react-query, @workspace/drizzle, @workspace/lib, zod (+14 more)
 
-### Community 78 - "sidebar.tsx"
+### Community 78 - "data-table-slider-filter.tsx"
 
-Cohesion: 0.20
-Nodes (13): Sidebar(), SidebarContext, SidebarContextProps, SidebarGroupAction(), SidebarMenuAction(), SidebarMenuBadge(), SidebarMenuButton(), sidebarMenuButtonVariants (+5 more)
+Cohesion: 0.16
+Nodes (10): DataTableSliderFilter(), DataTableSliderFilterProps, RangeValue, SliderMeta, SliderUtils, SliderFilter(), Default, LargeRange (+2 more)
 
 ### Community 79 - "devDependencies"
 
 Cohesion: 0.11
 Nodes (18): devDependencies, @chromatic-com/storybook, eslint-plugin-storybook, oxlint, playwright, storybook, @storybook/addon-a11y, @storybook/addon-docs (+10 more)
 
-### Community 80 - "time-range-filter/index.tsx"
+### Community 80 - "button.tsx"
 
-Cohesion: 0.09
-Nodes (36): ExportDataProps, TopbarUser(), ThemeChanger(), PRESET_KEYS, presetRanges, TimeRangeFilterProps, TimeRangeState, UserAvatar() (+28 more)
+Cohesion: 0.06
+Nodes (57): metadata, ExportDataProps, PRESET_KEYS, presetRanges, TimeRangeFilterProps, TimeRangeState, createReplySchema, CreateReplyType (+49 more)
 
 ### Community 81 - "AppBreadcrumb.tsx"
 
-Cohesion: 0.21
-Nodes (15): AppBreadcrumb(), findBreadcrumbs(), findRoute(), breadcrumbRoutes, BreadcrumbRouteType, Breadcrumb(), BreadcrumbEllipsis(), BreadcrumbItem() (+7 more)
+Cohesion: 0.17
+Nodes (17): AppBreadcrumb(), findBreadcrumbs(), findRoute(), Topbar(), ThemeChanger(), NotificationPanel(), Breadcrumb(), BreadcrumbEllipsis() (+9 more)
 
 ### Community 82 - "notification.contract.ts"
 
 Cohesion: 0.12
 Nodes (16): listNotificationContract, markAsReadContract, MarkAsReadContractType, notificationContract, settingsDetailsContract, SettingsDetailsContractType, subscribePushNotificationContract, SubscribePushNotificationContractType (+8 more)
 
-### Community 83 - "NotificationPanel.tsx"
+### Community 83 - "slider.stories.tsx"
 
-Cohesion: 0.12
-Nodes (19): useNotificationMarkAsRead(), ListNotificationContractType, CATEGORY_CONFIG, LEVEL_CONFIG, NotificationItem(), NotificationItemProps, timeAgo(), NotificationPanel() (+11 more)
+Cohesion: 0.33
+Nodes (5): Slider(), meta, Range, SingleValue, Story
 
-### Community 84 - "src/utils/index.ts"
+### Community 84 - "ServiceError"
 
-Cohesion: 0.14
-Nodes (9): Permission, PermissionBadge(), PRIORITY_OPTIONS, TaskPriorityBadge(), TaskPriorityEnumType, formatEnumValue(), MailError, MailErrorCode (+1 more)
+Cohesion: 0.25
+Nodes (3): MailError, MailErrorCode, ServiceError
 
 ### Community 85 - "compilerOptions"
 
@@ -734,28 +721,28 @@ Nodes (16): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib
 
 ### Community 87 - "NestedMenuItem.tsx"
 
-Cohesion: 0.23
-Nodes (10): Collapsible(), CollapsibleContent(), CollapsibleTrigger(), Default, meta, OpenByDefault, Story, SidebarMenuSub() (+2 more)
+Cohesion: 0.21
+Nodes (11): NestedMenuItem(), Collapsible(), CollapsibleContent(), CollapsibleTrigger(), Default, meta, OpenByDefault, Story (+3 more)
 
 ### Community 88 - "QstashMessageLogRepository"
 
-Cohesion: 0.19
-Nodes (4): QstashMessageLogRepository, EnsureRedisCompatible, HashSerializer, RedisSupportedTypes
+Cohesion: 0.14
+Nodes (7): QstashMessageLog, QstashMessageLogRepository, QstashMessageState, TTL_SECONDS, EnsureRedisCompatible, HashSerializer, RedisSupportedTypes
 
 ### Community 89 - "tasks"
 
 Cohesion: 0.12
 Nodes (16): cache, dependsOn, inputs, outputs, dependsOn, inputs, outputs, cache (+8 more)
 
-### Community 90 - "auth.ts"
+### Community 90 - "lib/env.ts"
 
-Cohesion: 0.10
-Nodes (19): { GET, POST }, metadata, SiteLogo(), AuthBackgroundShape(), createUserActivity(), statement, systemAc, SystemAction (+11 more)
+Cohesion: 0.20
+Nodes (4): metadata, SiteLogo(), AuthBackgroundShape(), env
 
-### Community 91 - "lib/utils.ts"
+### Community 91 - "slider-filter.tsx"
 
-Cohesion: 0.09
-Nodes (19): DataTableActionBar(), DataTableActionBarAction(), DataTableActionBarActionProps, DataTableActionBarProps, DataTableActionBarSelection(), DataTableActionBarSelectionProps, Portal(), PortalBackdrop() (+11 more)
+Cohesion: 0.14
+Nodes (18): Popover(), PopoverContent(), PopoverDescription(), PopoverHeader(), PopoverTitle(), PopoverTrigger(), Default, meta (+10 more)
 
 ### Community 92 - "app/layout.tsx"
 
@@ -784,8 +771,8 @@ Nodes (16): devDependencies, eslint, glob, jsdom, nyc, @testing-library/dom, @te
 
 ### Community 97 - "UserStats.tsx"
 
-Cohesion: 0.09
-Nodes (32): ContactStatusBadge(), statusVariantMap, formatGrowth(), UserStats(), ContactStatusEnumType, Stat(), StatDescription(), StatIndicator() (+24 more)
+Cohesion: 0.05
+Nodes (50): ContactStatusBadge(), statusVariantMap, formatGrowth(), UserStats(), ContactStatusEnumType, ButtonSkeleton(), buttonVariants, Default (+42 more)
 
 ### Community 98 - "ParameterType"
 
@@ -812,11 +799,6 @@ Nodes (14): scripts, build, commit, dev, docker:dev:down, docker:dev:up, format,
 Cohesion: 0.14
 Nodes (14): devDependencies, dotenv, drizzle-dbml-generator, drizzle-kit, eslint, @faker-js/faker, tsx, @types/node (+6 more)
 
-### Community 103 - "DatabaseType"
-
-Cohesion: 0.32
-Nodes (3): DatabaseType, EmailService, ThreadService
-
 ### Community 104 - "compilerOptions"
 
 Cohesion: 0.13
@@ -829,33 +811,33 @@ Nodes (17): exports, ./logger, ./node-zod, ./qstash, ./qstash/error, ./rate-limi
 
 ### Community 106 - "zod/index.ts"
 
-Cohesion: 0.13
-Nodes (6): nodeFieldValidatorZodSchema(), nodePaginateInputZodSchema(), searchFilterZodSchema(), fieldValidatorZodSchema(), ExtractObjectKeys, paginateInputZodSchema()
+Cohesion: 0.09
+Nodes (11): nodeFieldValidatorZodSchema(), nodePaginateInputZodSchema(), searchFilterZodSchema(), RangeSearchEnum, RangeSearchEnumSchema, stringArraySchema, stringBooleanSchema, stringToArray() (+3 more)
 
-### Community 107 - "data-table-global-search.tsx"
+### Community 107 - "ContactManagementTable.tsx"
 
-Cohesion: 0.24
-Nodes (7): DataTableGlobalSearch(), DataTableGlobalSearchProps, RefreshButton(), Default, Loading, meta, Story
+Cohesion: 0.30
+Nodes (9): ExportData(), DEFAULT_PAGE_SIZE, ContactManagementTable(), RoleManagementTable(), UserManagementTable(), useTableQueryState(), DataTableEmpty(), DataTableGlobalSearch() (+1 more)
 
-### Community 108 - "UpdateNotificationForm.tsx"
+### Community 108 - "button.stories.tsx"
 
-Cohesion: 0.25
-Nodes (9): useNotificationSettingsUpdate(), FormConfig, NOTIFICATION_FIELDS, NotificationFormProps, NotificationUpdateForm(), prepareFormData(), SwitchFieldProps, UpdateNotificationForm() (+1 more)
+Cohesion: 0.40
+Nodes (4): Icon, meta, Primary, Story
 
 ### Community 109 - "orpc.types.ts"
 
-Cohesion: 0.28
-Nodes (11): authStore(), AuthStoreAction, AuthStoreState, AuthStoreContext, AuthStoreProvider(), AuthSession, AuthUser, PermissionType (+3 more)
+Cohesion: 0.22
+Nodes (14): SendNotificationProps, AuthStoreAction, AuthStoreState, AuthSession, AuthUser, PermissionType, RoleType, ORPCContext (+6 more)
 
 ### Community 110 - "web/tests/setup.ts"
 
-Cohesion: 0.17
-Nodes (12): protectedRateLimit, publicRateLimit, redisClient, createMockDrizzleClient(), createMockRateLimit(), createMockRedisClient(), store, createChannelMock() (+4 more)
+Cohesion: 0.21
+Nodes (10): protectedRateLimit, publicRateLimit, redisClient, createMockDrizzleClient(), createMockRateLimit(), createChannelMock(), createMockSupabaseClient(), createQueryBuilder() (+2 more)
 
 ### Community 111 - "user.table.ts"
 
-Cohesion: 0.04
-Nodes (54): db_soft_delete, RoleEnumType, AccountDataModel, AccountRelations, AccountTable, InsertAccount, insertAccountSchema, SelectAccount (+46 more)
+Cohesion: 0.03
+Nodes (72): db_id, db_soft_delete, db_updated_at, NotificationCategoryEnum, NotificationLevelEnum, AccountDataModel, AccountRelations, AccountTable (+64 more)
 
 ### Community 112 - "compilerOptions"
 
@@ -867,15 +849,15 @@ Nodes (11): compilerOptions, allowJs, jsx, module, moduleResolution, noEmit, plu
 Cohesion: 0.17
 Nodes (12): devDependencies, eslint, @storybook/react-vite, tailwindcss, @tailwindcss/postcss, @turbo/gen, @types/node, @types/react (+4 more)
 
-### Community 114 - "detectDevice.ts"
+### Community 114 - "NotificationPermissionProvider.tsx"
 
-Cohesion: 0.19
-Nodes (14): BrowserName, browsers, checkTouchSupport(), detectDevice(), DeviceInfo, DevicePlatform, DeviceType, getScreenInfo() (+6 more)
+Cohesion: 0.11
+Nodes (34): checkPermission(), isIOSStandalone(), isPushSupportedOnPlatform(), isSupported(), NotificationPermissionProvider(), NotificationPromptCard(), requestPlatformPermission(), requiresGesture() (+26 more)
 
-### Community 115 - "getAuthUser.ts"
+### Community 115 - "getAuthUserWithRolesAndPermissionsCache"
 
-Cohesion: 0.29
-Nodes (10): DashboardPage(), metadata, SessionPage(), SessionManagement(), getAuthUser(), getAuthUserCache, getAuthUserWithRolesAndPermissions(), getAuthUserWithRolesAndPermissionsCache (+2 more)
+Cohesion: 0.40
+Nodes (5): DashboardPage(), metadata, SessionPage(), SessionManagement(), getAuthUserWithRolesAndPermissionsCache
 
 ### Community 116 - "Graphify Skill"
 
@@ -887,30 +869,20 @@ Nodes (10): Add and Watch Reference, Exports Reference, Extraction Specification
 Cohesion: 0.20
 Nodes (10): scripts, build, dev, format, lint, start, test, test:coverage (+2 more)
 
-### Community 119 - "NotificationPermissionProvider.tsx"
+### Community 119 - "LinkButton.tsx"
 
-Cohesion: 0.32
-Nodes (11): checkPermission(), isIOSStandalone(), isPushSupportedOnPlatform(), isSupported(), NotificationPermissionProvider(), NotificationPromptCard(), requestPlatformPermission(), requiresGesture() (+3 more)
+Cohesion: 0.67
+Nodes (3): LinkButton(), LinkButtonProps, RoutePathType
 
 ### Community 121 - "dependencies"
 
 Cohesion: 0.18
 Nodes (11): dependencies, drizzle-orm, express, http-status-codes, inversify, node-cron, @t3-oss/env-core, @workspace/contract (+3 more)
 
-### Community 122 - "push-notification.ts"
-
-Cohesion: 0.45
-Nodes (9): getPushSubscription(), isPushManagerSupported(), subscribeToPushNotifications(), unsubscribeFromPushNotifications(), getReadyServiceWorker(), getRegisteredServiceWorker(), isServiceWorkerSupported(), registerServiceWorker() (+1 more)
-
 ### Community 123 - "web/tsconfig.json"
 
 Cohesion: 0.22
 Nodes (8): compilerOptions, paths, plugins, exclude, extends, include, @workspace/ui/\*, @workspace/typescript-config/nextjs.json
-
-### Community 124 - "notificationSetting.table.ts"
-
-Cohesion: 0.18
-Nodes (10): NotificationCategoryEnum, InsertNotificationSettings, insertNotificationSettingsSchema, NotificationSettingsDataModel, NotificationSettingsRelations, NotificationSettingsTable, SelectNotificationSettings, selectNotificationSettingsSchema (+2 more)
 
 ### Community 125 - "typescript-config/package.json"
 
@@ -922,10 +894,10 @@ Nodes (8): author, contributors, license, name, private, publishConfig, access, 
 Cohesion: 0.33
 Nodes (7): ApiError, ApiResponseType, InputValidationError, resolveParameter(), resolveParameters(), serializeQuery(), validateWithZodSchema()
 
-### Community 127 - "SidebarMainMenu.tsx"
+### Community 127 - "web/types/index.ts"
 
-Cohesion: 0.16
-Nodes (15): NestedMenuItem(), SettingsSidebar(), SidebarMainMenu(), footerMenuLinks, settingsMenuLinks, sidebarMenuLinks, buildPermissionMap(), hasPermission() (+7 more)
+Cohesion: 0.25
+Nodes (12): SidebarMainMenu(), permissionSeparator, buildPermissionMap(), hasPermission(), PermissionStrType, SidebarGroupMenuLinkType, SidebarMenuLinkType, filterMenuItems() (+4 more)
 
 ### Community 128 - "exports"
 
@@ -984,8 +956,8 @@ Nodes (7): scripts, build, build:storybook, dev, dev:storybook, lint, preview
 
 ### Community 140 - "ExtendedRedis"
 
-Cohesion: 0.30
-Nodes (6): UpstashRatelimitConfig, createRedisClient(), ExtendedRedis, IUpstashRedistService, UpstashRedisService, UpstashRedisServiceConfig
+Cohesion: 0.21
+Nodes (6): QstashDeadLetterRepository, createRedisClient(), ExtendedRedis, IUpstashRedistService, UpstashRedisService, UpstashRedisServiceConfig
 
 ### Community 141 - "pnpm Workspace Config"
 
@@ -1024,8 +996,8 @@ Nodes (6): compilerOptions, jsx, display, extends, ./base.json, $schema
 
 ### Community 148 - "formatDateWithTimezone"
 
-Cohesion: 0.27
-Nodes (7): FormatDateCell(), FormatDateCellBaseProps, FormatDateCellProps, SessionCard(), DetailsStep(), QueryStateBoundary(), formatDateWithTimezone()
+Cohesion: 0.18
+Nodes (8): FormatDateCell(), FormatDateCellBaseProps, FormatDateCellProps, SessionCard(), DetailsStep(), QueryStateBoundaryProps, formatDateWithTimezone(), DateTimePickerTrigger()
 
 ### Community 149 - "ui/tsconfig.lint.json"
 
@@ -1057,10 +1029,10 @@ Nodes (5): plugins, rules, react/only-export-components, react/rules-of-hooks, $
 Cohesion: 0.25
 Nodes (7): Checked, Disabled, meta, Small, Story, Unchecked, Switch()
 
-### Community 156 - "db-utils.ts"
+### Community 156 - "drizzle-zod"
 
-Cohesion: 0.07
-Nodes (31): db_id, db_updated_at, InsertPermission, insertPermissionSchema, PermissionTableRelations, SelectPermission, selectPermissionSchema, UpdatePermission (+23 more)
+Cohesion: 0.09
+Nodes (21): RoleEnum, InsertPermission, insertPermissionSchema, PermissionTableRelations, SelectPermission, selectPermissionSchema, UpdatePermission, updatePermissionSchema (+13 more)
 
 ### Community 157 - "exports"
 
@@ -1069,8 +1041,8 @@ Nodes (6): exports, ./components/_, ./globals.css, ./hooks/_, ./lib/\*, ./postcs
 
 ### Community 158 - "SearchableSelector.tsx"
 
-Cohesion: 0.08
-Nodes (29): SearchableSelector(), SearchableSelectorContent(), SearchableSelectorContentProps, SearchableSelectorContext, SearchableSelectorContextProps, SearchableSelectorEmpty(), SearchableSelectorEmptyProps, SearchableSelectorItem() (+21 more)
+Cohesion: 0.12
+Nodes (20): SearchableSelectorContent(), SearchableSelectorContentProps, SearchableSelectorContext, SearchableSelectorContextProps, SearchableSelectorEmpty(), SearchableSelectorEmptyProps, SearchableSelectorItem(), SearchableSelectorItemProps (+12 more)
 
 ### Community 159 - "lib/src/types/index.ts"
 
@@ -1094,8 +1066,8 @@ Nodes (3): { dynamic, dynamicParams, revalidate, generateStaticParams, GET }, ne
 
 ### Community 164 - "overrides"
 
-Cohesion: 0.33
-Nodes (6): esbuild, postcss, sharp, pnpm, onlyBuiltDependencies, overrides
+Cohesion: 0.15
+Nodes (13): baseline-browser-mapping, browserslist, esbuild, fast-uri, hono, js-yaml, next, postcss (+5 more)
 
 ### Community 165 - "sql-generator.ts"
 
@@ -1107,40 +1079,25 @@ Nodes (4): execAsync, exportDrizzleSQL(), main(), SQL_OUTPUT_PATH
 Cohesion: 0.40
 Nodes (4): exclude, extends, include, @workspace/typescript-config/base.json
 
-### Community 167 - "tabs.tsx"
-
-Cohesion: 0.27
-Nodes (9): Default, Line, meta, Story, Tabs(), TabsContent(), TabsList(), tabsListVariants (+1 more)
-
-### Community 168 - "devDependencies"
-
-Cohesion: 0.29
-Nodes (7): devDependencies, eslint, tsup, @types/node, typescript, @workspace/eslint-config, @workspace/typescript-config
-
-### Community 169 - "CreateTaskDialog.tsx"
-
-Cohesion: 0.13
-Nodes (26): UserBannedType, createReplySchema, CreateReplyType, UserBannedForm(), UserBannedFormProps, DataTableFilterItems(), DataTableFilterViewProps, Dialog() (+18 more)
-
 ### Community 171 - "dependencies"
 
 Cohesion: 0.50
 Nodes (4): dependencies, react, react-dom, @workspace/ui
 
-### Community 173 - "csv.ts"
+### Community 173 - "user.procedure.ts"
 
-Cohesion: 0.29
-Nodes (7): arrayToCSV(), ExportOptions, ExportResult, JsonArray, JsonObject, JsonValue, prepareExport()
+Cohesion: 0.15
+Nodes (18): calcGrowth(), daysAgo(), listUserForSearchProcedure, listUserProcedure, profileUpdateProcedure, updateUserRoleProcedure, userDataExportProcedure, userDetailsProcedure (+10 more)
 
 ### Community 174 - "scripts"
 
 Cohesion: 0.50
 Nodes (4): scripts, format, lint, typecheck
 
-### Community 175 - "web/types/index.ts"
+### Community 175 - "formatOrpcError"
 
 Cohesion: 0.14
-Nodes (29): ProgressType, useBanUnbannedUser(), useRequestPasswordReset(), useContactReplyCreate(), useCreateTask(), useDeleteTask(), useUpdateTask(), useAssignFileEntity() (+21 more)
+Nodes (26): ProgressType, useContactReplyCreate(), ReplyCreateDialog(), useNotificationSettingsUpdate(), NotificationUpdateForm(), useCreateTask(), useDeleteTask(), useUpdateTask() (+18 more)
 
 ### Community 176 - "./ui"
 
@@ -1151,11 +1108,6 @@ Nodes (4): ./ui, import, require, types
 
 Cohesion: 0.67
 Nodes (3): path, config, commitizen
-
-### Community 195 - "notification.table.ts"
-
-Cohesion: 0.09
-Nodes (21): NotificationLevelEnum, TaskPriorityEnum, TaskStatusEnum, insertNotificationSchema, NotificationDataModel, NotificationRelations, NotificationTable, SelectNotification (+13 more)
 
 ### Community 196 - "useLocalStorage"
 
@@ -1177,16 +1129,6 @@ Nodes (7): compilerOptions, outDir, types, exclude, extends, include, @workspace
 Cohesion: 0.36
 Nodes (5): BuildConfigOptions, CopyDirectoryOptions, Entry, OutputOptions, tsup
 
-### Community 224 - "exports"
-
-Cohesion: 0.40
-Nodes (5): exports, ./base, ./express-js, ./next-js, ./react-internal
-
-### Community 225 - "QstashMessageLog.repository.ts"
-
-Cohesion: 0.40
-Nodes (3): QstashMessageLog, QstashMessageState, TTL_SECONDS
-
 ### Community 226 - "./enum-values"
 
 Cohesion: 0.67
@@ -1202,52 +1144,42 @@ Nodes (7): devDependencies, eslint, @types/node, typescript, vitest, @workspace/
 Cohesion: 0.29
 Nodes (6): compilerOptions, types, exclude, extends, include, @workspace/typescript-config/base.json
 
-### Community 230 - "baseZodSchema.ts"
-
-Cohesion: 0.29
-Nodes (5): RangeSearchEnum, RangeSearchEnumSchema, stringArraySchema, stringBooleanSchema, stringToArray()
-
 ### Community 231 - "post-checkout"
 
 Cohesion: 0.50
 Nodes (3): post-checkout script, GRAPHIFY_REBUILD_LOG, PYTHONHASHSEED
 
-### Community 232 - "scripts"
-
-Cohesion: 0.50
-Nodes (4): scripts, format, lint, typecheck
-
 ### Community 234 - "tsup-config/package.json"
 
+Cohesion: 0.08
+Nodes (25): author, contributors, devDependencies, eslint, tsup, @types/node, typescript, @workspace/eslint-config (+17 more)
+
+### Community 238 - "auth.schema.ts"
+
 Cohesion: 0.10
-Nodes (20): author, contributors, exports, files, license, main, module, name (+12 more)
-
-### Community 238 - "button.tsx"
-
-Cohesion: 0.12
-Nodes (12): metadata, Button(), buttonVariants, ButtonSpinner(), ButtonSpinnerProps, meta, Primary, Story (+4 more)
+Nodes (32): DEFAULT_UNAUTH_PATH, ERROR_PAGE_PATH, ForgetPasswordType, loginSchema, LoginType, magicLinkSchema, MagicLinkType, registerSchema (+24 more)
 
 ## Knowledge Gaps
 
-- **1714 isolated node(s):** `name`, `version`, `type`, `private`, `author` (+1709 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1913 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **43 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1726 isolated node(s):** `name`, `version`, `type`, `private`, `author` (+1721 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1925 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `SelectField.tsx`, `FileUpload.tsx`, `field.tsx`, `card.tsx`, `ContactDetails.tsx`, `tags/index.tsx`, `userTableColumn.tsx`, `NotificationManagement.tsx`, `slider-filter.tsx`, `dashboard/profile/page.tsx`, `switch.stories.tsx`, `spinner.tsx`, `useAuthStore`, `SearchableSelector.tsx`, `TaskKanbanBoard.tsx`, `UserBannedCell.tsx`, `DevPanelContext.tsx`, `sidebar.stories.tsx`, `CreateTaskDialog.tsx`, `tabs.tsx`, `date-time-picker.tsx`, `buildPaginateOptions.ts`, `input-group.tsx`, `DataTableSkeleton.tsx`, `sidebar.tsx`, `time-range-filter/index.tsx`, `AppBreadcrumb.tsx`, `NotificationPanel.tsx`, `NestedMenuItem.tsx`, `auth.ts`, `lib/utils.ts`, `app/layout.tsx`, `UserStats.tsx`, `sheet.tsx`, `data-table-global-search.tsx`, `button.tsx`, `SidebarMainMenu.tsx`?**
-  _High betweenness centrality (0.100) - this node is a cross-community bridge._
-- **Why does `zod` connect `contact.contract.ts` to `web/package.json`, `contracts/user.contract.ts`, `api/user.contract.ts`, `task.contract.ts`, `field.tsx`, `upload.contract.ts`, `User.controller.ts`, `apiClient.ts`, `contract/package.json`, `notification.contract.ts`, `backend/package.json`, `auth.ts`?**
-  _High betweenness centrality (0.040) - this node is a cross-community bridge._
-- **Why does `@workspace/vitest-config` connect `backend/package.json` to `web/package.json`, `package.json`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `FileUpload.tsx`, `field.tsx`, `date-filter.tsx`, `UpdateNotificationForm.tsx`, `tags/index.tsx`, `orpc.client.ts`, `userTableColumn.tsx`, `formatDateWithTimezone`, `NotificationManagement.tsx`, `drawer.tsx`, `dashboard/profile/page.tsx`, `switch.stories.tsx`, `DashboardShellHeader.tsx`, `useAuthStore`, `SearchableSelector.tsx`, `faceted-filter.tsx`, `TaskKanbanBoard.tsx`, `badge.tsx`, `DevPanelContext.tsx`, `sidebar.tsx`, `date-time-picker.tsx`, `buildPaginateOptions.ts`, `lib/utils.ts`, `button.tsx`, `AppBreadcrumb.tsx`, `slider.stories.tsx`, `NestedMenuItem.tsx`, `lib/env.ts`, `slider-filter.tsx`, `app/layout.tsx`, `UserStats.tsx`, `sheet.tsx`, `ContactManagementTable.tsx`, `auth.schema.ts`?**
+  _High betweenness centrality (0.085) - this node is a cross-community bridge._
+- **Why does `zod` connect `zod` to `web/package.json`, `api/user.contract.ts`, `task.contract.ts`, `di-container.ts`, `apiClient.ts`, `contract/package.json`, `auth.schema.ts`, `notification.contract.ts`, `backend/package.json`, `upload.contract.ts`, `lib/env.ts`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **Why does `@tanstack/react-query` connect `formatOrpcError` to `UserStats.tsx`, `TaskKanbanBoard.tsx`, `web/package.json`, `SearchableSelector.tsx`, `ContactManagementTable.tsx`, `UpdateNotificationForm.tsx`, `NotificationProvider.tsx`, `contract/package.json`, `apiClient.ts`, `orpc.client.ts`, `formatDateWithTimezone`, `NotificationManagement.tsx`, `slider-filter.tsx`, `app/layout.tsx`, `useAuthStore`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `type` to the rest of the system?**
-  _1714 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1726 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `email.table.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.08021390374331551 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06025369978858351 - nodes in this community are weakly interconnected._
 - **Should `eslint-config/package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.09388335704125178 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05454545454545454 - nodes in this community are weakly interconnected._
 - **Should `web/package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.05263157894736842 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected._

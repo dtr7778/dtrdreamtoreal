@@ -1476,9 +1476,9 @@
     "semantic_hash": "4040ca5dc660d1e9fee7c7ab0ccd17db"
   },
   "apps/web/package.json": {
-    "mtime": 1789732085.9175565,
-    "seen": 1789732340.9944859,
-    "ast_hash": "d8ec7040484b7ddfa01894719a4fbf95",
+    "mtime": 1789732604.3375316,
+    "seen": 1789732994.0814319,
+    "ast_hash": "562b979aa7bb9101727564cb96cd4fbb",
     "semantic_hash": ""
   },
   "apps/web/postcss.config.mjs": {
@@ -1692,9 +1692,9 @@
     "semantic_hash": "0416fb9809677c8bfe577c40ac051395"
   },
   "package.json": {
-    "mtime": 1789666981.2345908,
-    "seen": 1789727609.9880621,
-    "ast_hash": "2f4c03422c2dbf04c15e1162f2be0c52",
+    "mtime": 1789732729.6602507,
+    "seen": 1789732994.0814767,
+    "ast_hash": "d24552d9df759c68f37232e623f5d9e8",
     "semantic_hash": ""
   },
   "packages/drizzle/drizzle.config.ts": {
