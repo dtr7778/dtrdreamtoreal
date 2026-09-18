@@ -1,6 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 
-import type { UpStashRedis } from "../redis";
+import { ExtendedRedis } from "../redis";
 import type {
   Duration,
   GetRemainingResponse,
@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 export interface UpstashRatelimitConfig {
-  redisClient: UpStashRedis;
+  redisClient: ExtendedRedis;
   requests: number;
   window: Duration;
   algorithm: RatelimitAlgorithm;

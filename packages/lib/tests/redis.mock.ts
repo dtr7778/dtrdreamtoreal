@@ -1,8 +1,13 @@
 import { vi } from "vitest";
 
+import type { ExtendedRedis } from "../src/services/redis";
+
 const store = new Map<string, unknown>();
 
-export function createMockRedisClient() {
+export function createMockRedisClient(): {
+  store: Map<string, unknown>;
+  Redis: ExtendedRedis;
+} {
   return {
     store,
     Redis: vi.fn().mockImplementation(() => ({
@@ -51,6 +56,6 @@ export function createMockRedisClient() {
         store.clear();
         return "OK";
       }),
-    })),
+    })) as unknown as ExtendedRedis,
   };
 }

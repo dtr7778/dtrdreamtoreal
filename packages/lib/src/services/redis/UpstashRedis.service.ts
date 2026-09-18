@@ -1,21 +1,30 @@
 import { Redis } from "@upstash/redis";
 
-import { BaseRedisService } from "./BaseRedis.service";
+import { ExtendedRedis } from "./types";
 
-export interface IUpstashRedisServiceConfig {
+export interface IUpstashRedistService {
+  getClient(): ExtendedRedis;
+}
+
+export interface UpstashRedisServiceConfig {
   url: string;
   token: string;
 }
 
-export class UpstashRedisService extends BaseRedisService {
-  constructor(private readonly configs: IUpstashRedisServiceConfig) {
-    super();
+export class UpstashRedisService implements IUpstashRedistService {
+  protected client: ExtendedRedis | undefined = undefined;
+
+  constructor(config: UpstashRedisServiceConfig) {
+    this.client = new Redis({
+      url: config.url,
+      token: config.token,
+    });
   }
 
-  async init(): Promise<void> {
-    this.client = new Redis({
-      url: this.configs.url,
-      token: this.configs.token,
-    });
+  public getClient(): ExtendedRedis {
+    if (!this.client) {
+      throw new Error("Redis client not initialized");
+    }
+    return this.client;
   }
 }

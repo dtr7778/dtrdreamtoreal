@@ -1,3 +1,3 @@
 export * from "./createRedisClient.factory";
-export * from "./types";
+export type { ExtendedRedis } from "./types";
 export * from "./HashSerializer";
