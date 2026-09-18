@@ -22,6 +22,5 @@ export function fieldValidatorZodSchema<
           : `Each value in '${key}' must be one of: <no allowed fields provided>`,
       }
     )
-    .nullable()
-    .optional();
+    .nullish();
 }

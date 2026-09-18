@@ -33,8 +33,8 @@ export function paginateInputZodSchema<
     | z.ZodOptional<z.ZodNullable<z.ZodObject<z.ZodRawShape>>>;
 }> {
   const base = z.object({
-    page: z.number().int().min(1).default(1).nullable().optional(),
-    limit: z.number().int().min(1).default(20).nullable().optional(),
+    page: z.number().int().min(1).default(1).nullish(),
+    limit: z.number().int().min(1).default(20).nullish(),
     order: z
       .enum(["asc", "desc"] as const)
       .nullable()
@@ -43,9 +43,9 @@ export function paginateInputZodSchema<
       .enum(orderFields as unknown as [string, ...string[]])
       .nullable()
       .optional(),
-    search: z.string().trim().toLowerCase().nullable().optional(),
+    search: z.string().trim().toLowerCase().nullish(),
     searchFields: fieldValidatorZodSchema("searchFields", searchFields),
-    filter: filter ? filter.optional() : z.object({}).nullable().optional(),
+    filter: filter ? filter.optional() : z.object({}).nullish(),
   });
 
   return base;
