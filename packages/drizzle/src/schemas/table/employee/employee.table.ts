@@ -8,6 +8,7 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
+import { UserTable } from "../user";
 import { CompanyTable } from "./company.table";
 import { EmployeeAddressTable } from "./employeeAddress.table";
 import { EmployeeEmailThreadTable } from "./employeeEmailThread.table";
@@ -31,6 +32,7 @@ export const EmployeeTable = pgTable(
     department: varchar("department", { length: 100 }),
     website: varchar("website", { length: 500 }),
 
+    createdBy: uuid("created_by").notNull(),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },
@@ -40,11 +42,22 @@ export const EmployeeTable = pgTable(
       columns: [table.companyId],
       foreignColumns: [CompanyTable.id],
     }).onDelete("cascade"),
+    foreignKey({
+      name: "employee_createdBy_fkey",
+      columns: [table.createdBy],
+      foreignColumns: [UserTable.id],
+    }).onDelete("set null"),
     index("employee_companyId_idx").on(table.companyId),
+    index("employee_createdBy_idx").on(table.createdBy),
   ]
 );
 
 export const EmployeeRelations = relations(EmployeeTable, ({ many, one }) => ({
+  createdBy: one(UserTable, {
+    fields: [EmployeeTable.createdBy],
+    references: [UserTable.id],
+    relationName: "EmployeeToUser",
+  }),
   company: one(CompanyTable, {
     fields: [EmployeeTable.companyId],
     references: [CompanyTable.id],
@@ -53,7 +66,9 @@ export const EmployeeRelations = relations(EmployeeTable, ({ many, one }) => ({
   addresses: many(EmployeeAddressTable, {
     relationName: "EmployeeAddressToEmployee",
   }),
-  socialMedia: many(EmployeeSocialTable, { relationName: "EmployeeSocialToEmployee" }),
+  socialMedia: many(EmployeeSocialTable, {
+    relationName: "EmployeeSocialToEmployee",
+  }),
   emailThreads: many(EmployeeEmailThreadTable, {
     relationName: "EmployeeEmailThreadToEmployee",
   }),
@@ -68,8 +83,8 @@ export const insertEmployeeSchema = createInsertSchema(EmployeeTable, {
   updatedAt: true,
 });
 export const selectEmployeeSchema = createSelectSchema(EmployeeTable, {
-  website: z.url().optional(),
-  email: z.email().optional(),
+  website: z.url().nullable(),
+  email: z.email().nullable(),
 });
 export const updateEmployeeSchema = createUpdateSchema(EmployeeTable, {
   website: z.url().optional(),

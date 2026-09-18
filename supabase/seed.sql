@@ -63,7 +63,21 @@ INSERT INTO public.permissions (name, level, resource, action, description)
 		('system.contact.update', 'system', 'contact', 'update', 'Edit any contact"s information and assignments'),
 		('system.contact.delete', 'system', 'contact', 'delete', 'Remove contacts from the system permanently'),
 		('system.contact.manage', 'system', 'contact', 'manage', 'Full contact administration including reassignment'),
-		('system.contact.export', 'system', 'contact', 'export', 'Export contact data to CSV or other formats');
+		('system.contact.export', 'system', 'contact', 'export', 'Export contact data to CSV or other formats'),
+		('system.company.create', 'system', 'company', 'create', 'Create new companies in the system'),
+		('system.company.read', 'system', 'company', 'read', 'View any company"s details'),
+		('system.company.list', 'system', 'company', 'list', 'List all companies with filters and pagination'),
+		('system.company.update', 'system', 'company', 'update', 'Edit any company"s information'),
+		('system.company.delete', 'system', 'company', 'delete', 'Remove companies from the system permanently'),
+		('system.company.manage', 'system', 'company', 'manage', 'Full company administration'),
+		('system.company.export', 'system', 'company', 'export', 'Export company data to CSV or other formats'),
+		('system.company_employee.create', 'system', 'company_employee', 'create', 'Create new employees in the system'),
+		('system.company_employee.read', 'system', 'company_employee', 'read', 'View any employee"s details'),
+		('system.company_employee.list', 'system', 'company_employee', 'list', 'List all employees with filters and pagination'),
+		('system.company_employee.update', 'system', 'company_employee', 'update', 'Edit any employee"s information'),
+		('system.company_employee.delete', 'system', 'company_employee', 'delete', 'Remove employees from the system permanently'),
+		('system.company_employee.manage', 'system', 'company_employee', 'manage', 'Full employee administration'),
+		('system.company_employee.export', 'system', 'company_employee', 'export', 'Export employee data to CSV or other formats');
 
 DELETE FROM public.roles;
 INSERT INTO public.roles (role_name, description)
@@ -88,6 +102,10 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('SUPPORT_AGENT', 'system.task.manage'),
 		('SUPPORT_AGENT', 'system.contact.read'),
 		('SUPPORT_AGENT', 'system.contact.list'),
+		('SUPPORT_AGENT', 'system.company.read'),
+		('SUPPORT_AGENT', 'system.company.list'),
+		('SUPPORT_AGENT', 'system.company_employee.read'),
+		('SUPPORT_AGENT', 'system.company_employee.list'),
 		('ADMIN', 'self.user.read'),
 		('ADMIN', 'self.user.update'),
 		('ADMIN', 'system.role-permission.list'),
@@ -101,6 +119,16 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('ADMIN', 'system.contact.create'),
 		('ADMIN', 'system.contact.update'),
 		('ADMIN', 'system.contact.delete'),
+		('ADMIN', 'system.company.read'),
+		('ADMIN', 'system.company.list'),
+		('ADMIN', 'system.company.create'),
+		('ADMIN', 'system.company.update'),
+		('ADMIN', 'system.company.delete'),
+		('ADMIN', 'system.company_employee.read'),
+		('ADMIN', 'system.company_employee.list'),
+		('ADMIN', 'system.company_employee.create'),
+		('ADMIN', 'system.company_employee.update'),
+		('ADMIN', 'system.company_employee.delete'),
 		('SUPER_ADMIN', 'self.user.read'),
 		('SUPER_ADMIN', 'self.user.update'),
 		('SUPER_ADMIN', 'system.role-permission.list'),
@@ -108,7 +136,11 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('SUPER_ADMIN', 'system.user.manage'),
 		('SUPER_ADMIN', 'system.task.manage'),
 		('SUPER_ADMIN', 'system.contact.manage'),
-		('SUPER_ADMIN', 'system.contact.export')
+		('SUPER_ADMIN', 'system.contact.export'),
+		('SUPER_ADMIN', 'system.company.manage'),
+		('SUPER_ADMIN', 'system.company.export'),
+		('SUPER_ADMIN', 'system.company_employee.manage'),
+		('SUPER_ADMIN', 'system.company_employee.export')
  )
  INSERT INTO public.role_permissions (role_id, permission_id)
  SELECT r.id, p.id

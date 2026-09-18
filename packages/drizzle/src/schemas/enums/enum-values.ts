@@ -11,6 +11,8 @@ export const RESOURCE_TYPE = [
   "lead_mail",
   "task",
   "contact",
+  "company",
+  "company_employee",
 ] as const;
 export const ACTION_TYPE = [
   "create",

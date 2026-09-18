@@ -39,6 +39,14 @@ export const rolesAndPermissionData: Array<{
       // Contact permissions
       "system.contact.read",
       "system.contact.list",
+
+      // Company permissions
+      "system.company.read",
+      "system.company.list",
+
+      // Employee permissions
+      "system.company_employee.read",
+      "system.company_employee.list",
     ],
   },
   {
@@ -63,6 +71,20 @@ export const rolesAndPermissionData: Array<{
       "system.contact.create",
       "system.contact.update",
       "system.contact.delete",
+
+      // Company permissions
+      "system.company.read",
+      "system.company.list",
+      "system.company.create",
+      "system.company.update",
+      "system.company.delete",
+
+      // Employee permissions
+      "system.company_employee.read",
+      "system.company_employee.list",
+      "system.company_employee.create",
+      "system.company_employee.update",
+      "system.company_employee.delete",
     ],
   },
   {
@@ -80,6 +102,14 @@ export const rolesAndPermissionData: Array<{
       // Contact permissions
       "system.contact.manage",
       "system.contact.export",
+
+      // Company permissions
+      "system.company.manage",
+      "system.company.export",
+
+      // Employee permissions
+      "system.company_employee.manage",
+      "system.company_employee.export",
     ],
   },
 ];

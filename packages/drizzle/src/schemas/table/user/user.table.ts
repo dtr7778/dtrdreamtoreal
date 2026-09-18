@@ -18,6 +18,7 @@ import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
 import { ContactSubmissionReplyTable } from "../contact";
 import { EmailThreadTable } from "../email";
+import { CompanyTable, EmployeeTable } from "../employee";
 import { FileTable } from "../file.table";
 import { NotificationTable } from "../notification";
 import { UserRoleTable } from "../role-permission";
@@ -90,6 +91,8 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   contactReplies: many(ContactSubmissionReplyTable, {
     relationName: "ContactSubmissionReplyToUser",
   }),
+  createdCompanies: many(CompanyTable, { relationName: "CompanyToUser" }),
+  createdEmployee: many(EmployeeTable, { relationName: "EmployeeToUser" }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

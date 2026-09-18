@@ -408,6 +408,94 @@ const systemPermissions: CreatePermissionType[] = [
     action: "export",
     description: "Export contact data to CSV or other formats",
   },
+
+  // Company
+  {
+    level: "system",
+    resource: "company",
+    action: "create",
+    description: "Create new companies in the system",
+  },
+  {
+    level: "system",
+    resource: "company",
+    action: "read",
+    description: 'View any company"s details',
+  },
+  {
+    level: "system",
+    resource: "company",
+    action: "list",
+    description: "List all companies with filters and pagination",
+  },
+  {
+    level: "system",
+    resource: "company",
+    action: "update",
+    description: 'Edit any company"s information',
+  },
+  {
+    level: "system",
+    resource: "company",
+    action: "delete",
+    description: "Remove companies from the system permanently",
+  },
+  {
+    level: "system",
+    resource: "company",
+    action: "manage",
+    description: "Full company administration",
+  },
+  {
+    level: "system",
+    resource: "company",
+    action: "export",
+    description: "Export company data to CSV or other formats",
+  },
+
+  // Employee
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "create",
+    description: "Create new employees in the system",
+  },
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "read",
+    description: 'View any employee"s details',
+  },
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "list",
+    description: "List all employees with filters and pagination",
+  },
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "update",
+    description: 'Edit any employee"s information',
+  },
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "delete",
+    description: "Remove employees from the system permanently",
+  },
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "manage",
+    description: "Full employee administration",
+  },
+  {
+    level: "system",
+    resource: "company_employee",
+    action: "export",
+    description: "Export employee data to CSV or other formats",
+  },
 ];
 
 export const permissionsData: CreatePermissionType[] = [

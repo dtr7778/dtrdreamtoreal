@@ -1,4 +1,4 @@
-◇ injected env (6) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (6) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 CREATE TYPE "public"."AddressTypeEnum" AS ENUM('billing', 'shipping', 'office', 'home', 'work', 'other');
 CREATE TYPE "public"."ContactStatusEnum" AS ENUM('pending', 'processing', 'replied', 'closed', 'spam');
 CREATE TYPE "public"."EmailDirectionEnum" AS ENUM('outbound', 'inbound', 'web_form');
@@ -114,6 +114,7 @@ CREATE TABLE "companies" (
 	"email" varchar(255),
 	"phone" varchar(50),
 	"description" text,
+	"created_by" uuid NOT NULL,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
@@ -151,6 +152,7 @@ CREATE TABLE "employees" (
 	"job_title" varchar(256),
 	"department" varchar(100),
 	"website" varchar(500),
+	"created_by" uuid NOT NULL,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
@@ -379,6 +381,7 @@ ALTER TABLE "emails" ADD CONSTRAINT "email_emailThread_fkey" FOREIGN KEY ("threa
 ALTER TABLE "email_attachments" ADD CONSTRAINT "emailAttachment_emailId_fkey" FOREIGN KEY ("email_id") REFERENCES "public"."emails"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "email_recipients" ADD CONSTRAINT "emailRecipient_email_fkey" FOREIGN KEY ("email_id") REFERENCES "public"."emails"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "email_threads" ADD CONSTRAINT "emailThread_closedBy_fkey" FOREIGN KEY ("closed_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "companies" ADD CONSTRAINT "company_createdBy_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "company_addresses" ADD CONSTRAINT "companyAddress_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_addresses" ADD CONSTRAINT "companyAddress_addressId_fkey" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_email_threads" ADD CONSTRAINT "companyEmailThread_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
@@ -386,6 +389,7 @@ ALTER TABLE "company_email_threads" ADD CONSTRAINT "companyEmailThread_emailThre
 ALTER TABLE "company_socials" ADD CONSTRAINT "companySocial_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_socials" ADD CONSTRAINT "companySocial_socialMediaId_fkey" FOREIGN KEY ("social_media_id") REFERENCES "public"."social_media"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "employees" ADD CONSTRAINT "employee_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "employees" ADD CONSTRAINT "employee_createdBy_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "employee_addresses" ADD CONSTRAINT "employeeAddress_employeeId_fkey" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "employee_addresses" ADD CONSTRAINT "employeeAddress_addressId_fkey" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "employee_email_threads" ADD CONSTRAINT "employeeEmailThread_employeeId_fkey" FOREIGN KEY ("employee_id") REFERENCES "public"."employees"("id") ON DELETE cascade ON UPDATE no action;
@@ -434,6 +438,7 @@ CREATE INDEX "emailRecipient_type_idx" ON "email_recipients" USING btree ("type"
 CREATE INDEX "emailThread_closedBy_idx" ON "email_threads" USING btree ("closed_by");
 CREATE INDEX "emailThread_contactEmail_idx" ON "email_threads" USING btree ("contact_email");
 CREATE INDEX "emailThread_isClosed_idx" ON "email_threads" USING btree ("is_closed");
+CREATE INDEX "companies_createdBy_idx" ON "companies" USING btree ("created_by");
 CREATE INDEX "companies_name_idx" ON "companies" USING btree ("name");
 CREATE INDEX "companyAddress_companyId_idx" ON "company_addresses" USING btree ("company_id");
 CREATE INDEX "companyAddress_addressId_idx" ON "company_addresses" USING btree ("address_id");
@@ -442,6 +447,7 @@ CREATE INDEX "companyEmailThread_emailThreadId_idx" ON "company_email_threads" U
 CREATE INDEX "companySocial_companyId_idx" ON "company_socials" USING btree ("company_id");
 CREATE INDEX "companySocial_socialMediaId_idx" ON "company_socials" USING btree ("social_media_id");
 CREATE INDEX "employee_companyId_idx" ON "employees" USING btree ("company_id");
+CREATE INDEX "employee_createdBy_idx" ON "employees" USING btree ("created_by");
 CREATE INDEX "employeeAddress_employeeId_idx" ON "employee_addresses" USING btree ("employee_id");
 CREATE INDEX "employeeAddress_addressId_idx" ON "employee_addresses" USING btree ("address_id");
 CREATE INDEX "employeeEmailThread_employeeId_idx" ON "employee_email_threads" USING btree ("employee_id");
