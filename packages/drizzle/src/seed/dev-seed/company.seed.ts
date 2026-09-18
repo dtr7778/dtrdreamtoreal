@@ -30,9 +30,19 @@ export async function seedCompanies(
       const createdBy = faker.helpers.arrayElement(users);
       return {
         ...company,
+        industry: faker.commerce.department(),
+        description: faker.helpers.maybe(
+          () => faker.lorem.sentences({ min: 1, max: 3 }),
+          { probability: 0.5 }
+        ),
         name: faker.company.name(),
-        legalName: faker.company.name(),
-        phone: faker.phone.number({ style: "national" }),
+        legalName: faker.helpers.maybe(() => faker.company.name(), {
+          probability: 0.8,
+        }),
+        phone: faker.helpers.maybe(
+          () => faker.phone.number({ style: "national" }),
+          { probability: 0.7 }
+        ),
         createdBy: createdBy.id,
         employSize: faker.helpers.arrayElement([
           "1-10",

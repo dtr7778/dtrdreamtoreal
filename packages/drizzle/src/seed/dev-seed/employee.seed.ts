@@ -20,87 +20,6 @@ import {
 import { SocialMediaPlatfromTypeEnumSchema } from "../../schemas/enums/zod-db-enums";
 import { db } from "../seed-db-client";
 
-const DEPARTMENT_OPTIONS = [
-  "Engineering",
-  "Marketing",
-  "Sales",
-  "Human Resources",
-  "Finance",
-  "Operations",
-  "Product",
-  "Design",
-  "Customer Support",
-  "Legal",
-];
-
-const JOB_TITLES: Record<string, string[]> = {
-  Engineering: [
-    "Software Engineer",
-    "Senior Software Engineer",
-    "Tech Lead",
-    "Engineering Manager",
-    "DevOps Engineer",
-  ],
-  Marketing: [
-    "Marketing Manager",
-    "Content Strategist",
-    "SEO Specialist",
-    "Brand Manager",
-    "Growth Hacker",
-  ],
-  Sales: [
-    "Sales Representative",
-    "Account Executive",
-    "Sales Manager",
-    "Business Development Rep",
-    "Sales Director",
-  ],
-  "Human Resources": [
-    "HR Manager",
-    "Recruiter",
-    "HR Business Partner",
-    "Talent Acquisition Specialist",
-  ],
-  Finance: [
-    "Financial Analyst",
-    "Accountant",
-    "CFO",
-    "Controller",
-    "Financial Manager",
-  ],
-  Operations: [
-    "Operations Manager",
-    "Project Manager",
-    "Business Analyst",
-    "Process Improvement Specialist",
-  ],
-  Product: [
-    "Product Manager",
-    "Product Owner",
-    "Scrum Master",
-    "Business Analyst",
-  ],
-  Design: [
-    "UI Designer",
-    "UX Designer",
-    "Graphic Designer",
-    "Creative Director",
-    "Design Lead",
-  ],
-  "Customer Support": [
-    "Support Specialist",
-    "Support Manager",
-    "Customer Success Manager",
-    "Technical Support Engineer",
-  ],
-  Legal: [
-    "Legal Counsel",
-    "Paralegal",
-    "Compliance Officer",
-    "Contract Manager",
-  ],
-};
-
 export async function seedEmployees(
   companies: Array<CompanyDataModel>,
   users: Array<UserDataModel>
@@ -108,17 +27,11 @@ export async function seedEmployees(
   console.log("🌱 Seeding employees...");
 
   const employeesData: Array<InsertEmployee> = companies.flatMap((company) => {
-    const employeeCount = faker.number.int({ min: 1, max: 4 });
-
     return zocker(insertEmployeeSchema)
-      .generateMany(employeeCount)
+      .generateMany(faker.number.int({ min: 2, max: 50 }))
       .map((employee) => {
         const firstName = faker.person.firstName();
         const lastName = faker.person.lastName();
-        const department = faker.helpers.arrayElement(DEPARTMENT_OPTIONS);
-        const jobTitle = faker.helpers.arrayElement(
-          JOB_TITLES[department] ?? ["Employee"]
-        );
         const createdBy = faker.helpers.arrayElement(users);
 
         return {
@@ -134,8 +47,8 @@ export async function seedEmployees(
             () => faker.phone.number({ style: "national" }),
             { probability: 0.6 }
           ),
-          jobTitle,
-          department,
+          jobTitle: faker.person.jobTitle(),
+          department: faker.commerce.department(),
           website: faker.helpers.maybe(() => faker.internet.url(), {
             probability: 0.4,
           }),
