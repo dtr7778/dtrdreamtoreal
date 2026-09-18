@@ -53,7 +53,7 @@ function DataTableActionBar<TData>({
     visibleProp ?? table.getFilteredSelectedRowModel().rows.length > 0;
 
   return (
-    <Portal container={portalContainer}>
+    <Portal container={portalContainer} className="pointer-events-none">
       <AnimatePresence>
         {visible && (
           <motion.div
@@ -64,7 +64,7 @@ function DataTableActionBar<TData>({
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className={cn(
-              "fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit flex-wrap items-center justify-center gap-2 rounded-md border bg-background p-2 text-foreground shadow-sm",
+              "fixed inset-x-0 pointer-events-auto bottom-6 z-50 mx-auto flex w-fit flex-wrap items-center justify-center gap-2 rounded-md border bg-background p-2 text-foreground shadow-sm",
               className
             )}
             {...props}
