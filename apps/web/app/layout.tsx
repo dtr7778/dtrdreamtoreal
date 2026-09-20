@@ -13,6 +13,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { env } from "@/lib/env";
 
 import { DevPanel } from "@/components/dev-panel";
+import { ProgressBarProvider } from "@/components/providers/progress-bar-provider";
 import { TanstackQueryProvider } from "@/components/providers/tanstack-query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
@@ -108,29 +109,31 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <TooltipProvider>
-            <NuqsAdapter>
-              <TanstackQueryProvider>{children}</TanstackQueryProvider>
-            </NuqsAdapter>
-            <Toaster
-              position="top-center"
-              reverseOrder={true}
-              gutter={6}
-              toastOptions={{
-                duration: 3000,
-                removeDelay: 2000,
-                className: "__react-hot-toast",
-              }}
-            />
-            <DevPanel
-              currentEnv={env.NODE_ENV}
-              envVars={Object.entries(process.env)
-                .filter(
-                  ([k]) => k.startsWith("NEXT_PUBLIC_") || k === "NODE_ENV"
-                )
-                .map(([key, value]) => ({ key, value: value ?? "" }))}
-            />
-          </TooltipProvider>
+          <ProgressBarProvider>
+            <TooltipProvider>
+              <NuqsAdapter>
+                <TanstackQueryProvider>{children}</TanstackQueryProvider>
+              </NuqsAdapter>
+              <Toaster
+                position="top-center"
+                reverseOrder={true}
+                gutter={6}
+                toastOptions={{
+                  duration: 3000,
+                  removeDelay: 2000,
+                  className: "__react-hot-toast",
+                }}
+              />
+              <DevPanel
+                currentEnv={env.NODE_ENV}
+                envVars={Object.entries(process.env)
+                  .filter(
+                    ([k]) => k.startsWith("NEXT_PUBLIC_") || k === "NODE_ENV"
+                  )
+                  .map(([key, value]) => ({ key, value: value ?? "" }))}
+              />
+            </TooltipProvider>
+          </ProgressBarProvider>
         </ThemeProvider>
       </body>
     </html>
