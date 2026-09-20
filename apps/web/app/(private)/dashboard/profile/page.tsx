@@ -109,6 +109,7 @@ export default async function ProfilePage() {
                     render={
                       <Button
                         size="icon"
+                        nativeButton={false}
                         render={<Link href="/dashboard/settings/profile" />}
                       />
                     }
