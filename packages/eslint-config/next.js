@@ -1,3 +1,4 @@
+import { fixupPluginRules } from "@eslint/compat"
 import js from "@eslint/js"
 import pluginNext from "@next/eslint-plugin-next"
 import eslintConfigPrettier from "eslint-config-prettier"
@@ -20,6 +21,9 @@ export const nextJsConfig = [
   ...tseslint.configs.recommended,
   {
     ...pluginReact.configs.flat.recommended,
+    plugins: {
+      react: fixupPluginRules(pluginReact),
+    },
     languageOptions: {
       ...pluginReact.configs.flat.recommended.languageOptions,
       globals: {

@@ -80,6 +80,11 @@
       "sharp",
       "unrs-resolver",
       "lightningcss"
-    ]
+    ],
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "eslint-plugin-react>eslint": "10"
+      }
+    }
   }
 }
