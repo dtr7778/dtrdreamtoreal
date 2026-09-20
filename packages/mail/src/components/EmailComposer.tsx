@@ -4,7 +4,6 @@ import { forwardRef, useCallback, useRef, useState } from "react";
 
 import { EmailEditor, type EmailEditorRef } from "@react-email/editor";
 import { extendTheme } from "@react-email/editor/plugins";
-// @ts-expect-error Missing declaration for the imported CSS asset.
 import "@react-email/editor/themes/default.css";
 import { type Content } from "@tiptap/react";
 import { ImagePlus, Link2, Upload } from "lucide-react";
