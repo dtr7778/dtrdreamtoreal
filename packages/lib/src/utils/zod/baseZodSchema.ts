@@ -59,3 +59,7 @@ export const RangeSearchEnumSchema = z.enum([
   "CUSTOM_MONTH",
 ]);
 export type RangeSearchEnum = z.infer<typeof RangeSearchEnumSchema>;
+
+export const emptyStrSchema = z
+  .string()
+  .transform((val) => (val === "" ? undefined : val));
