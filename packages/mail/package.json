@@ -15,7 +15,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./error": "./src/MailError.ts"
+    "./error": "./src/MailError.ts",
+    "./components/*": "./src/components/*.tsx"
   },
   "scripts": {
     "dev": "email dev --dir='./src/mail-templates/' --port=8088",
@@ -35,9 +36,13 @@
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@react-email/editor": "^1.7.8",
+    "@tiptap/react": "catalog:",
     "@workspace/drizzle": "workspace:*",
     "@workspace/lib": "workspace:*",
+    "@workspace/ui": "workspace:*",
     "drizzle-orm": "catalog:",
+    "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-email": "^6.9.2",
