@@ -1,12 +1,15 @@
 import { ContactIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
+  Building2,
   ClipboardList,
   House,
+  ListTree,
   MessagesSquare,
   Settings,
   ShieldUser,
   User,
+  UserSquare,
   UsersRound,
 } from "lucide-react";
 
@@ -21,6 +24,37 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         icon: <House />,
         path: "/dashboard",
         pathRegex: /^\/dashboard$/,
+      },
+      {
+        title: "Companies",
+        icon: <Building2 />,
+        permissions: [
+          "system.company.manage",
+          "system.company.list",
+          "system.company_employee.manage",
+          "system.company_employee.list",
+        ],
+        path: "/dashboard/companies",
+        pathRegex: /^\/dashboard\/companies(\/.*)?$/,
+        items: [
+          {
+            title: "All campanies",
+            icon: <ListTree />,
+            path: "/dashboard/companies/",
+            permissions: ["system.company.manage", "system.company.list"],
+            pathRegex: /^\/dashboard\/companies(\/.*)?$/,
+          },
+          {
+            title: "All employees",
+            icon: <UserSquare />,
+            path: "/dashboard/employees/",
+            permissions: [
+              "system.company_employee.manage",
+              "system.company_employee.list",
+            ],
+            pathRegex: /^\/dashboard\/employees(\/.*)?$/,
+          },
+        ],
       },
       {
         title: "Tasks",
