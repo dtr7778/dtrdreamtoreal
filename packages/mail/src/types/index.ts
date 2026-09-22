@@ -57,6 +57,16 @@ export type MailCallbackPayload = SendMailOption & {
   deduplicationId?: string;
 };
 
+/**
+ * A single entry passed to `sendMailBatch`.
+ */
+export interface SendMailBatchItem {
+  /** The mail to send. */
+  options: SendMailOption;
+  /** Whether this is a system mail (skips thread creation). Defaults to true. */
+  isSystemMail?: boolean;
+}
+
 export type InboundEmailAttachment = InboundAttachment;
 
 export type InboundEmailPayload = GetReceivingEmailResponseSuccess;

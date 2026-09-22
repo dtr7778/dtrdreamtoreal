@@ -4,6 +4,8 @@ import { CreateEmailOptions } from "resend";
 import { EmailTable } from "@workspace/drizzle/schemas";
 import {
   IQstashService,
+  type QstashPublishOptions,
+  type QstashPublishResult,
   QstashService,
   QstashServiceConfig,
 } from "@workspace/lib/qstash";
@@ -16,11 +18,32 @@ import type {
   MailCallbackPayload,
   QstashMailConfig,
   QstashMailResult,
+  SendMailBatchItem,
   SendMailOption,
 } from "../types";
 import type { IMailTransport } from "../types";
 import { EmailService } from "./Email.service";
 import { ThreadService } from "./Thread.service";
+
+/** Route key used to register and publish mail messages. */
+const MAIL_ROUTE_KEY = "mail";
+
+/** Default deduplication window (seconds) applied to sent mails. */
+const DEFAULT_DEDUP_WINDOW_SECONDS = 300;
+
+/** Everything needed to publish and finalize a single prepared mail. */
+interface PreparedMail {
+  /** Id of the persisted outbound email record. */
+  emailId: string;
+  /** Thread the mail belongs to, when not a system mail. */
+  threadId?: string;
+  /** Redis key used to suppress duplicates. */
+  dedupKey: string;
+  /** RFC 5322 message id derived from the email record. */
+  generatedMessageId: string;
+  /** Original send options. */
+  options: SendMailOption;
+}
 
 export interface IQstashMailService extends IQstashService {
   processMailCallback(
@@ -36,11 +59,20 @@ export interface IQstashMailService extends IQstashService {
     options: SendMailOption,
     isSystemMail?: boolean
   ): Promise<QstashMailResult>;
+  sendMailBatch(items: SendMailBatchItem[]): Promise<QstashMailResult[]>;
   handleMailReceipt(qMessageId: string): Promise<void>;
   handleMailFailure(qMessageId: string): Promise<void>;
   handleRetryMail(qMessageId: string): Promise<QstashMailResult>;
 }
 
+/**
+ * QStash-backed mail service.
+ *
+ * Mails are not sent inline: each `sendMail` / `sendMailBatch` call persists an
+ * outbound record and publishes a QStash message whose callback
+ * ({@link processMailCallback}) performs the actual transport send. Delivery
+ * and failure callbacks keep the email record in sync.
+ */
 export abstract class QstashMailService
   extends QstashService
   implements IQstashMailService
@@ -63,21 +95,29 @@ export abstract class QstashMailService
     this.emailService = new EmailService(qstashMailConfig.database);
 
     this.registerCallbackHandler<MailCallbackPayload>(
-      "mail",
+      MAIL_ROUTE_KEY,
       this.processMailCallback.bind(this)
     );
-    this.registerReceiptHandler("mail", this.handleMailReceipt.bind(this));
+    this.registerReceiptHandler(
+      MAIL_ROUTE_KEY,
+      this.handleMailReceipt.bind(this)
+    );
   }
 
+  // ─── Configuration & small helpers ────────────────────────────────────────
+
+  /** Apply mail-specific defaults. */
   private normalizeQstashMailConfig(
     config: QstashMailConfig
   ): QstashMailConfig & { dedupWindowSeconds: number } {
     return {
       ...config,
-      dedupWindowSeconds: config.dedupWindowSeconds ?? 300,
+      dedupWindowSeconds:
+        config.dedupWindowSeconds ?? DEFAULT_DEDUP_WINDOW_SECONDS,
     };
   }
 
+  /** Merge thread/reply headers into the outbound header map. */
   protected buildHeaders(
     prevHeaders?: Record<string, string> | undefined,
     inReplyTo?: string | null | undefined,
@@ -98,10 +138,12 @@ export abstract class QstashMailService
     return headers;
   }
 
+  /** Derive the RFC 5322 message id for an email record. */
   protected generateMessageId(emailId: string): string {
     return `${emailId}@${this.qstashMailConfig.domainName}`;
   }
 
+  /** Build the dedup key from the recipient set and subject. */
   private generateMailDedupKey(options: SendMailOption): string {
     const to = this.emailService
       .normalizeRecipients(options.to)
@@ -111,7 +153,8 @@ export abstract class QstashMailService
     return this.generateDedupKey(`mail:${to}|${options.subject}`, "mail");
   }
 
-  private async checkRateLimit(recipient: string) {
+  /** Enforce both the per-minute and per-hour recipient rate limits. */
+  private async checkRateLimit(recipient: string): Promise<void> {
     const [minute, hour] = await Promise.all([
       this.qstashMailConfig.minRatelimit.limit(recipient),
       this.qstashMailConfig.hourRatelimit.limit(recipient),
@@ -129,7 +172,8 @@ export abstract class QstashMailService
     }
   }
 
-  private async checkDuplicate(key: string) {
+  /** Reject a mail when its dedup key is still within the dedup window. */
+  private async checkDuplicate(key: string): Promise<void> {
     const exists = await this.qstashMailConfig.redisClient.get(key);
 
     if (exists) {
@@ -141,116 +185,234 @@ export abstract class QstashMailService
     }
   }
 
+  /** Record the dedup key with the configured TTL. */
   private async markProcessed(key: string, value: string): Promise<void> {
     await this.qstashMailConfig.redisClient.set(key, value, {
       ex: this.qstashMailConfig.dedupWindowSeconds,
     });
   }
 
+  /** Strip the surrounding angle brackets from a message id. */
   private cleanMessageId(messageId: string): string {
     return messageId.replace(/^<|>$/g, "");
   }
 
+  // ─── Sending ──────────────────────────────────────────────────────────────
+
+  /**
+   * Persist and publish a single mail.
+   *
+   * @throws {MailError|QstashError} for validation, rate-limit, dedup and
+   * publish failures; other failures are returned as a failed result.
+   */
   public async sendMail(
     options: SendMailOption,
     isSystemMail: boolean = true
   ): Promise<QstashMailResult> {
     try {
-      if (!options.html && !options.text) {
-        throw new MailError(
-          "Either 'html' or 'text' must be provided",
-          "MAIL_INVALID_PAYLOAD",
-          400
-        );
-      }
-
-      const primaryRecipient = this.emailService.extractPrimaryRecipient(
-        options.to
+      const mail = await this.prepareMail(options, isSystemMail);
+      const result = await this.publish<MailCallbackPayload>(
+        this.buildPublishOptions(mail)
       );
-      await this.checkRateLimit(primaryRecipient.email);
+      await this.finalizeMail(mail, result);
 
-      const dedupKey = this.generateMailDedupKey(options);
-      await this.checkDuplicate(dedupKey);
-
-      const { emailId, threadId, qMessageId, deduplicationId } =
-        await this.qstashMailConfig.database.transaction(async (tx) => {
-          let threadId: string | undefined = undefined;
-
-          if (!isSystemMail) {
-            const threadData = await this.threadService.findOrCreateThread(
-              {
-                threadId: options?.threadId,
-                subject: `Te: ${options.subject}`,
-                contactEmail: primaryRecipient.email,
-                contactName: primaryRecipient?.name,
-              },
-              tx
-            );
-
-            threadId = threadData;
-          }
-
-          const { emailId } = await this.emailService.createOutboundEmailRecord(
-            {
-              options,
-              threadId,
-            },
-            tx
-          );
-
-          const generatedMessageId = this.generateMessageId(emailId);
-          const references = options.inReplyTo
-            ? [...(options.references ?? []), options.inReplyTo]
-            : options.references;
-
-          const { messageId: qMessageId, deduplicationId } =
-            await this.publish<MailCallbackPayload>({
-              body: {
-                ...options,
-                headers: this.buildHeaders(
-                  {
-                    ...options.headers,
-                    "Message-ID": `<${generatedMessageId}>`,
-                  },
-                  options.inReplyTo,
-                  references
-                ),
-                emailId,
-                threadId,
-              },
-              url: this.qstashMailConfig.callbackUrl,
-              callback: this.qstashMailConfig.receiptCallbackUrl,
-              failureCallback: this.qstashMailConfig.failureCallbackUrl,
-              routeKey: "mail",
-            });
-
-          await tx
-            .update(EmailTable)
-            .set({
-              qMessageId,
-              resendMessageId: generatedMessageId,
-            })
-            .where(eq(EmailTable.id, emailId));
-
-          await Promise.all([
-            this.markProcessed(dedupKey, qMessageId),
-            this.updateMessage(qMessageId, { deduplicationId }),
-          ]);
-
-          return { emailId, threadId, qMessageId, deduplicationId };
-        });
-
-      return { success: true, qMessageId, deduplicationId, emailId, threadId };
+      return this.toSuccessResult(mail, result);
     } catch (err) {
       if (err instanceof MailError || err instanceof QstashError) throw err;
 
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
+      return this.toErrorResult(err);
     }
   }
 
+  /**
+   * Persist and publish several mails in a single QStash batch request.
+   *
+   * Each item is validated, rate-limited, deduplicated and persisted before a
+   * single {@link QstashService.publishBatch} call is made. Items that fail
+   * during preparation are reported individually; the remaining items are
+   * still batched.
+   *
+   * @returns one {@link QstashMailResult} per input item, in the same order.
+   */
+  public async sendMailBatch(
+    items: SendMailBatchItem[]
+  ): Promise<QstashMailResult[]> {
+    if (items.length === 0) return [];
+
+    const results: QstashMailResult[] = new Array(items.length);
+    const prepared: Array<{ index: number; mail: PreparedMail }> = [];
+
+    await Promise.all(
+      items.map(async (item, index) => {
+        try {
+          const mail = await this.prepareMail(
+            item.options,
+            item.isSystemMail ?? true
+          );
+          prepared.push({ index, mail });
+        } catch (err) {
+          results[index] = this.toErrorResult(err);
+        }
+      })
+    );
+
+    if (prepared.length === 0) return results;
+
+    try {
+      const published = await this.publishBatch<MailCallbackPayload>(
+        prepared.map(({ mail }) => this.buildPublishOptions(mail))
+      );
+
+      await Promise.all(
+        prepared.map(async ({ index, mail }, i) => {
+          const result = published[i];
+          if (!result) {
+            results[index] = {
+              success: false,
+              error: "Missing publish result",
+            };
+            return;
+          }
+
+          await this.finalizeMail(mail, result);
+          results[index] = this.toSuccessResult(mail, result);
+        })
+      );
+    } catch (err) {
+      const error =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      for (const { index } of prepared) {
+        results[index] = { success: false, error };
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Validate a mail, enforce rate limits/dedup and persist its outbound record.
+   * Shared by {@link sendMail} and {@link sendMailBatch}.
+   */
+  private async prepareMail(
+    options: SendMailOption,
+    isSystemMail: boolean
+  ): Promise<PreparedMail> {
+    if (!options.html && !options.text) {
+      throw new MailError(
+        "Either 'html' or 'text' must be provided",
+        "MAIL_INVALID_PAYLOAD",
+        400
+      );
+    }
+
+    const primaryRecipient = this.emailService.extractPrimaryRecipient(
+      options.to
+    );
+    await this.checkRateLimit(primaryRecipient.email);
+
+    const dedupKey = this.generateMailDedupKey(options);
+    await this.checkDuplicate(dedupKey);
+
+    let threadId: string | undefined = undefined;
+    if (!isSystemMail) {
+      threadId = await this.threadService.findOrCreateThread({
+        threadId: options.threadId,
+        subject: `Te: ${options.subject}`,
+        contactEmail: primaryRecipient.email,
+        contactName: primaryRecipient.name,
+      });
+    }
+
+    const { emailId } = await this.emailService.createOutboundEmailRecord({
+      options,
+      threadId,
+    });
+
+    return {
+      emailId,
+      threadId,
+      dedupKey,
+      generatedMessageId: this.generateMessageId(emailId),
+      options,
+    };
+  }
+
+  /** Build the QStash publish payload (and callbacks) for a prepared mail. */
+  private buildPublishOptions(
+    mail: PreparedMail
+  ): QstashPublishOptions<MailCallbackPayload> {
+    const { options, generatedMessageId, emailId, threadId } = mail;
+    const references = options.inReplyTo
+      ? [...(options.references ?? []), options.inReplyTo]
+      : options.references;
+
+    return {
+      body: {
+        ...options,
+        headers: this.buildHeaders(
+          {
+            ...options.headers,
+            "Message-ID": `<${generatedMessageId}>`,
+          },
+          options.inReplyTo,
+          references
+        ),
+        emailId,
+        threadId,
+      },
+      url: this.qstashMailConfig.callbackUrl,
+      callback: this.qstashMailConfig.receiptCallbackUrl,
+      failureCallback: this.qstashMailConfig.failureCallbackUrl,
+      routeKey: MAIL_ROUTE_KEY,
+    };
+  }
+
+  /** Link the published QStash message back to the email record. */
+  private async finalizeMail(
+    mail: PreparedMail,
+    result: QstashPublishResult
+  ): Promise<void> {
+    await this.qstashMailConfig.database
+      .update(EmailTable)
+      .set({
+        qMessageId: result.messageId,
+        resendMessageId: mail.generatedMessageId,
+      })
+      .where(eq(EmailTable.id, mail.emailId));
+
+    await Promise.all([
+      this.markProcessed(mail.dedupKey, result.messageId),
+      this.updateMessage(result.messageId, {
+        deduplicationId: result.deduplicationId,
+      }),
+    ]);
+  }
+
+  /** Shape a successful publish into the public mail result. */
+  private toSuccessResult(
+    mail: PreparedMail,
+    result: QstashPublishResult
+  ): QstashMailResult {
+    return {
+      success: true,
+      qMessageId: result.messageId,
+      deduplicationId: result.deduplicationId,
+      emailId: mail.emailId,
+      threadId: mail.threadId,
+    };
+  }
+
+  /** Shape a thrown value into a failed mail result. */
+  private toErrorResult(err: unknown): QstashMailResult {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error occurred",
+    };
+  }
+
+  // ─── Delivery processing ──────────────────────────────────────────────────
+
+  /** QStash callback that performs the actual transport send. */
   public async processMailCallback(
     payload: MailCallbackPayload,
     context: { messageId: string }
@@ -289,12 +451,15 @@ export abstract class QstashMailService
     }
   }
 
+  /** Handle a delivery receipt for a mail message. */
   public async handleMailReceipt(qMessageId: string): Promise<void> {
-    await this.handleDeliveryReceipt(qMessageId, "mail");
+    await this.handleDeliveryReceipt(qMessageId, MAIL_ROUTE_KEY);
   }
 
+  /** Mark a mail as failed after its failure callback fires. */
   public async handleMailFailure(qMessageId: string): Promise<void> {
     await this.handleFailed(qMessageId);
+
     const [emailData] = await this.qstashMailConfig.database
       .select({ id: EmailTable.id })
       .from(EmailTable)
@@ -311,9 +476,12 @@ export abstract class QstashMailService
     }
   }
 
+  /** Re-publish a failed mail from its stored QStash message. */
   public async handleRetryMail(qMessageId: string): Promise<QstashMailResult> {
     try {
-      const result = await this.retryMessage(qMessageId, { routeKey: "mail" });
+      const result = await this.retryMessage(qMessageId, {
+        routeKey: MAIL_ROUTE_KEY,
+      });
       return {
         success: true,
         qMessageId: result.messageId,
@@ -330,7 +498,13 @@ export abstract class QstashMailService
     }
   }
 
-  public async processMailSent(resendId: string, resendMessageId: string) {
+  // ─── Status updates ───────────────────────────────────────────────────────
+
+  /** Mark the email record as sent using the transport's message id. */
+  public async processMailSent(
+    resendId: string,
+    resendMessageId: string
+  ): Promise<void> {
     await this.emailService.updateEmailByResendId(
       resendId,
       {
@@ -341,7 +515,8 @@ export abstract class QstashMailService
     );
   }
 
-  public async processMailDelivered(resendId: string) {
+  /** Mark the email record as delivered. */
+  public async processMailDelivered(resendId: string): Promise<void> {
     await this.emailService.updateEmailByResendId(
       resendId,
       {
@@ -351,45 +526,14 @@ export abstract class QstashMailService
     );
   }
 
+  // ─── Inbound mail ─────────────────────────────────────────────────────────
+
+  /** Persist an inbound email and attach it to an existing thread when known. */
   public async processInboundEmail(
     payload: InboundEmailPayload
   ): Promise<InboundEmailResult> {
     try {
-      let threadId: string | undefined = undefined;
-
-      const inReplyTo = payload.headers?.["in-reply-to"];
-
-      if (inReplyTo) {
-        const [originalEmail] = await this.qstashMailConfig.database
-          .select({ threadId: EmailTable.threadId })
-          .from(EmailTable)
-          .where(eq(EmailTable.resendMessageId, this.cleanMessageId(inReplyTo)))
-          .limit(1);
-
-        if (originalEmail?.threadId) {
-          threadId = originalEmail.threadId;
-        }
-      }
-
-      if (!threadId && payload.headers?.references) {
-        const referenceIds = payload.headers.references
-          .split(/\s+/)
-          .map(this.cleanMessageId)
-          .filter(Boolean);
-
-        for (const refId of referenceIds) {
-          const [email] = await this.qstashMailConfig.database
-            .select({ threadId: EmailTable.threadId })
-            .from(EmailTable)
-            .where(eq(EmailTable.resendMessageId, refId))
-            .limit(1);
-
-          if (email?.threadId) {
-            threadId = email.threadId;
-            break;
-          }
-        }
-      }
+      const threadId = await this.resolveInboundThreadId(payload);
 
       const { emailId } = await this.emailService.createInboundEmailRecord(
         {
@@ -406,10 +550,47 @@ export abstract class QstashMailService
         threadId,
       };
     } catch (err) {
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
+      return this.toErrorResult(err);
     }
+  }
+
+  /**
+   * Resolve the thread an inbound mail belongs to by matching its
+   * `In-Reply-To` header, then any `References` header, against previously
+   * stored `resendMessageId`s.
+   */
+  private async resolveInboundThreadId(
+    payload: InboundEmailPayload
+  ): Promise<string | undefined> {
+    const inReplyTo = payload.headers?.["in-reply-to"];
+
+    if (inReplyTo) {
+      const [originalEmail] = await this.qstashMailConfig.database
+        .select({ threadId: EmailTable.threadId })
+        .from(EmailTable)
+        .where(eq(EmailTable.resendMessageId, this.cleanMessageId(inReplyTo)))
+        .limit(1);
+
+      if (originalEmail?.threadId) return originalEmail.threadId;
+    }
+
+    if (!payload.headers?.references) return undefined;
+
+    const referenceIds = payload.headers.references
+      .split(/\s+/)
+      .map(this.cleanMessageId)
+      .filter(Boolean);
+
+    for (const refId of referenceIds) {
+      const [email] = await this.qstashMailConfig.database
+        .select({ threadId: EmailTable.threadId })
+        .from(EmailTable)
+        .where(eq(EmailTable.resendMessageId, refId))
+        .limit(1);
+
+      if (email?.threadId) return email.threadId;
+    }
+
+    return undefined;
   }
 }

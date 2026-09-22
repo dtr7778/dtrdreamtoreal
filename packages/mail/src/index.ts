@@ -4,4 +4,5 @@ export type {
   InboundEmailPayload,
   InboundEmailResult,
   MailCallbackPayload,
+  SendMailBatchItem,
 } from "./types";
