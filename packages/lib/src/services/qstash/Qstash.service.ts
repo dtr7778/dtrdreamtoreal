@@ -1,130 +1,67 @@
-import { createHash, randomUUID } from "node:crypto";
+import { Client, type PublishBatchRequest, Receiver } from "@upstash/qstash";
 
-import { Client, Receiver } from "@upstash/qstash";
-
+import { formatError } from "../../utils";
+import { QSTASH_DEFAULTS } from "./constants";
+import { HandlerRegistry } from "./HandlerRegistry";
+import {
+  buildDedupKey,
+  type NormalizedPublishOptions,
+  normalizePublishOptions,
+  requireLog,
+  retryDelayExpression,
+  toLogEntry,
+  toMessageView,
+} from "./helpers";
 import { QstashError } from "./QstashError";
 import { QstashDeadLetterRepository } from "./repositories/QstashDeadLetter.repository";
-import {
-  ContentType,
+import { QstashMessageLogRepository } from "./repositories/QstashMessageLog.repository";
+import type {
+  QstashCallbackHandler,
+  QstashDeadLetter,
+  QstashMessage,
   QstashMessageLog,
-  QstashMessageLogRepository,
-} from "./repositories/QstashMessageLog.repository";
-import { QstashServiceConfig } from "./types";
+  QstashPublishOptions,
+  QstashPublishResult,
+  QstashReceiptHandler,
+  QstashServiceConfig,
+} from "./types";
 
-export interface QstashPublishOptions<T = unknown> {
-  url: string;
-  body: T;
-  deduplicationId?: string;
-  retries?: number;
-  callback: string | null;
-  failureCallback: string | null;
-  contentType?: ContentType;
-  headers?: Record<string, string>;
-  routeKey?: string;
-}
+/** Configuration after defaults have been applied. */
+type ResolvedConfig = QstashServiceConfig & {
+  defaultRetries: number;
+  defaultRetryDelay: number;
+};
 
-export type QstashCallbackHandler<T = unknown> = (
-  payload: T,
-  context: { messageId: string }
-) => Promise<unknown>;
-
-export type QstashReceiptHandler = (messageId: string) => Promise<void>;
-
-export interface QstashPublishResult {
-  messageId: string;
-  deduplicationId: string;
-}
-
-export type QstashMessage = Pick<
-  QstashMessageLog,
-  | "messageId"
-  | "state"
-  | "deliveredAt"
-  | "isDeadLetter"
-  | "createdAt"
-  | "scheduledAt"
->;
-
-export type QstashDeadLetter = Pick<
-  QstashMessageLog,
-  "messageId" | "retried" | "createdAt"
->;
-
+/** Public surface shared by every QStash service implementation. */
 export interface IQstashService {
+  /** Verify the signature of an inbound QStash request. */
   verifySignature(
     body: string,
     signature: string,
     url?: string
   ): Promise<boolean>;
+  /** Access the low-level QStash client. */
   getClient(): Client;
+  /** Access the signature receiver. */
   getReceiver(): Receiver;
 }
 
-const DEFAULTS = {
-  retries: 3,
-  retryDelayMs: 1000,
-  dlqListLimit: 50,
-} as const;
-
-class HandlerRegistry {
-  private readonly callbacks = new Map<string, QstashCallbackHandler>();
-  private readonly receipts = new Map<string, QstashReceiptHandler>();
-
-  setCallback(routeKey: string, handler: QstashCallbackHandler): void {
-    this.callbacks.set(routeKey, handler);
-  }
-
-  setReceipt(routeKey: string, handler: QstashReceiptHandler): void {
-    this.receipts.set(routeKey, handler);
-  }
-
-  getCallback(routeKey: string): QstashCallbackHandler | undefined {
-    return this.callbacks.get(routeKey);
-  }
-
-  getReceipt(routeKey: string): QstashReceiptHandler | undefined {
-    return this.receipts.get(routeKey);
-  }
-}
-
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : "Unknown error";
-}
-
-function requireLog(
-  log: QstashMessageLog | null,
-  messageId: string
-): QstashMessageLog {
-  if (!log) {
-    throw new QstashError(
-      `Message log not found: ${messageId}`,
-      "QSTASH_LOG_NOT_FOUND",
-      404,
-      { messageId }
-    );
-  }
-  return log;
-}
-
-function toMessageView(log: QstashMessageLog): QstashMessage {
-  return {
-    messageId: log.messageId,
-    state: log.state,
-    deliveredAt: log.deliveredAt,
-    isDeadLetter: log.isDeadLetter,
-    createdAt: log.createdAt,
-    scheduledAt: log.scheduledAt,
-  };
-}
-
-// ─── QstashService ──────────────────────────────────────────────────────────
-
+/**
+ * High-level wrapper around Upstash QStash.
+ *
+ * Responsibilities:
+ * - publish (single / batch) and scheduled publishing through queues/topics;
+ * - persist a message log for every publish and expose read/list helpers;
+ * - verify inbound request signatures;
+ * - route deliveries/receipts to handlers registered by subclasses;
+ * - track and retry dead-lettered messages.
+ *
+ * The service is designed to be subclassed: the operational methods are
+ * `protected` so concrete services (mail, audit, …) can expose the subset they
+ * need.
+ */
 export class QstashService implements IQstashService {
-  private readonly config: QstashServiceConfig & {
-    defaultRetries: number;
-    defaultRetryDelay: number;
-  };
-
+  private readonly config: ResolvedConfig;
   private readonly client: Client;
   private readonly receiver: Receiver;
   private readonly logs: QstashMessageLogRepository;
@@ -140,16 +77,19 @@ export class QstashService implements IQstashService {
     this.handlers = new HandlerRegistry();
   }
 
-  private normalizeConfig(config: QstashServiceConfig): QstashServiceConfig & {
-    defaultRetries: number;
-    defaultRetryDelay: number;
-  } {
+  // ─── Setup ────────────────────────────────────────────────────────────────
+
+  /** Merge caller configuration with service defaults. */
+  private normalizeConfig(config: QstashServiceConfig): ResolvedConfig {
     return {
       ...config,
-      defaultRetries: config.defaultRetries ?? DEFAULTS.retries,
-      defaultRetryDelay: config.defaultRetryDelay ?? DEFAULTS.retryDelayMs,
+      defaultRetries: config.defaultRetries ?? QSTASH_DEFAULTS.retries,
+      defaultRetryDelay:
+        config.defaultRetryDelay ?? QSTASH_DEFAULTS.retryDelayMs,
     };
   }
+
+  /** Build the low-level QStash client, wrapping init failures. */
   private createClient(): Client {
     try {
       return new Client({
@@ -163,12 +103,14 @@ export class QstashService implements IQstashService {
       });
     } catch (err) {
       throw new QstashError(
-        `Failed to initialize QStash client: ${errorMessage(err)}`,
+        `Failed to initialize QStash client: ${formatError(err)}`,
         "QSTASH_CLIENT_INIT_FAILED",
         500
       );
     }
   }
+
+  /** Build the signature receiver, wrapping init failures. */
   private createReceiver(): Receiver {
     try {
       return new Receiver({
@@ -177,103 +119,158 @@ export class QstashService implements IQstashService {
       });
     } catch (err) {
       throw new QstashError(
-        `Failed to initialize QStash receiver: ${errorMessage(err)}`,
+        `Failed to initialize QStash receiver: ${formatError(err)}`,
         "QSTASH_RECEIVER_INIT_FAILED",
         500
       );
     }
   }
 
+  // ─── Publishing ─────────────────────────────────────────────────────────────
+
+  /**
+   * Publish a single message and persist its log.
+   *
+   * The transport is chosen by {@link dispatchToQstash} (explicit queue →
+   * topic → default queue → direct).
+   */
   protected async publish<T = unknown>(
     options: QstashPublishOptions<T>
   ): Promise<QstashPublishResult> {
-    const {
-      url,
-      body,
-      deduplicationId: providedDedupId,
-      retries,
-      callback,
-      failureCallback,
-      contentType = "json",
-      headers = {},
-    } = options;
-
-    const deduplicationId =
-      providedDedupId ?? `dedup_${Date.now()}_${randomUUID().slice(0, 8)}`;
-    const maxRetries = retries ?? this.config.defaultRetries;
+    const normalized = normalizePublishOptions(
+      options,
+      this.config.defaultRetries
+    );
 
     try {
-      const messageId = await this.dispatchToQstash({
-        url,
-        body: contentType === "text" ? String(body) : body,
-        deduplicationId,
-        retries: maxRetries,
-        callback: callback ?? undefined,
-        failureCallback: failureCallback ?? undefined,
-        headers: Object.keys(headers).length > 0 ? headers : undefined,
-      });
+      const messageId = await this.dispatchToQstash(normalized);
 
-      await this.logs.store(
-        {
-          messageId,
-          deduplicationId,
-          state: "pending",
-          retried: 0,
-          maxRetries,
-          url,
-          callback,
-          failureCallback,
-          contentType,
-          deliveredAt: null,
-          isDeadLetter: false,
-          createdAt: Date.now(),
-          scheduledAt: Date.now(),
-        },
-        body
-      );
+      await this.logs.store(toLogEntry(normalized, messageId), normalized.body);
 
-      return { messageId, deduplicationId };
+      return { messageId, deduplicationId: normalized.deduplicationId };
     } catch (err) {
       throw err instanceof QstashError
         ? err
         : new QstashError(
-            `Failed to publish to QStash: ${errorMessage(err)}`,
+            `Failed to publish to QStash: ${formatError(err)}`,
             "QSTASH_PUBLISH_FAILED",
             500,
-            { url, deduplicationId }
+            { url: normalized.url, deduplicationId: normalized.deduplicationId }
           );
     }
   }
 
   /**
-   * Dispatches a message to QStash using the configured transport:
-   *   1. Topic (if defaultTopic is set) — publishJSON with topic
-   *   2. Queue (if defaultQueue is set) — enqueueJSON
-   *   3. Direct — publishJSON without topic
+   * Publish multiple messages in a single QStash batch request and persist a
+   * log for each.
+   *
+   * Note: QStash batch publishing targets URLs/queues and does not support
+   * topics. The configured `defaultQueue` is applied to every message unless a
+   * per-message `queueName` is provided.
    */
-  private async dispatchToQstash(params: {
-    url: string;
-    body: unknown;
-    deduplicationId: string;
-    retries: number;
-    callback?: string;
-    failureCallback?: string;
-    headers?: Record<string, string>;
-  }): Promise<string> {
-    const retryDelay = `pow(2, retried) * ${this.config.defaultRetryDelay}`;
+  protected async publishBatch<T = unknown>(
+    options: QstashPublishOptions<T>[]
+  ): Promise<QstashPublishResult[]> {
+    if (options.length === 0) return [];
 
-    const base: Record<string, unknown> = {
-      url: params.url,
-      body: params.body,
-      deduplicationId: params.deduplicationId,
-      retries: params.retries,
-      retryDelay,
-      ...(params.callback && { callback: params.callback }),
-      ...(params.failureCallback && {
-        failureCallback: params.failureCallback,
-      }),
-      ...(params.headers && { headers: params.headers }),
-    };
+    const entries = options.map((option) =>
+      normalizePublishOptions(option, this.config.defaultRetries)
+    );
+
+    try {
+      const responses = (await this.client.batch(
+        entries.map((entry) => this.buildBatchRequest(entry))
+      )) as Array<{ messageId: string }>;
+
+      return await Promise.all(
+        responses.map(async (response, index) => {
+          const entry = entries[index];
+          if (!entry) {
+            throw new QstashError(
+              "Batch response/request mismatch",
+              "QSTASH_BATCH_PUBLISH_FAILED",
+              500,
+              { index }
+            );
+          }
+
+          await this.logs.store(
+            toLogEntry(entry, response.messageId),
+            entry.body
+          );
+
+          return {
+            messageId: response.messageId,
+            deduplicationId: entry.deduplicationId,
+          };
+        })
+      );
+    } catch (err) {
+      throw err instanceof QstashError
+        ? err
+        : new QstashError(
+            `Failed to publish batch to QStash: ${formatError(err)}`,
+            "QSTASH_BATCH_PUBLISH_FAILED",
+            500,
+            { count: options.length }
+          );
+    }
+  }
+
+  /**
+   * Enqueue a message onto a queue for delayed delivery.
+   *
+   * Provide either `delay` (seconds from now) or `notBefore` (absolute unix
+   * timestamp in seconds). Falls back to the configured `defaultQueue` when no
+   * `queueName` is given.
+   */
+  protected async scheduleQueue<T = unknown>(
+    options: QstashPublishOptions<T>
+  ): Promise<QstashPublishResult> {
+    const queueName = options.queueName ?? this.config.defaultQueue;
+
+    if (!queueName) {
+      throw new QstashError(
+        "No queue configured for scheduled delivery",
+        "QSTASH_QUEUE_MISSING",
+        400,
+        { url: options.url }
+      );
+    }
+
+    if (options.delay === undefined && options.notBefore === undefined) {
+      throw new QstashError(
+        "scheduleQueue requires either 'delay' or 'notBefore'",
+        "QSTASH_SCHEDULE_MISSING",
+        400,
+        { url: options.url }
+      );
+    }
+
+    return this.publish({ ...options, queueName });
+  }
+
+  /**
+   * Dispatch a normalized message using the first transport that applies:
+   *
+   * 1. explicit `queueName`  → `queue(...).enqueueJSON`
+   * 2. configured topic      → `publishJSON` with `topic`
+   * 3. configured default queue → `queue(...).enqueueJSON`
+   * 4. direct                → `publishJSON`
+   *
+   * @returns the QStash message id.
+   */
+  private async dispatchToQstash(
+    params: NormalizedPublishOptions<unknown>
+  ): Promise<string> {
+    const base = this.buildRequestBase(params);
+
+    if (params.queueName) {
+      const result = await this.client
+        .queue({ queueName: params.queueName })
+        .enqueueJSON(base);
+      return result.messageId;
+    }
 
     if (this.config.defaultTopic) {
       const result = await this.client.publishJSON({
@@ -294,6 +291,74 @@ export class QstashService implements IQstashService {
     return result.messageId;
   }
 
+  /**
+   * Build the transport-agnostic request payload shared by every QStash call.
+   * Only defined options are included so the SDK does not send empty fields.
+   */
+  private buildRequestBase(
+    params: NormalizedPublishOptions<unknown>
+  ): Record<string, unknown> {
+    return {
+      url: params.url,
+      body: params.contentType === "text" ? String(params.body) : params.body,
+      deduplicationId: params.deduplicationId,
+      retries: params.maxRetries,
+      retryDelay: retryDelayExpression(this.config.defaultRetryDelay),
+      ...(params.callback && { callback: params.callback }),
+      ...(params.failureCallback && {
+        failureCallback: params.failureCallback,
+      }),
+      ...(Object.keys(params.headers).length > 0 && {
+        headers: params.headers,
+      }),
+      ...(params.delay !== undefined && { delay: params.delay }),
+      ...(params.notBefore !== undefined && { notBefore: params.notBefore }),
+    };
+  }
+
+  /**
+   * Build a single entry for the QStash batch endpoint. Batch entries carry
+   * their own queue and a serialized body with a matching content-type.
+   */
+  private buildBatchRequest(
+    params: NormalizedPublishOptions<unknown>
+  ): PublishBatchRequest {
+    const headers: Record<string, string> = {
+      ...(params.contentType === "json" && {
+        "content-type": "application/json",
+      }),
+      ...params.headers,
+    };
+    const queueName = params.queueName ?? this.config.defaultQueue;
+
+    return {
+      url: params.url,
+      body:
+        params.contentType === "json"
+          ? JSON.stringify(params.body)
+          : String(params.body),
+      deduplicationId: params.deduplicationId,
+      retries: params.maxRetries,
+      retryDelay: retryDelayExpression(this.config.defaultRetryDelay),
+      ...(params.callback && { callback: params.callback }),
+      ...(params.failureCallback && {
+        failureCallback: params.failureCallback,
+      }),
+      ...(Object.keys(headers).length > 0 && { headers }),
+      ...(params.delay !== undefined && { delay: params.delay }),
+      ...(params.notBefore !== undefined && { notBefore: params.notBefore }),
+      ...(queueName && { queueName }),
+    };
+  }
+
+  // ─── Signature verification ───────────────────────────────────────────────
+
+  /**
+   * Verify the signature of an inbound QStash request.
+   *
+   * @throws {QstashError} `QSTASH_SIGNATURE_INVALID` (401) for bad signatures,
+   * `QSTASH_VERIFICATION_ERROR` (500) for any other verification failure.
+   */
   public async verifySignature(
     body: string,
     signature: string,
@@ -312,30 +377,28 @@ export class QstashService implements IQstashService {
             401
           )
         : new QstashError(
-            `Verification error: ${errorMessage(error)}`,
+            `Verification error: ${formatError(error)}`,
             "QSTASH_VERIFICATION_ERROR",
             500
           );
     }
   }
 
-  private dedupKey(hash: string) {
-    return `qstash:dedup:${hash}`;
-  }
+  // ─── Deduplication ────────────────────────────────────────────────────────
 
+  /** Build a deterministic dedup key for `content` within `scope`. */
   protected generateDedupKey(content: unknown, scope = "default"): string {
-    const str = typeof content === "string" ? content : JSON.stringify(content);
-    const hash = createHash("sha256")
-      .update(`${scope}:${str}`)
-      .digest("hex")
-      .slice(0, 32);
-    return this.dedupKey(hash);
+    return buildDedupKey(content, scope);
   }
 
+  /** Remove a dedup key so the same content can be published again. */
   protected async clearDedupCache(key: string): Promise<void> {
     await this.config.redisClient.del(key);
   }
 
+  // ─── Handler registration ─────────────────────────────────────────────────
+
+  /** Register the handler that processes deliveries for `routeKey`. */
   protected registerCallbackHandler<T = unknown>(
     routeKey: string,
     handler: QstashCallbackHandler<T>
@@ -343,6 +406,7 @@ export class QstashService implements IQstashService {
     this.handlers.setCallback(routeKey, handler as QstashCallbackHandler);
   }
 
+  /** Register the handler that processes receipts for `routeKey`. */
   protected registerReceiptHandler(
     routeKey: string,
     handler: QstashReceiptHandler
@@ -350,6 +414,15 @@ export class QstashService implements IQstashService {
     this.handlers.setReceipt(routeKey, handler);
   }
 
+  // ─── Delivery processing ──────────────────────────────────────────────────
+
+  /**
+   * Run the registered callback handler for a delivery and update its log.
+   *
+   * The log is marked `delivered` on success and `failed` (with the retry
+   * counter incremented) on error; the original error is re-thrown so QStash
+   * can retry.
+   */
   protected async processCallback<T = unknown>(
     payload: T,
     context: { messageId: string; routeKey: string }
@@ -386,6 +459,11 @@ export class QstashService implements IQstashService {
     }
   }
 
+  /**
+   * Handle a delivery receipt: mark the message delivered, or move it to the
+   * dead letter queue once retries are exhausted. A route-specific receipt
+   * handler, when registered, is invoked on dead-lettering.
+   */
   protected async handleDeliveryReceipt(
     messageId: string,
     routeKey?: string
@@ -413,6 +491,7 @@ export class QstashService implements IQstashService {
     }
   }
 
+  /** Mark a message as failed after a failed delivery callback. */
   protected async handleFailed(messageId: string): Promise<void> {
     requireLog(await this.logs.fetch(messageId), messageId);
 
@@ -422,26 +501,54 @@ export class QstashService implements IQstashService {
     });
   }
 
+  // ─── Message queries ──────────────────────────────────────────────────────
+
+  /** List every message as a lightweight view. */
   protected async listMessages(): Promise<QstashMessage[]> {
+    const logs = await this.loadAllLogs();
+    return logs.map(toMessageView);
+  }
+
+  /** Fetch a single message view, or `null` when unknown. */
+  protected async getMessage(messageId: string): Promise<QstashMessage | null> {
+    const log = await this.logs.fetch(messageId);
+    return log ? toMessageView(log) : null;
+  }
+
+  /** List every stored message log (full record). */
+  protected async listMessageLogs(): Promise<QstashMessageLog[]> {
+    return this.loadAllLogs();
+  }
+
+  /** Fetch a single stored message log, or `null` when unknown. */
+  protected async getMessageLog(
+    messageId: string
+  ): Promise<QstashMessageLog | null> {
+    return this.logs.fetch(messageId);
+  }
+
+  /** Read every stored log, resolving the message id from each Redis key. */
+  private async loadAllLogs(): Promise<QstashMessageLog[]> {
     const keys = await this.logs.listAllKeys();
-    const messages: QstashMessage[] = [];
+    const logs: QstashMessageLog[] = [];
 
     for (const key of keys) {
       const messageId = key.split(":").pop();
       if (!messageId) continue;
 
       const log = await this.logs.fetch(messageId);
-      if (log) messages.push(toMessageView(log));
+      if (log) logs.push(log);
     }
 
-    return messages;
+    return logs;
   }
 
-  protected async getMessage(messageId: string): Promise<QstashMessage | null> {
-    const log = await this.logs.fetch(messageId);
-    return log ? toMessageView(log) : null;
-  }
+  // ─── Retries & dead letters ───────────────────────────────────────────────
 
+  /**
+   * Re-publish a `failed` or `dead_letter` message using its stored body and
+   * options. The original log is marked `retrying` and removed from the DLQ.
+   */
   protected async retryMessage(
     messageId: string,
     overrideOptions?: Partial<QstashPublishOptions>
@@ -490,11 +597,12 @@ export class QstashService implements IQstashService {
     return result;
   }
 
+  /** List the newest dead-lettered messages, up to `limit`. */
   protected async listDeadLetters(
-    limit = DEFAULTS.dlqListLimit
-  ): Promise<Array<QstashDeadLetter>> {
+    limit = QSTASH_DEFAULTS.dlqListLimit
+  ): Promise<QstashDeadLetter[]> {
     const messageIds = await this.dlq.listIds(limit);
-    const results: Array<QstashDeadLetter> = [];
+    const results: QstashDeadLetter[] = [];
 
     for (const messageId of messageIds) {
       const log = await this.logs.fetch(messageId);
@@ -510,6 +618,10 @@ export class QstashService implements IQstashService {
     return results;
   }
 
+  /**
+   * Apply a partial update to a message log. Setting `isDeadLetter: true`
+   * also adds the message to the dead letter index.
+   */
   protected async updateMessage(
     messageId: string,
     updates: Partial<QstashMessageLog>
@@ -521,14 +633,19 @@ export class QstashService implements IQstashService {
     }
   }
 
+  /** Remove a message log and its stored body. */
   protected async clearStatusCache(messageId: string): Promise<void> {
     await this.logs.remove(messageId);
   }
 
+  // ─── Accessors ────────────────────────────────────────────────────────────
+
+  /** Expose the underlying QStash client. */
   public getClient(): Client {
     return this.client;
   }
 
+  /** Expose the signature receiver. */
   public getReceiver(): Receiver {
     return this.receiver;
   }

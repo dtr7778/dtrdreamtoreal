@@ -1,46 +1,36 @@
-import { ExtendedRedis, HashSerializer } from "../../redis";
+import { type ExtendedRedis, HashSerializer } from "../../redis";
+import { QSTASH_KEY_PREFIX } from "../constants";
+import type { ContentType, QstashMessageLog } from "../types";
 
-export type ContentType = "json" | "text";
-
-export type QstashMessageState =
-  | "pending"
-  | "delivered"
-  | "failed"
-  | "retrying"
-  | "dead_letter";
-
-export interface QstashMessageLog {
-  messageId: string;
-  deduplicationId: string;
-  state: QstashMessageState;
-  retried: number;
-  maxRetries: number;
-  url: string;
-  callback: string | null;
-  failureCallback: string | null;
-  isDeadLetter: boolean;
-  contentType: ContentType;
-  deliveredAt: number | null;
-  createdAt: number;
-  scheduledAt: number | null;
-}
-
+/** TTL (seconds) applied to stored logs and bodies. */
 const TTL_SECONDS = {
   log: 86_400 * 7,
   body: 86_400 * 7,
 } as const;
 
+/**
+ * Redis-backed persistence for message logs.
+ *
+ * Each message is stored as two keys:
+ * - `qstash:log:<messageId>`  – the serialized {@link QstashMessageLog} hash.
+ * - `qstash:body:<messageId>` – the raw body, kept so the message can be
+ *   replayed on retry.
+ */
 export class QstashMessageLogRepository {
   constructor(private readonly redis: ExtendedRedis) {}
 
-  public logKey(messageId: string) {
-    return `qstash:log:${messageId}`;
-  }
-  public bodyKey(messageId: string) {
-    return `qstash:body:${messageId}`;
+  /** Redis key holding the log hash for `messageId`. */
+  public logKey(messageId: string): string {
+    return `${QSTASH_KEY_PREFIX.log}:${messageId}`;
   }
 
-  async store(entry: QstashMessageLog, body: unknown): Promise<void> {
+  /** Redis key holding the stored body for `messageId`. */
+  public bodyKey(messageId: string): string {
+    return `${QSTASH_KEY_PREFIX.body}:${messageId}`;
+  }
+
+  /** Persist a log entry together with its body, refreshing their TTLs. */
+  public async store<T>(entry: QstashMessageLog, body: T): Promise<void> {
     const logKey = this.logKey(entry.messageId);
     const bodyKey = this.bodyKey(entry.messageId);
     const serialized = HashSerializer.serialize(entry);
@@ -52,13 +42,19 @@ export class QstashMessageLogRepository {
     await this.redis.set(bodyKey, bodyStr, { ex: TTL_SECONDS.body });
   }
 
-  async fetch(messageId: string): Promise<QstashMessageLog | null> {
+  /** Read the log for `messageId`, or `null` when it does not exist. */
+  public async fetch(messageId: string): Promise<QstashMessageLog | null> {
     const data = await this.redis.hgetall(this.logKey(messageId));
     if (!data || !data.messageId) return null;
     return HashSerializer.deserialize<QstashMessageLog>(data);
   }
 
-  async fetchBody<T>(
+  /**
+   * Read the stored body for `messageId`, decoding JSON when the message was
+   * published with `contentType: "json"`. Returns `null` when missing or when
+   * JSON decoding fails.
+   */
+  public async fetchBody<T>(
     messageId: string,
     contentType: ContentType
   ): Promise<T | null> {
@@ -74,7 +70,8 @@ export class QstashMessageLogRepository {
     return raw as T;
   }
 
-  async update(
+  /** Apply a partial update to a log, refreshing its TTL. */
+  public async update(
     messageId: string,
     updates: Partial<QstashMessageLog>
   ): Promise<void> {
@@ -86,15 +83,19 @@ export class QstashMessageLogRepository {
     await this.redis.expire(key, TTL_SECONDS.log);
   }
 
-  async remove(messageId: string): Promise<void> {
+  /** Delete both the log and its body. */
+  public async remove(messageId: string): Promise<void> {
     await this.redis.del(this.logKey(messageId), this.bodyKey(messageId));
   }
 
   /**
-   * Note: uses the KEYS command which is O(N) over the keyspace.
-   * For large-scale production use, consider replacing with SCAN.
+   * List every log key currently stored.
+   *
+   * Note: uses the `KEYS` command which is O(N) over the keyspace. For
+   * large-scale production use, consider replacing this with a cursor-based
+   * `SCAN`.
    */
-  async listAllKeys(): Promise<string[]> {
+  public async listAllKeys(): Promise<string[]> {
     return this.redis.keys(`${this.logKey("*")}`);
   }
 }
