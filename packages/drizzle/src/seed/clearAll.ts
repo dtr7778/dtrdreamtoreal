@@ -1,4 +1,4 @@
-import { DatabaseType } from "../clients/drizzle-client-withUpstashRedis";
+import { DatabaseType } from "../clients/drizzle-client";
 import * as schema from "../schemas";
 
 export async function clearAll(db: DatabaseType) {
