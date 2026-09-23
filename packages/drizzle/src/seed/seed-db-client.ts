@@ -2,7 +2,7 @@ import { join } from "node:path";
 
 import { config } from "dotenv";
 
-import { createDrizzleClient } from "../drizzle-client";
+import { createDrizzleClient } from "../clients/drizzle-client";
 
 config({
   path: [join(process.cwd(), "../../.env")],

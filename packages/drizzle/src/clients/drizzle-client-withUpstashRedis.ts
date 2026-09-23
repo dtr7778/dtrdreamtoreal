@@ -1,18 +1,25 @@
 import { type Cache } from "drizzle-orm/cache/core";
+import { type CacheConfig } from "drizzle-orm/cache/core/types";
 import { upstashCache } from "drizzle-orm/cache/upstash";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
-import * as schema from "./schemas";
+import * as schema from "../schemas";
+import { createConnection } from "./createConnection";
 
-interface CreateDrizzleClientConfigs {
+interface DrizzleClientConfigs {
   databaseUrl: string;
   isProd: boolean;
   operationMode: "seed" | "normal";
   redisUrl?: string;
   redisToken?: string;
+  /** Default cache config applied to every cached query. @default { ex: 60 } */
+  redisCacheConfig?: CacheConfig;
+  /** Cache every query globally. @default true */
+  redisCacheGlobal?: boolean;
   showDBLog?: boolean;
 }
+
+export type DatabaseType = PostgresJsDatabase<typeof schema>;
 
 export function createDrizzleClient({
   databaseUrl,
@@ -21,14 +28,10 @@ export function createDrizzleClient({
   showDBLog = false,
   redisUrl,
   redisToken,
-}: CreateDrizzleClientConfigs): PostgresJsDatabase<typeof schema> {
-  const connection = postgres(databaseUrl, {
-    max: isProd ? 20 : 5,
-    idle_timeout: 20,
-    connect_timeout: 10,
-    prepare: false,
-    debug: !isProd && operationMode !== "seed",
-  });
+  redisCacheConfig = { ex: 60 },
+  redisCacheGlobal = true,
+}: DrizzleClientConfigs): DatabaseType {
+  const connection = createConnection(databaseUrl, isProd, operationMode);
 
   let cache: Cache | undefined = undefined;
 
@@ -36,8 +39,8 @@ export function createDrizzleClient({
     cache = upstashCache({
       url: redisUrl,
       token: redisToken,
-      global: true,
-      config: { ex: 60 },
+      global: redisCacheGlobal,
+      config: redisCacheConfig,
     });
   }
 
@@ -47,5 +50,3 @@ export function createDrizzleClient({
     cache,
   });
 }
-
-export type DatabaseType = ReturnType<typeof createDrizzleClient>;

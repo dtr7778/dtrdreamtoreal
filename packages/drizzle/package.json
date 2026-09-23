@@ -15,8 +15,16 @@
   },
   "exports": {
     "./client": {
-      "import": "./src/drizzle-client.ts",
-      "types": "./src/drizzle-client.ts"
+      "import": "./src/clients/drizzle-client.ts",
+      "types": "./src/clients/drizzle-client.ts"
+    },
+    "./client/ioRedis": {
+      "import": "./src/clients/drizzle-client-withIoRedis.ts",
+      "types": "./src/clients/drizzle-client-withIoRedis.ts"
+    },
+    "./client/upstashRedis": {
+      "import": "./src/clients/drizzle-client-withUpstashRedis.ts",
+      "types": "./src/clients/drizzle-client-withUpstashRedis.ts"
     },
     "./client/mock": {
       "import": "./tests/drizzle-client.mock.ts",
@@ -41,6 +49,10 @@
     "./sql-helpers": {
       "import": "./src/sql-helpers.ts",
       "types": "./src/sql-helpers.ts"
+    },
+    "./helpers": {
+      "import": "./src/helpers/index.ts",
+      "types": "./src/helpers/index.ts"
     }
   },
   "scripts": {
@@ -81,6 +93,7 @@
     "better-auth": "catalog:",
     "drizzle-orm": "catalog:",
     "drizzle-zod": "^0.8.3",
+    "ioredis": "catalog:",
     "postgres": "^3.4.9",
     "zod": "catalog:"
   }
