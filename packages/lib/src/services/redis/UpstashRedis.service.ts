@@ -1,6 +1,6 @@
 import { Redis } from "@upstash/redis";
 
-import { ExtendedRedis } from "./types";
+export type ExtendedRedis = Redis;
 
 export interface IUpstashRedistService {
   getClient(): ExtendedRedis;

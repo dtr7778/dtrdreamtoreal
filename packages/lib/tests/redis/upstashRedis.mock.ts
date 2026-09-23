@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-import type { ExtendedRedis } from "../src/services/redis";
+import type { ExtendedRedis } from "../../src/services/redis/createUpstashRedisClient.factory";
 
 const store = new Map<string, unknown>();
 
