@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { CreateEmailOptions } from "resend";
 
 import { DatabaseType } from "@workspace/drizzle/client";
 import {
@@ -12,6 +13,9 @@ import {
 } from "@workspace/drizzle/schemas";
 
 import { InboundEmailPayload, SendMailOption } from "../types";
+
+/** Recipient kinds persisted in {@link EmailRecipientTable}. */
+type RecipientType = "from" | "to" | "cc" | "bcc" | "reply_to" | "received_for";
 
 export interface RecipientInfo {
   email: string;
@@ -74,6 +78,8 @@ export class EmailService {
     const bccRecipients = this.normalizeRecipients(options.bcc);
     const replyToRecipients = this.normalizeRecipients(options.replyTo);
 
+    const metadata = this.buildOutboundMetadata(options);
+
     return db.transaction(async (tx) => {
       const [email] = await tx
         .insert(EmailTable)
@@ -84,6 +90,8 @@ export class EmailService {
           subject: options.subject,
           textBody: options.text,
           htmlBody: options.html,
+          headers: options.headers,
+          metadata,
         } satisfies InsertEmail)
         .returning({ id: EmailTable.id });
 
@@ -137,6 +145,7 @@ export class EmailService {
                 filename: `${a.filename}`,
                 contentType: `${a.contentType}`,
                 contentId: a.contentId,
+                url: a.path,
               }) satisfies InsertEmailAttachment
           )
         );
@@ -144,6 +153,102 @@ export class EmailService {
 
       return { emailId: email.id, threadId };
     });
+  }
+
+  /** Persist the send options that are not already covered by table columns. */
+  private buildOutboundMetadata(
+    options: SendMailOption
+  ): Record<string, unknown> | undefined {
+    const metadata: Record<string, unknown> = {};
+
+    if (options.tags) metadata.tags = options.tags;
+    if (options.topicId) metadata.topicId = options.topicId;
+    if (options.scheduledAt) metadata.scheduledAt = options.scheduledAt;
+
+    return Object.keys(metadata).length > 0 ? metadata : undefined;
+  }
+
+  /** Format a persisted recipient back into an RFC 5322 address. */
+  private formatAddress(recipient: { email: string; name: string | null }): string {
+    return recipient.name
+      ? `${recipient.name} <${recipient.email}>`
+      : recipient.email;
+  }
+
+  /**
+   * Rebuild the {@link CreateEmailOptions} for an outbound email from its
+   * persisted record. Used by the QStash callback to send a mail without
+   * embedding its content in the published message.
+   */
+  public async buildOutboundEmailOptions(
+    emailId: string
+  ): Promise<CreateEmailOptions> {
+    const [email] = await this.database
+      .select({
+        subject: EmailTable.subject,
+        textBody: EmailTable.textBody,
+        htmlBody: EmailTable.htmlBody,
+        headers: EmailTable.headers,
+        metadata: EmailTable.metadata,
+      })
+      .from(EmailTable)
+      .where(eq(EmailTable.id, emailId))
+      .limit(1);
+
+    if (!email) {
+      throw new Error(`Outbound email not found: ${emailId}`);
+    }
+
+    const [recipients, attachments] = await Promise.all([
+      this.database
+        .select()
+        .from(EmailRecipientTable)
+        .where(eq(EmailRecipientTable.emailId, emailId)),
+      this.database
+        .select()
+        .from(EmailAttachmentTable)
+        .where(eq(EmailAttachmentTable.emailId, emailId)),
+    ]);
+
+    const byType = (type: RecipientType) =>
+      recipients
+        .filter((r) => r.type === type)
+        .map((r) => this.formatAddress(r));
+
+    const from = byType("from")[0];
+    if (!from) {
+      throw new Error(`Outbound email ${emailId} has no sender`);
+    }
+
+    const to = byType("to");
+    const cc = byType("cc");
+    const bcc = byType("bcc");
+    const replyTo = byType("reply_to");
+    const metadata = email.metadata ?? {};
+
+    return {
+      from,
+      to,
+      cc: cc.length > 0 ? cc : undefined,
+      bcc: bcc.length > 0 ? bcc : undefined,
+      replyTo: replyTo.length > 0 ? replyTo : undefined,
+      subject: email.subject ?? "",
+      text: email.textBody ?? undefined,
+      html: email.htmlBody ?? undefined,
+      headers: email.headers ?? undefined,
+      attachments:
+        attachments.length > 0
+          ? attachments.map((a) => ({
+              filename: a.filename,
+              contentType: a.contentType ?? undefined,
+              contentId: a.contentId ?? undefined,
+              path: a.url ?? undefined,
+            }))
+          : undefined,
+      tags: metadata.tags as CreateEmailOptions["tags"],
+      topicId: (metadata.topicId as string | undefined) ?? undefined,
+      scheduledAt: metadata.scheduledAt as string | undefined,
+    } as CreateEmailOptions;
   }
 
   public async createInboundEmailRecord(

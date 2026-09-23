@@ -15,7 +15,6 @@ export const mail =
     appName: env.NEXT_PUBLIC_SITE_NAME,
     database: db,
     redisClient,
-    domainName: env.DOMAIN_NAME,
     supportMail: env.SUPPORT_MAIL,
     systemMail: env.SYSTEM_MAIL,
     resendApiKey: env.RESEND_API_KEY,

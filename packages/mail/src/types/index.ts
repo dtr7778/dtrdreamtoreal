@@ -11,7 +11,6 @@ import type { ExtendedRedis } from "@workspace/lib/redis";
 export interface QstashMailConfig {
   database: DatabaseType;
   redisClient: ExtendedRedis;
-  domainName: string;
   minRatelimit: IRatelimit;
   hourRatelimit: IRatelimit;
   callbackUrl: string;
@@ -51,11 +50,10 @@ export type SendMailOption = Omit<
   references?: string[] | undefined;
 };
 
-export type MailCallbackPayload = SendMailOption & {
+export interface MailCallbackPayload {
   emailId: string;
   threadId?: string | undefined;
-  deduplicationId?: string;
-};
+}
 
 /**
  * A single entry passed to `sendMailBatch`.

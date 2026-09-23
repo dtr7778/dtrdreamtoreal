@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import { CreateEmailOptions } from "resend";
 
 import { EmailTable } from "@workspace/drizzle/schemas";
 import {
@@ -39,15 +38,11 @@ interface PreparedMail {
   threadId?: string;
   /** Redis key used to suppress duplicates. */
   dedupKey: string;
-  /** RFC 5322 message id derived from the email record. */
-  generatedMessageId: string;
-  /** Original send options. */
-  options: SendMailOption;
 }
 
 export interface IQstashMailService extends IQstashService {
   processMailCallback(
-    payload: SendMailOption,
+    payload: MailCallbackPayload,
     context: { messageId: string }
   ): Promise<void>;
   processInboundEmail(
@@ -136,11 +131,6 @@ export abstract class QstashMailService
     }
 
     return headers;
-  }
-
-  /** Derive the RFC 5322 message id for an email record. */
-  protected generateMessageId(emailId: string): string {
-    return `${emailId}@${this.qstashMailConfig.domainName}`;
   }
 
   /** Build the dedup key from the recipient set and subject. */
@@ -323,8 +313,19 @@ export abstract class QstashMailService
       });
     }
 
+    const references = options.inReplyTo
+      ? [...(options.references ?? []), options.inReplyTo]
+      : options.references;
+
     const { emailId } = await this.emailService.createOutboundEmailRecord({
-      options,
+      options: {
+        ...options,
+        headers: this.buildHeaders(
+          options.headers,
+          options.inReplyTo,
+          references
+        ),
+      },
       threadId,
     });
 
@@ -332,8 +333,6 @@ export abstract class QstashMailService
       emailId,
       threadId,
       dedupKey,
-      generatedMessageId: this.generateMessageId(emailId),
-      options,
     };
   }
 
@@ -341,24 +340,10 @@ export abstract class QstashMailService
   private buildPublishOptions(
     mail: PreparedMail
   ): QstashPublishOptions<MailCallbackPayload> {
-    const { options, generatedMessageId, emailId, threadId } = mail;
-    const references = options.inReplyTo
-      ? [...(options.references ?? []), options.inReplyTo]
-      : options.references;
-
     return {
       body: {
-        ...options,
-        headers: this.buildHeaders(
-          {
-            ...options.headers,
-            "Message-ID": `<${generatedMessageId}>`,
-          },
-          options.inReplyTo,
-          references
-        ),
-        emailId,
-        threadId,
+        emailId: mail.emailId,
+        threadId: mail.threadId,
       },
       url: this.qstashMailConfig.callbackUrl,
       callback: this.qstashMailConfig.receiptCallbackUrl,
@@ -372,19 +357,15 @@ export abstract class QstashMailService
     mail: PreparedMail,
     result: QstashPublishResult
   ): Promise<void> {
-    await this.qstashMailConfig.database
-      .update(EmailTable)
-      .set({
-        qMessageId: result.messageId,
-        resendMessageId: mail.generatedMessageId,
-      })
-      .where(eq(EmailTable.id, mail.emailId));
-
     await Promise.all([
       this.markProcessed(mail.dedupKey, result.messageId),
       this.updateMessage(result.messageId, {
         deduplicationId: result.deduplicationId,
       }),
+      this.qstashMailConfig.database
+        .update(EmailTable)
+        .set({ qMessageId: result.messageId })
+        .where(eq(EmailTable.id, mail.emailId)),
     ]);
   }
 
@@ -418,27 +399,18 @@ export abstract class QstashMailService
     context: { messageId: string }
   ): Promise<void> {
     try {
-      const resendId = await this.mailTransport.send({
-        from: payload.from,
-        to: payload.to,
-        cc: payload.cc,
-        bcc: payload.bcc,
-        replyTo: payload.replyTo,
-        subject: payload.subject,
-        html: payload.html,
-        text: payload.text,
-        attachments: payload.attachments,
-        headers: payload.headers,
-        topicId: payload.topicId,
-        tags: payload.tags,
-      } as CreateEmailOptions);
+      const options = await this.emailService.buildOutboundEmailOptions(
+        payload.emailId
+      );
+
+      const resendId = await this.mailTransport.send(options);
 
       await this.qstashMailConfig.database
         .update(EmailTable)
         .set({
-          resendId: resendId,
+          resendId,
         })
-        .where(eq(EmailTable.qMessageId, context.messageId));
+        .where(eq(EmailTable.id, payload.emailId));
     } catch (err) {
       if (err instanceof MailError || err instanceof QstashError) throw err;
 

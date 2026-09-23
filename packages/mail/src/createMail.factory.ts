@@ -26,7 +26,6 @@ export function createMail(configs: MailConfig): IMailService {
   const qstashMailConfig: QstashMailConfig = {
     database: configs.database,
     redisClient: configs.redisClient,
-    domainName: configs.domainName,
     minRatelimit: configs.minRatelimit,
     hourRatelimit: configs.hourRatelimit,
     callbackUrl: configs.callbackUrl,
