@@ -438,8 +438,6 @@ export class QstashService implements IQstashService {
       );
     }
 
-    await this.logs.update(messageId, { state: "pending" });
-
     try {
       const result = await handler(payload, { messageId });
 
@@ -603,6 +601,7 @@ export class QstashService implements IQstashService {
   ): Promise<QstashDeadLetter[]> {
     const messageIds = await this.dlq.listIds(limit);
     const results: QstashDeadLetter[] = [];
+    const stale: string[] = [];
 
     for (const messageId of messageIds) {
       const log = await this.logs.fetch(messageId);
@@ -612,8 +611,12 @@ export class QstashService implements IQstashService {
           createdAt: log.createdAt,
           retried: log.retried,
         });
+      } else {
+        stale.push(messageId);
       }
     }
+
+    await this.dlq.removeMany(stale);
 
     return results;
   }
@@ -633,9 +636,10 @@ export class QstashService implements IQstashService {
     }
   }
 
-  /** Remove a message log and its stored body. */
+  /** Remove a message log, its stored body and any dead letter index entry. */
   protected async clearStatusCache(messageId: string): Promise<void> {
     await this.logs.remove(messageId);
+    await this.dlq.remove(messageId);
   }
 
   // ─── Accessors ────────────────────────────────────────────────────────────

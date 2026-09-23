@@ -1,12 +1,6 @@
 import { type ExtendedRedis, HashSerializer } from "../../redis";
-import { QSTASH_KEY_PREFIX } from "../constants";
+import { QSTASH_KEY_PREFIX, QSTASH_TTL_SECONDS } from "../constants";
 import type { ContentType, QstashMessageLog } from "../types";
-
-/** TTL (seconds) applied to stored logs and bodies. */
-const TTL_SECONDS = {
-  log: 86_400 * 7,
-  body: 86_400 * 7,
-} as const;
 
 /**
  * Redis-backed persistence for message logs.
@@ -38,8 +32,8 @@ export class QstashMessageLogRepository {
       entry.contentType === "json" ? JSON.stringify(body) : String(body);
 
     await this.redis.hset(logKey, serialized);
-    await this.redis.expire(logKey, TTL_SECONDS.log);
-    await this.redis.set(bodyKey, bodyStr, { ex: TTL_SECONDS.body });
+    await this.redis.expire(logKey, QSTASH_TTL_SECONDS.log);
+    await this.redis.set(bodyKey, bodyStr, { ex: QSTASH_TTL_SECONDS.body });
   }
 
   /** Read the log for `messageId`, or `null` when it does not exist. */
@@ -80,7 +74,7 @@ export class QstashMessageLogRepository {
     if (Object.keys(fields).length === 0) return;
 
     await this.redis.hset(key, fields);
-    await this.redis.expire(key, TTL_SECONDS.log);
+    await this.redis.expire(key, QSTASH_TTL_SECONDS.log);
   }
 
   /** Delete both the log and its body. */

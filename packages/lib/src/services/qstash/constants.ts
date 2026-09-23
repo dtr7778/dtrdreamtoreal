@@ -19,3 +19,19 @@ export const QSTASH_KEY_PREFIX = {
   deadLetterSet: "qstash:dlq",
   deadLetterSorted: "qstash:dlq:sorted",
 } as const;
+
+/**
+ * TTLs (in seconds) applied to persisted QStash state.
+ *
+ * Logs, bodies and the dead letter index all expire on the same schedule so a
+ * dead letter can never outlive the message it points at. See
+ * `QstashMessageLogRepository` and `QstashDeadLetterRepository`.
+ */
+export const QSTASH_TTL_SECONDS = {
+  /** Serialized message log hash. */
+  log: 86_400 * 7,
+  /** Raw message body kept for replay. */
+  body: 86_400 * 7,
+  /** Dead letter id index (set + sorted set). */
+  deadLetter: 86_400 * 7,
+} as const;
