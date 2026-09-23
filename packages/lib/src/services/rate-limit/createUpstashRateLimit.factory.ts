@@ -1,13 +1,9 @@
-import { ExtendedRedis } from "../redis";
-import type { Duration, IRatelimit, RatelimitAlgorithm } from "./types";
-import { UpstashRatelimit } from "./upstashRateLimit.service";
-
-export type {
-  IRatelimit,
-  RatelimitResponse,
-  Duration,
-  RatelimitAlgorithm,
-} from "./types";
+import { ExtendedRedis } from "../redis/UpstashRedis.service";
+import type { Duration, RatelimitAlgorithm } from "./types";
+import {
+  type IUpstashRatelimit,
+  UpstashRatelimit,
+} from "./UpstashRateLimit.service";
 
 export interface RatelimitFactoryConfig {
   redisClient: ExtendedRedis;
@@ -24,10 +20,10 @@ export function createRatelimit({
   requests,
   window,
   algorithm = "slidingWindow",
-  prefix = "upstash-ratelimit",
+  prefix = "ratelimit",
   analytics = true,
   burst,
-}: RatelimitFactoryConfig): IRatelimit {
+}: RatelimitFactoryConfig): IUpstashRatelimit {
   return new UpstashRatelimit({
     redisClient,
     requests,

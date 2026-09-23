@@ -1,13 +1,19 @@
 import { Ratelimit } from "@upstash/ratelimit";
 
-import { ExtendedRedis } from "../redis";
-import type {
-  Duration,
-  GetRemainingResponse,
-  IRatelimit,
-  RatelimitAlgorithm,
-  RatelimitResponse,
-} from "./types";
+import { ExtendedRedis } from "../redis/UpstashRedis.service";
+import type { Duration, RatelimitAlgorithm } from "./types";
+
+export type RatelimitResponse = ReturnType<
+  InstanceType<typeof Ratelimit>["limit"]
+>;
+export type GetRemainingResponse = ReturnType<
+  InstanceType<typeof Ratelimit>["getRemaining"]
+>;
+
+export interface IUpstashRatelimit {
+  limit(identifier: string): Promise<RatelimitResponse>;
+  getRemaining(identifier: string): Promise<GetRemainingResponse>;
+}
 
 export interface UpstashRatelimitConfig {
   redisClient: ExtendedRedis;
@@ -19,7 +25,7 @@ export interface UpstashRatelimitConfig {
   burst?: number;
 }
 
-export class UpstashRatelimit implements IRatelimit {
+export class UpstashRatelimit implements IUpstashRatelimit {
   private readonly ratelimit: Ratelimit;
   private readonly burst: number;
 
