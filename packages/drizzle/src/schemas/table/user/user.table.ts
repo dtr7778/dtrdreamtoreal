@@ -23,6 +23,7 @@ import { FileTable } from "../file.table";
 import { NotificationTable } from "../notification";
 import { UserRoleTable } from "../role-permission";
 import { SessionTable } from "../session.table";
+import { SiteAuditTable } from "../siteAudit";
 import { TaskTable } from "../task";
 import { NotificationSettingsTable } from "./notificationSetting.table";
 import { PushSubscriptionTable } from "./pushSubscription.table";
@@ -93,6 +94,7 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   }),
   createdCompanies: many(CompanyTable, { relationName: "CompanyToUser" }),
   createdEmployee: many(EmployeeTable, { relationName: "EmployeeToUser" }),
+  siteAudits: many(SiteAuditTable, { relationName: "SiteAuditToTriggeredBy" }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

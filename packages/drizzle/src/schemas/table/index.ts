@@ -3,6 +3,7 @@ export * from "./email";
 export * from "./employee";
 export * from "./notification";
 export * from "./role-permission";
+export * from "./siteAudit";
 export * from "./user";
 export * from "./account.table";
 export * from "./address.table";

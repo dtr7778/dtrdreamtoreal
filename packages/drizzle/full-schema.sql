@@ -1,6 +1,10 @@
-◇ injected env (6) from ../../.env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (6) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
 CREATE TYPE "public"."AddressTypeEnum" AS ENUM('billing', 'shipping', 'office', 'home', 'work', 'other');
+CREATE TYPE "public"."AuditItemStatusEnum" AS ENUM('pending', 'running', 'passed', 'failed', 'warning', 'needs_review', 'error', 'skipped');
+CREATE TYPE "public"."AuditStatusEnum" AS ENUM('pending', 'running', 'completed', 'failed', 'partial', 'cancelled');
 CREATE TYPE "public"."ContactStatusEnum" AS ENUM('pending', 'processing', 'replied', 'closed', 'spam');
+CREATE TYPE "public"."CwvSourceEnum" AS ENUM('psi', 'crux', 'crux_history', 'bigquery');
+CREATE TYPE "public"."CwvStrategyEnum" AS ENUM('phone', 'desktop');
 CREATE TYPE "public"."EmailDirectionEnum" AS ENUM('outbound', 'inbound', 'web_form');
 CREATE TYPE "public"."EmailEventTypeEnum" AS ENUM('email.sent', 'email.delivered', 'email.delivery_delayed', 'email.bounced', 'email.complained', 'email.opened', 'email.clicked', 'email.unsubscribed', 'email.rejected');
 CREATE TYPE "public"."EmailRecipientTypeEnum" AS ENUM('to', 'cc', 'bcc', 'reply_to', 'from', 'received_for');
@@ -228,6 +232,58 @@ CREATE TABLE "user_roles" (
 	"assigned_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "audit_items" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"site_audit_id" uuid NOT NULL,
+	"checklist_key" varchar(150) NOT NULL,
+	"section" varchar(100) NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"url" varchar,
+	"status" "AuditItemStatusEnum" DEFAULT 'pending' NOT NULL,
+	"message" text,
+	"evidence" jsonb,
+	"duration_ms" integer,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "cwv_snapshots" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"site_audit_id" uuid NOT NULL,
+	"url" varchar(2048) NOT NULL,
+	"strategy" "CwvStrategyEnum" NOT NULL,
+	"source" "CwvSourceEnum" NOT NULL,
+	"lcp" double precision,
+	"inp" double precision,
+	"cls" double precision,
+	"ttfb" double precision,
+	"fcp" double precision,
+	"performance_score" double precision,
+	"country_code" varchar(8),
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "site_audits" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"company_id" uuid NOT NULL,
+	"url" varchar NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"description" text,
+	"status" "AuditStatusEnum" DEFAULT 'pending' NOT NULL,
+	"report_image_file_id" uuid,
+	"error" text,
+	"total_items" integer DEFAULT 0 NOT NULL,
+	"completed_items" integer DEFAULT 0 NOT NULL,
+	"passed_items" integer DEFAULT 0 NOT NULL,
+	"failed_items" integer DEFAULT 0 NOT NULL,
+	"started_at" timestamp (3) with time zone,
+	"completed_at" timestamp (3) with time zone,
+	"triggered_by" uuid,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -402,6 +458,10 @@ ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permission_role_fkey" FOREIG
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permission_permission_fkey" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_roles" ADD CONSTRAINT "fk_user_roles_role_id" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_roles" ADD CONSTRAINT "fk_user_roles_user_id" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "audit_items" ADD CONSTRAINT "auditItem_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "cwv_snapshots" ADD CONSTRAINT "cwvSnapshot_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_company_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_triggerdBy_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_session_fkey" FOREIGN KEY ("session_id") REFERENCES "public"."sessions"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
@@ -468,6 +528,18 @@ CREATE INDEX "role_permission_permission_idx" ON "role_permissions" USING btree 
 CREATE INDEX "user_role_unique" ON "user_roles" USING btree ("user_id","role_id");
 CREATE INDEX "user_role_role_id_idx" ON "user_roles" USING btree ("role_id");
 CREATE INDEX "user_role_user_id_idx" ON "user_roles" USING btree ("user_id");
+CREATE INDEX "auditItem_siteAuditId_idx" ON "audit_items" USING btree ("site_audit_id");
+CREATE INDEX "auditItem_checklistKey_idx" ON "audit_items" USING btree ("checklist_key");
+CREATE INDEX "auditItem_status_idx" ON "audit_items" USING btree ("status");
+CREATE INDEX "auditItem_url_idx" ON "audit_items" USING btree ("url");
+CREATE INDEX "cwvSnapshot_siteAuditId_idx" ON "cwv_snapshots" USING btree ("site_audit_id");
+CREATE INDEX "cwvSnapshot_url_idx" ON "cwv_snapshots" USING btree ("url");
+CREATE INDEX "cwvSnapshot_strategy_idx" ON "cwv_snapshots" USING btree ("strategy");
+CREATE INDEX "cwvSnapshot_source_idx" ON "cwv_snapshots" USING btree ("source");
+CREATE INDEX "cwvSnapshot_countryCode_idx" ON "cwv_snapshots" USING btree ("country_code");
+CREATE INDEX "siteAudit_companyId_idx" ON "site_audits" USING btree ("company_id");
+CREATE INDEX "siteAudit_triggeredBy_idx" ON "site_audits" USING btree ("triggered_by");
+CREATE INDEX "siteAudit_createdAt_idx" ON "site_audits" USING btree ("created_at");
 CREATE UNIQUE INDEX "user_email_key" ON "users" USING btree ("email");
 CREATE INDEX "user_activity_user_id_idx" ON "user_activities" USING btree ("user_id");
 CREATE INDEX "user_activity_login_at_idx" ON "user_activities" USING btree ("login_at");

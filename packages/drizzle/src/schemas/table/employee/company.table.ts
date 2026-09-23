@@ -15,6 +15,7 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
+import { SiteAuditTable } from "../siteAudit/siteAudit.table";
 import { UserTable } from "../user";
 import { CompanyAddressTable } from "./companyAddress.table";
 import { CompanyEmailThreadTable } from "./companyEmailThread.table";
@@ -67,6 +68,7 @@ export const CompanyRelation = relations(CompanyTable, ({ many, one }) => ({
   emailThreads: many(CompanyEmailThreadTable, {
     relationName: "CompanyEmailThreadToCompany",
   }),
+  siteAudits: many(SiteAuditTable, { relationName: "SiteAuditToCompany" }),
 }));
 
 export const insertCompanySchema = createInsertSchema(CompanyTable, {

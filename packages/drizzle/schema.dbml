@@ -7,12 +7,44 @@ enum AddressTypeEnum {
   other
 }
 
+enum AuditItemStatusEnum {
+  pending
+  running
+  passed
+  failed
+  warning
+  needs_review
+  error
+  skipped
+}
+
+enum AuditStatusEnum {
+  pending
+  running
+  completed
+  failed
+  partial
+  cancelled
+}
+
 enum ContactStatusEnum {
   pending
   processing
   replied
   closed
   spam
+}
+
+enum CwvSourceEnum {
+  psi
+  crux
+  crux_history
+  bigquery
+}
+
+enum CwvStrategyEnum {
+  phone
+  desktop
 }
 
 enum EmailDirectionEnum {
@@ -463,6 +495,83 @@ table user_roles {
   }
 }
 
+table audit_items {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  site_audit_id uuid [not null]
+  checklist_key varchar(150) [not null]
+  section varchar(100) [not null]
+  title varchar(255) [not null]
+  url varchar
+  status AuditItemStatusEnum [not null, default: 'pending']
+  message text
+  evidence jsonb
+  duration_ms integer
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    site_audit_id [name: 'auditItem_siteAuditId_idx']
+    checklist_key [name: 'auditItem_checklistKey_idx']
+    status [name: 'auditItem_status_idx']
+    url [name: 'auditItem_url_idx']
+  }
+}
+
+table cwv_snapshots {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  site_audit_id uuid [not null]
+  url varchar(2048) [not null]
+  strategy CwvStrategyEnum [not null]
+  source CwvSourceEnum [not null]
+  lcp "double precision"
+  inp "double precision"
+  cls "double precision"
+  ttfb "double precision"
+  fcp "double precision"
+  performance_score "double precision"
+  country_code varchar(8)
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    site_audit_id [name: 'cwvSnapshot_siteAuditId_idx']
+    url [name: 'cwvSnapshot_url_idx']
+    strategy [name: 'cwvSnapshot_strategy_idx']
+    source [name: 'cwvSnapshot_source_idx']
+    country_code [name: 'cwvSnapshot_countryCode_idx']
+  }
+}
+
+table site_audits {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  company_id uuid [not null]
+  url varchar [not null]
+  name varchar(255) [not null]
+  description text
+  status AuditStatusEnum [not null, default: 'pending']
+  report_image_file_id uuid
+  error text
+  total_items integer [not null, default: 0]
+  completed_items integer [not null, default: 0]
+  passed_items integer [not null, default: 0]
+  failed_items integer [not null, default: 0]
+  started_at "timestamp (3) with time zone"
+  completed_at "timestamp (3) with time zone"
+  triggered_by uuid
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+  updated_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    
+    company_id [name: 'siteAudit_companyId_idx']
+    triggered_by [name: 'siteAudit_triggeredBy_idx']
+    created_at [name: 'siteAudit_createdAt_idx']
+  }
+}
+
 table users {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   name varchar(255) [not null]
@@ -726,6 +835,14 @@ ref: role_permissions.permission_id > permissions.id
 ref: user_roles.role_id > roles.id
 
 ref: user_roles.user_id - users.id
+
+ref: audit_items.site_audit_id > site_audits.id
+
+ref: cwv_snapshots.site_audit_id > site_audits.id
+
+ref: site_audits.company_id > companies.id
+
+ref: site_audits.triggered_by > users.id
 
 ref: user_activities.user_id - users.id
 

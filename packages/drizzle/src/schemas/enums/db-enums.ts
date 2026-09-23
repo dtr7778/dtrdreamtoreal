@@ -2,7 +2,11 @@ import { pgEnum } from "drizzle-orm/pg-core";
 
 import {
   ADDRESS_TYPE,
+  AUDIT_ITEM_STATUS,
+  AUDIT_STATUS,
   CONTACT_STATUS,
+  CWV_SOURCE,
+  CWV_STRATEGY,
   EMAIL_DIRECTION,
   EMAIL_EVENT_TYPE,
   EMAIL_RECIPIENT_TYPE,
@@ -58,3 +62,14 @@ export const SocialMediaTypeEnum = pgEnum(
   "SocialMediaTypeEnum",
   SOCIAL_MEDIA_TYPE
 );
+
+export const AuditStatusEnum = pgEnum("AuditStatusEnum", AUDIT_STATUS);
+
+export const AuditItemStatusEnum = pgEnum(
+  "AuditItemStatusEnum",
+  AUDIT_ITEM_STATUS
+);
+
+export const CwvStrategyEnum = pgEnum("CwvStrategyEnum", CWV_STRATEGY);
+
+export const CwvSourceEnum = pgEnum("CwvSourceEnum", CWV_SOURCE);

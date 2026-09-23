@@ -3,7 +3,11 @@ import z from "zod";
 import {
   ACTION_TYPE,
   ADDRESS_TYPE,
+  AUDIT_ITEM_STATUS,
+  AUDIT_STATUS,
   CONTACT_STATUS,
+  CWV_SOURCE,
+  CWV_STRATEGY,
   EMAIL_DIRECTION,
   EMAIL_EVENT_TYPE,
   EMAIL_RECIPIENT_TYPE,
@@ -80,3 +84,15 @@ export type SocialMediaPlatfromTypeEnumType = z.infer<
 
 export const SocialMediaTypeEnumSchema = z.enum(SOCIAL_MEDIA_TYPE);
 export type SocialMediaTypeEnumType = z.infer<typeof SocialMediaTypeEnumSchema>;
+
+export const AuditStatusEnumSchema = z.enum(AUDIT_STATUS);
+export type AudittatusEnumType = z.infer<typeof AuditStatusEnumSchema>;
+
+export const AuditItemStatusEnumSchema = z.enum(AUDIT_ITEM_STATUS);
+export type AuditItemStatusEnumType = z.infer<typeof AuditItemStatusEnumSchema>;
+
+export const CwvStrategyEnumSchema = z.enum(CWV_STRATEGY);
+export type CwvStrategyEnumType = z.infer<typeof CwvStrategyEnumSchema>;
+
+export const CwvSourceEnumSchema = z.enum(CWV_SOURCE);
+export type CwvSourceEnumType = z.infer<typeof CwvSourceEnumSchema>;

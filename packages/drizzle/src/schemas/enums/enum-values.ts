@@ -1,4 +1,7 @@
-export const FILE_ENTITY_TYPES = ["profile_image"] as const;
+export const FILE_ENTITY_TYPES = [
+  "profile_image",
+  "audit_report_image",
+] as const;
 
 export const ROLES = ["USER", "SUPPORT_AGENT", "ADMIN", "SUPER_ADMIN"] as const;
 
@@ -105,3 +108,27 @@ export const SOCIAL_MEDIA_PLATFROM_TYPE = [
 ] as const;
 
 export const SOCIAL_MEDIA_TYPE = ["person", "company"] as const;
+
+export const AUDIT_STATUS = [
+  "pending",
+  "running",
+  "completed",
+  "failed",
+  "partial",
+  "cancelled",
+] as const;
+
+export const AUDIT_ITEM_STATUS = [
+  "pending",
+  "running",
+  "passed",
+  "failed",
+  "warning",
+  "needs_review",
+  "error",
+  "skipped",
+] as const;
+
+export const CWV_STRATEGY = ["phone", "desktop"] as const;
+
+export const CWV_SOURCE = ["psi", "crux", "crux_history", "bigquery"] as const;
