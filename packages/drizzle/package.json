@@ -22,7 +22,7 @@
       "import": "./src/clients/drizzle-client-withIoRedis.ts",
       "types": "./src/clients/drizzle-client-withIoRedis.ts"
     },
-    "./client/upstashRedis": {
+    "./client/upstash": {
       "import": "./src/clients/drizzle-client-withUpstashRedis.ts",
       "types": "./src/clients/drizzle-client-withUpstashRedis.ts"
     },
