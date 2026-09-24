@@ -3,7 +3,7 @@ import { join } from "node:path";
 import express from "express";
 import type { Container } from "inversify";
 
-import { ExtendedRedis } from "@workspace/lib/redis";
+import { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
 import { BaseServer, ClassConstructor } from "@workspace/lib/server";
 
 import pkg from "../package.json";
@@ -32,7 +32,6 @@ export class Server extends BaseServer {
         allowedOrigins: env.CORS_ORIGIN,
       },
       rateLimitConfig: {
-        algorithm: "slidingWindow",
         window: "10 s",
         requests: 10,
         redisClient: container.get<ExtendedRedis>(CONTAINER_TYPES.Redis),

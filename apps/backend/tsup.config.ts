@@ -12,7 +12,7 @@ config({
 
 const options: OutputOptions = createBuildConfig({
   isDev: process.env.NODE_ENV === "development",
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/worker.ts"],
   format: ["cjs"],
   outDir: "dist",
   name: "Backend",
