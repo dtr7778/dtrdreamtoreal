@@ -42,7 +42,7 @@ export abstract class TestBaseServer implements ITestBaseServer {
     this.init();
 
     this.app.use(notFoundHandler);
-    this.app.use(errorMiddleware());
+    this.app.use(errorMiddleware);
   }
 
   protected abstract init(): void;

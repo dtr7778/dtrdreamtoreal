@@ -4,21 +4,21 @@ import express from "express";
 import { StatusCodes } from "http-status-codes";
 import type { Container } from "inversify";
 
-import type { LoggerConfig } from "../logger";
 import {
   IoRedisRatelimit,
   type IoRedisRatelimitConfig,
 } from "../rate-limit/IoRedisRateLimit.service";
 import { ApiResponse } from "./classes";
 import { API_MESSAGE } from "./constant";
-import { createCsrf, type CsrfConfig } from "./createCsrf";
+import { createCsrf } from "./csrf/createCsrf";
+import type { CsrfConfig } from "./csrf/csrf";
 import {
   cookieParserMiddleware,
   CorsConfig,
   corsMiddleware,
+  csrfErrorMiddleware,
   errorMiddleware,
   jsonMiddleware,
-  loggerMiddleware,
   nonceMiddleware,
   notFoundHandler,
   urlEncoderMiddleware,
@@ -31,6 +31,7 @@ import { OpenApiLoader } from "./services/OpenApiLoader.service";
 import type {
   ClassConstructor,
   IApplication,
+  IInterceptor,
   IRequest,
   IResponse,
 } from "./types";
@@ -51,7 +52,8 @@ export interface BaseServerConfig {
   corsConfig: CorsConfig;
   csrfConfig: CsrfConfig;
   rateLimitConfig: IoRedisRatelimitConfig;
-  loggerConfig: LoggerConfig;
+  interceptors?: readonly ClassConstructor<IInterceptor>[];
+  beforeBodyParser?: (app: IApplication) => void;
 }
 
 export abstract class BaseServer implements IBaseServer {
@@ -78,33 +80,40 @@ export abstract class BaseServer implements IBaseServer {
     this.app.use(corsMiddleware(config.corsConfig));
     this.app.use(cookieParserMiddleware);
 
-    const { generateToken, middleware, CsrfTokenError } = createCsrf(
-      config.csrfConfig
-    );
+    const { generateToken, setCsrfCookie, middleware } = createCsrf({
+      ...config.csrfConfig,
+      basePath: config.basePath,
+    });
+
     this.app.get("/csrf-token", (req, res) => {
+      const token = generateToken(req);
+      setCsrfCookie(res, token);
       apiResponse(res)(
         new ApiResponse({
           statusCode: StatusCodes.OK,
           message: API_MESSAGE.GET_CSRF_TOKEN,
-          data: generateToken(req, res),
+          data: token,
         })
       );
     });
-    this.app.use(middleware);
 
     const rateLimit = new IoRedisRatelimit(config.rateLimitConfig);
     this.app.use(rateLimitMiddleware(rateLimit));
 
-    this.app.use(loggerMiddleware(config.loggerConfig));
+    config.beforeBodyParser?.(this.app);
 
     this.app.use(jsonMiddleware());
+    this.app.use(middleware);
     this.app.use(urlEncoderMiddleware());
+
+    const globalInterceptors = [...(config.interceptors ?? [])];
 
     ControllerLoader.loadAllControllers({
       info: { basePath: config.basePath },
       expressApplication: this.app,
       dependencyContainer: config.container,
       controllerClasses: config.controllerClasses,
+      globalInterceptors,
     });
 
     if (config?.cronJobClasses) {
@@ -125,7 +134,8 @@ export abstract class BaseServer implements IBaseServer {
     });
 
     this.app.use(notFoundHandler);
-    this.app.use(errorMiddleware(CsrfTokenError));
+    this.app.use(csrfErrorMiddleware);
+    this.app.use(errorMiddleware);
   }
 
   protected abstract init(): void;

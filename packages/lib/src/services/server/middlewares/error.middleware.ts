@@ -3,37 +3,25 @@ import { StatusCodes } from "http-status-codes";
 import { MailError } from "../../../utils";
 import { ApiError } from "../classes";
 import { API_MESSAGE } from "../constant";
-import { ICsrfTokenError } from "../createCsrf";
 import type { INextFunction, IRequest, IResponse } from "../types";
 
-export function errorMiddleware(CsrfTokenError?: ICsrfTokenError) {
-  return function (
-    err: unknown,
-    req: IRequest,
-    res: IResponse,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _next: INextFunction
-  ) {
-    const error: ApiError = getServerError(err, CsrfTokenError);
+export function errorMiddleware(
+  err: unknown,
+  _req: IRequest,
+  res: IResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _next: INextFunction
+) {
+  const error: ApiError = getServerError(err);
 
-    const errorData = error.toApiResponse();
+  const errorData = error.toApiResponse();
 
-    return res.status(errorData.statusCode).json(errorData);
-  };
+  return res.status(errorData.statusCode).json(errorData);
 }
 
-function getServerError(
-  err: unknown,
-  CsrfTokenError?: ICsrfTokenError
-): ApiError {
+function getServerError(err: unknown): ApiError {
   if (err instanceof ApiError) {
     return err;
-  }
-  if (CsrfTokenError && err === CsrfTokenError) {
-    return new ApiError({
-      statusCode: StatusCodes.FORBIDDEN,
-      message: API_MESSAGE.INVALID_CSRF,
-    });
   }
   if (err instanceof MailError) {
     return new ApiError({
