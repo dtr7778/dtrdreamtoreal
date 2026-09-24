@@ -16,6 +16,7 @@ export const RESOURCE_TYPE = [
   "contact",
   "company",
   "company_employee",
+  "site_audit",
 ] as const;
 export const ACTION_TYPE = [
   "create",

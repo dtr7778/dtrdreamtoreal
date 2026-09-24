@@ -47,6 +47,10 @@ export const rolesAndPermissionData: Array<{
       // Employee permissions
       "system.company_employee.read",
       "system.company_employee.list",
+
+      // Site audit permissions
+      "system.site_audit.read",
+      "system.site_audit.list",
     ],
   },
   {
@@ -85,6 +89,13 @@ export const rolesAndPermissionData: Array<{
       "system.company_employee.create",
       "system.company_employee.update",
       "system.company_employee.delete",
+
+      // Site audit permissions
+      "system.site_audit.read",
+      "system.site_audit.list",
+      "system.site_audit.create",
+      "system.site_audit.update",
+      "system.site_audit.delete",
     ],
   },
   {
@@ -110,6 +121,9 @@ export const rolesAndPermissionData: Array<{
       // Employee permissions
       "system.company_employee.manage",
       "system.company_employee.export",
+
+      // Site audit permissions
+      "system.site_audit.manage",
     ],
   },
 ];

@@ -77,7 +77,13 @@ INSERT INTO public.permissions (name, level, resource, action, description)
 		('system.company_employee.update', 'system', 'company_employee', 'update', 'Edit any employee"s information'),
 		('system.company_employee.delete', 'system', 'company_employee', 'delete', 'Remove employees from the system permanently'),
 		('system.company_employee.manage', 'system', 'company_employee', 'manage', 'Full employee administration'),
-		('system.company_employee.export', 'system', 'company_employee', 'export', 'Export employee data to CSV or other formats');
+		('system.company_employee.export', 'system', 'company_employee', 'export', 'Export employee data to CSV or other formats'),
+		('system.site_audit.create', 'system', 'site_audit', 'create', 'Create new site audits in the system'),
+		('system.site_audit.read', 'system', 'site_audit', 'read', 'View any site audit"s details and results'),
+		('system.site_audit.list', 'system', 'site_audit', 'list', 'List all site audits with filters and pagination'),
+		('system.site_audit.update', 'system', 'site_audit', 'update', 'Edit any site audit"s information'),
+		('system.site_audit.delete', 'system', 'site_audit', 'delete', 'Remove site audits from the system permanently'),
+		('system.site_audit.manage', 'system', 'site_audit', 'manage', 'Full site audit administration');
 
 DELETE FROM public.roles;
 INSERT INTO public.roles (role_name, description)
@@ -106,6 +112,8 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('SUPPORT_AGENT', 'system.company.list'),
 		('SUPPORT_AGENT', 'system.company_employee.read'),
 		('SUPPORT_AGENT', 'system.company_employee.list'),
+		('SUPPORT_AGENT', 'system.site_audit.read'),
+		('SUPPORT_AGENT', 'system.site_audit.list'),
 		('ADMIN', 'self.user.read'),
 		('ADMIN', 'self.user.update'),
 		('ADMIN', 'system.role-permission.list'),
@@ -129,6 +137,11 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('ADMIN', 'system.company_employee.create'),
 		('ADMIN', 'system.company_employee.update'),
 		('ADMIN', 'system.company_employee.delete'),
+		('ADMIN', 'system.site_audit.read'),
+		('ADMIN', 'system.site_audit.list'),
+		('ADMIN', 'system.site_audit.create'),
+		('ADMIN', 'system.site_audit.update'),
+		('ADMIN', 'system.site_audit.delete'),
 		('SUPER_ADMIN', 'self.user.read'),
 		('SUPER_ADMIN', 'self.user.update'),
 		('SUPER_ADMIN', 'system.role-permission.list'),
@@ -140,7 +153,8 @@ WITH role_perm_mapping (role_name, permission_name) AS (
 		('SUPER_ADMIN', 'system.company.manage'),
 		('SUPER_ADMIN', 'system.company.export'),
 		('SUPER_ADMIN', 'system.company_employee.manage'),
-		('SUPER_ADMIN', 'system.company_employee.export')
+		('SUPER_ADMIN', 'system.company_employee.export'),
+		('SUPER_ADMIN', 'system.site_audit.manage')
  )
  INSERT INTO public.role_permissions (role_id, permission_id)
  SELECT r.id, p.id

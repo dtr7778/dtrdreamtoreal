@@ -496,6 +496,44 @@ const systemPermissions: CreatePermissionType[] = [
     action: "export",
     description: "Export employee data to CSV or other formats",
   },
+
+  // Site Audit
+  {
+    level: "system",
+    resource: "site_audit",
+    action: "create",
+    description: "Create new site audits in the system",
+  },
+  {
+    level: "system",
+    resource: "site_audit",
+    action: "read",
+    description: 'View any site audit"s details and results',
+  },
+  {
+    level: "system",
+    resource: "site_audit",
+    action: "list",
+    description: "List all site audits with filters and pagination",
+  },
+  {
+    level: "system",
+    resource: "site_audit",
+    action: "update",
+    description: 'Edit any site audit"s information',
+  },
+  {
+    level: "system",
+    resource: "site_audit",
+    action: "delete",
+    description: "Remove site audits from the system permanently",
+  },
+  {
+    level: "system",
+    resource: "site_audit",
+    action: "manage",
+    description: "Full site audit administration",
+  },
 ];
 
 export const permissionsData: CreatePermissionType[] = [
