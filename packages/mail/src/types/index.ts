@@ -5,17 +5,29 @@ import type {
 } from "resend";
 
 import { DatabaseType } from "@workspace/drizzle/client";
-import type { IRatelimit } from "@workspace/lib/rate-limit";
-import type { ExtendedRedis } from "@workspace/lib/redis";
+import type { IUpstashRatelimit } from "@workspace/lib/rate-limit/upstash";
+import type { ExtendedRedis } from "@workspace/lib/redis/upstash";
 
 export interface QstashMailConfig {
   database: DatabaseType;
   redisClient: ExtendedRedis;
-  minRatelimit: IRatelimit;
-  hourRatelimit: IRatelimit;
+  minRatelimit: IUpstashRatelimit;
+  hourRatelimit: IUpstashRatelimit;
   callbackUrl: string;
   receiptCallbackUrl: string;
   failureCallbackUrl: string;
+  dedupWindowSeconds?: number;
+}
+
+/**
+ * Config accepted by the BullMQ-backed mail service.
+ *
+ * No callback URLs: the backend worker processes the job (loads the persisted
+ * email by id and sends it) and updates the shared database directly.
+ */
+export interface BullmqMailConfig {
+  database: DatabaseType;
+  redisClient: ExtendedRedis;
   dedupWindowSeconds?: number;
 }
 
@@ -34,6 +46,15 @@ export interface QstashMailResult {
   qMessageId?: string;
   error?: string;
   deduplicationId?: string;
+}
+
+/** Result shape returned by the BullMQ-backed mail service. */
+export interface BullmqMailResult {
+  success: boolean;
+  emailId?: string;
+  threadId?: string;
+  messageId?: string;
+  error?: string;
 }
 
 export interface IMailTransport {

@@ -1,11 +1,11 @@
 import { Column, Row, Section, Text } from "react-email";
 
-import { EmailButton } from "../../shared/EmailButton";
+import { EmailButton } from "../../components/EmailButton";
 import {
   EmailHeading,
   EmailInfoCard,
   EmailLayout,
-} from "../../shared/EmailLayout";
+} from "../../components/EmailLayout";
 
 export interface RoleChangedMailProps {
   userName: string;

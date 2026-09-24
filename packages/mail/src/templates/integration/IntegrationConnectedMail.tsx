@@ -1,12 +1,12 @@
 import { Column, Row, Section, Text } from "react-email";
 
-import { EmailButton } from "../../shared/EmailButton";
+import { EmailButton } from "../../components/EmailButton";
 import {
   EmailHeading,
   EmailInfoCard,
   EmailLayout,
-} from "../../shared/EmailLayout";
-import { EmailLink } from "../../shared/EmailLink";
+} from "../../components/EmailLayout";
+import { EmailLink } from "../../components/EmailLink";
 
 export interface IntegrationConnectedMailProps {
   adminName: string;

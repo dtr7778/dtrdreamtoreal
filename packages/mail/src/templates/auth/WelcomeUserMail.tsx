@@ -1,8 +1,8 @@
 import { Section, Text } from "react-email";
 
-import { EmailButton } from "../../shared/EmailButton";
-import { EmailHeading, EmailLayout } from "../../shared/EmailLayout";
-import { EmailLink } from "../../shared/EmailLink";
+import { EmailButton } from "../../components/EmailButton";
+import { EmailHeading, EmailLayout } from "../../components/EmailLayout";
+import { EmailLink } from "../../components/EmailLink";
 
 export interface WelcomeUserMailProps {
   userName: string;

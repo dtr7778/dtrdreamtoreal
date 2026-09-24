@@ -138,7 +138,6 @@ export abstract class QstashMailService
     const to = this.emailService
       .normalizeRecipients(options.to)
       .map((r) => r.email)
-      .sort()
       .join(",");
     return this.generateDedupKey(`mail:${to}|${options.subject}`, "mail");
   }

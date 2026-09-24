@@ -15,11 +15,10 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./error": "./src/MailError.ts",
     "./components/*": "./src/components/*.tsx"
   },
   "scripts": {
-    "dev": "email dev --dir='./src/mail-templates/' --port=8088",
+    "dev": "email dev --dir='./src/templates/' --port=8088",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"

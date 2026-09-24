@@ -1,16 +1,21 @@
 import { QstashServiceConfig } from "@workspace/lib/qstash";
 
-import { ResendMailTransport } from "./ResendMail.transport";
-import { IMailService, MailService } from "./services/Mail.service";
-import { MailServiceConfig, QstashMailConfig } from "./types";
+import {
+  IQstashMailerService,
+  QstashMailerService,
+} from "../services/QstashMailer.service";
+import { ResendMailTransport } from "../transports/ResendMail.transport";
+import { MailServiceConfig, QstashMailConfig } from "../types";
 
-type MailConfig = MailServiceConfig &
+type QstashMailerConfig = MailServiceConfig &
   QstashServiceConfig &
   QstashMailConfig & {
     resendApiKey: string;
   };
 
-export function createMail(configs: MailConfig): IMailService {
+export function createQstashMailer(
+  configs: QstashMailerConfig
+): IQstashMailerService {
   const qstashConfig: QstashServiceConfig = {
     redisClient: configs.redisClient,
     baseUrl: configs.baseUrl,
@@ -18,7 +23,6 @@ export function createMail(configs: MailConfig): IMailService {
     currentSigningKey: configs.currentSigningKey,
     nextSigningKey: configs.nextSigningKey,
     defaultQueue: configs.defaultQueue,
-    defaultTopic: configs.defaultTopic,
     defaultRetries: configs.defaultRetries,
     defaultRetryDelay: configs.defaultRetryDelay,
   };
@@ -42,7 +46,7 @@ export function createMail(configs: MailConfig): IMailService {
 
   const mailTransport = new ResendMailTransport(configs.resendApiKey);
 
-  return new MailService(
+  return new QstashMailerService(
     mailServiceConfig,
     qstashMailConfig,
     qstashConfig,

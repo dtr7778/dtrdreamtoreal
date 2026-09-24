@@ -4,7 +4,7 @@ import {
   EmailHeading,
   EmailInfoCard,
   EmailLayout,
-} from "../../shared/EmailLayout";
+} from "../../components/EmailLayout";
 
 export interface PasswordChangedMailProps {
   userName: string;
