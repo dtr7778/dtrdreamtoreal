@@ -17,11 +17,18 @@ export const env = createEnv({
       .default("8000")
       .transform((arg) => parseInt(arg)),
     CSRF_TOKEN: z.string().min(1),
+    BULLMQ_SIGNING_SECRET: z.string().min(1),
+    RESEND_API_KEY: z.string().min(1),
     API_LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace"])
       .default("info"),
-    REDIS_REST_URL: z.url().min(1),
-    REDIS_REST_TOKEN: z.string().min(1),
+    REDIS_HOST: z.string().min(1),
+    REDIS_PORT: z
+      .string()
+      .default("6379")
+      .transform((arg) => parseInt(arg)),
+    REDIS_USERNAME: z.string().min(1),
+    REDIS_PASSWORD: z.string().min(1),
     CORS_ORIGIN: z
       .string()
       .min(1)
@@ -31,6 +38,16 @@ export const env = createEnv({
           .map((o) => o.trim())
           .filter(Boolean)
       ),
+    GOOGLE_PSI_BASE_URL: z
+      .url()
+      .default("https://www.googleapis.com/pagespeedonline/v5"),
+    GOOGLE_PSI_API_KEY: z.string().default(""),
+    GOOGLE_CRUX_BASE_URL: z
+      .url()
+      .default("https://chromeuxreport.googleapis.com/v1"),
+    GOOGLE_CRUX_API_KEY: z.string().default(""),
+    RESEND_INBOUND_WEBHOOK_SECRET: z.string().min(1),
+    RESEND_OUTBOUND_WEBHOOK_SECRET: z.string().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -41,19 +58,41 @@ export const env = createEnv({
             "postgresql://postgres:postgres@localhost:5432/postgres",
           BACKEND_PORT: "8000",
           CSRF_TOKEN: "csrf_token",
+          BULLMQ_SIGNING_SECRET: "bullmq_signing_secret",
+          RESEND_API_KEY: "re_any_key_works",
           API_LOG_LEVEL: "info",
-          REDIS_REST_URL: "http://localhost:6379",
-          REDIS_REST_TOKEN: "token",
+          REDIS_HOST: "localhost",
+          REDIS_PORT: "6379",
+          REDIS_USERNAME: "default",
+          REDIS_PASSWORD: "12345678",
           CORS_ORIGIN: "http://localhost:3000",
+          GOOGLE_PSI_API_KEY: "google_psi_api_key",
+          GOOGLE_PSI_BASE_URL: "https://www.googleapis.com/pagespeedonline/v5",
+          GOOGLE_CRUX_API_KEY: "google_crux_api_key",
+          GOOGLE_CRUX_BASE_URL: "https://chromeuxreport.googleapis.com/v1",
+          RESEND_INBOUND_WEBHOOK_SECRET: "resend_inbound_webhook_secret",
+          RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
           DATABASE_URL: process.env.DATABASE_URL,
           BACKEND_PORT: process.env.BACKEND_PORT,
           CSRF_TOKEN: process.env.CSRF_TOKEN,
+          BULLMQ_SIGNING_SECRET: process.env.BULLMQ_SIGNING_SECRET,
+          RESEND_API_KEY: process.env.RESEND_API_KEY,
           API_LOG_LEVEL: process.env.API_LOG_LEVEL,
-          REDIS_REST_URL: process.env.REDIS_REST_URL,
-          REDIS_REST_TOKEN: process.env.REDIS_REST_TOKEN,
+          REDIS_HOST: process.env.REDIS_HOST,
+          REDIS_PORT: process.env.REDIS_PORT,
+          REDIS_USERNAME: process.env.REDIS_USERNAME,
+          REDIS_PASSWORD: process.env.REDIS_PASSWORD,
           CORS_ORIGIN: process.env.CORS_ORIGIN,
+          GOOGLE_PSI_API_KEY: process.env.GOOGLE_PSI_API_KEY,
+          GOOGLE_PSI_BASE_URL: process.env.GOOGLE_PSI_BASE_URL,
+          GOOGLE_CRUX_API_KEY: process.env.GOOGLE_CRUX_API_KEY,
+          GOOGLE_CRUX_BASE_URL: process.env.GOOGLE_CRUX_BASE_URL,
+          RESEND_INBOUND_WEBHOOK_SECRET:
+            process.env.RESEND_INBOUND_WEBHOOK_SECRET,
+          RESEND_OUTBOUND_WEBHOOK_SECRET:
+            process.env.RESEND_OUTBOUND_WEBHOOK_SECRET,
         },
 });
