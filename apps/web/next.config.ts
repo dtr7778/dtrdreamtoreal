@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     "@workspace/drizzle",
     "@workspace/lib",
     "@workspace/mail",
+    "@workspace/contract",
   ],
   allowedDevOrigins: [process.env.NGROK_URL!],
   typedRoutes: true,
