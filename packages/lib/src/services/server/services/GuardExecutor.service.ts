@@ -33,6 +33,7 @@ export class GuardExecutorService {
   public static sendForbiddenResponse(response: IResponse): void {
     apiResponse(response)(
       new ApiResponse({
+        success: false,
         message: API_MESSAGE.FORBIDDEN,
         statusCode: StatusCodes.FORBIDDEN,
         data: null,

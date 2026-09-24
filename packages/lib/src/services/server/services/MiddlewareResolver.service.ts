@@ -35,6 +35,7 @@ export class MiddlewareResolverService {
         const middlewareInstance =
           dependencyContainer.get<IMiddleware>(middlewareClass);
         await middlewareInstance.execute(executionContext);
+        nextFunction();
       } catch (error) {
         nextFunction(error);
       }
