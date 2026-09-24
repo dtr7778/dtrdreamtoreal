@@ -6,7 +6,7 @@
  * The publisher is app-specific: it maps `queue`/`job` onto the matching
  * backend contract (e.g. the mail queue) and ships {@link payload}.
  */
-export interface BullmqEnqueueRequest<T = unknown> {
+export interface BullmqEnqueueRequest<T> {
   /** Logical queue key, used by the publisher to pick the backend contract. */
   queue: string;
   /** Job name forwarded to the backend queue. */
@@ -37,7 +37,7 @@ export interface BullmqEnqueueResult {
  */
 export interface IBullmqPublisher {
   /** Enqueue a single signed request. */
-  enqueue<T = unknown>(
+  enqueue<T>(
     request: BullmqEnqueueRequest<T>,
     signature: string
   ): Promise<BullmqEnqueueResult>;
