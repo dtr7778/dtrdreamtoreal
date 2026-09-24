@@ -16,7 +16,10 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "exports": {
     "./types": "./src/types/index.ts",
@@ -46,17 +49,19 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "catalog:",
-    "@types/http-errors": "^2.0.5",
     "@types/ioredis-mock": "catalog:",
     "@types/node": "catalog:",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
     "eslint": "catalog:",
     "ioredis-mock": "catalog:",
+    "reflect-metadata": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@workspace/drizzle": "workspace:*",
     "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@date-fns/tz": "catalog:",
     "@scalar/express-api-reference": "^0.10.18",
@@ -67,12 +72,10 @@
     "bullmq": "catalog:",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "csrf-csrf": "^4.0.3",
     "date-fns": "catalog:",
     "express": "catalog:",
     "express-rate-limit": "catalog:",
     "helmet": "^8.3.0",
-    "http-errors": "^2.0.1",
     "http-status-codes": "catalog:",
     "inversify": "catalog:",
     "ioredis": "catalog:",
