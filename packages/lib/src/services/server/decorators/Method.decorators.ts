@@ -8,7 +8,7 @@ function createHttpMethodDecorator(
 ) {
   return function (
     path: string,
-    contract: Omit<ContractOutputs, "method" | "path">
+    contract?: Omit<ContractOutputs, "method" | "path">
   ): MethodDecorator {
     return function (target: object, propertyKey: string | symbol) {
       const controllerClass = target.constructor;

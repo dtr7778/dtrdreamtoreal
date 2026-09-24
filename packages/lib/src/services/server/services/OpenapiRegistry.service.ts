@@ -20,7 +20,10 @@ export class OpenApiRegistryService {
       REFLECT_KEYS.ROUTE_DOCS,
       controllerDefinition.controllerClass,
       routeDefinition.handlerMethodName
-    ) as ContractOutputs;
+    ) as ContractOutputs | undefined;
+
+    // Routes without a contract (e.g. webhooks) are intentionally undocumented.
+    if (!routeDocumentation) return;
 
     const { input, output, meta } = routeDocumentation;
     const { body, params, query } = input.shape;
