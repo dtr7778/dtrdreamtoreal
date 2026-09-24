@@ -11,7 +11,12 @@ export function corsMiddleware(config: CorsConfig) {
     return cors({
       methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,
-      allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "x-csrf-token",
+      ],
       optionsSuccessStatus: 200,
       origin: (
         origin: string | undefined,
