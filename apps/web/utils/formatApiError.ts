@@ -1,3 +1,4 @@
+import { BullmqError } from "@workspace/lib/bullmq/error";
 import { QstashError } from "@workspace/lib/qstash/error";
 import { MailError, ServiceError } from "@workspace/lib/utils";
 
@@ -8,6 +9,13 @@ export interface FormattedError {
 
 export function formatApiError(error: unknown): FormattedError {
   if (error instanceof QstashError) {
+    return {
+      message: error.message,
+      statusCode: error.statusCode,
+    };
+  }
+
+  if (error instanceof BullmqError) {
     return {
       message: error.message,
       statusCode: error.statusCode,

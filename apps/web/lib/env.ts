@@ -21,6 +21,7 @@ export const env = createEnv({
     QSTASH_TOKEN: z.string().min(1),
     QSTASH_CURRENT_SIGNING_KEY: z.string().min(1),
     QSTASH_NEXT_SIGNING_KEY: z.string().min(1),
+    BULLMQ_SIGNING_SECRET: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
     RESEND_INBOUND_WEBHOOK_SECRET: z.string().min(1),
     RESEND_OUTBOUND_WEBHOOK_SECRET: z.string().min(1),
@@ -62,6 +63,7 @@ export const env = createEnv({
           QSTASH_TOKEN: "token",
           QSTASH_CURRENT_SIGNING_KEY: "current_signing_key",
           QSTASH_NEXT_SIGNING_KEY: "next_signing_key",
+          BULLMQ_SIGNING_SECRET: "bullmq_signing_secret",
           RESEND_API_KEY: "re_any_key_works",
           RESEND_INBOUND_WEBHOOK_SECRET: "resend_inbound_webhook_secret",
           RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
@@ -92,6 +94,7 @@ export const env = createEnv({
           QSTASH_TOKEN: process.env.QSTASH_TOKEN,
           QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
           QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+          BULLMQ_SIGNING_SECRET: process.env.BULLMQ_SIGNING_SECRET,
           RESEND_API_KEY: process.env.RESEND_API_KEY,
           RESEND_INBOUND_WEBHOOK_SECRET:
             process.env.RESEND_INBOUND_WEBHOOK_SECRET,

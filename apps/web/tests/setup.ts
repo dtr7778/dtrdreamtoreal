@@ -1,12 +1,17 @@
 import { afterAll, afterEach, vi } from "vitest";
 
-import { createMockDrizzleClient } from "@workspace/drizzle/client/mock";
-import { createMockRateLimit } from "@workspace/lib/rate-limit/mock";
-import { createMockRedisClient } from "@workspace/lib/redis/mock";
+import {
+  createMockDrizzleClient,
+  MockDatabaseType,
+} from "@workspace/drizzle/client/mock";
+import { createMockRateLimit } from "@workspace/lib/rate-limit/upstash/mock";
+import { createMockRedisClient } from "@workspace/lib/redis/upstash/mock";
 import { createMockSupabaseClient } from "@workspace/lib/supabase/client/mock";
 
+let db: MockDatabaseType;
+
 vi.mock("@/lib/db", async () => {
-  const db = await createMockDrizzleClient();
+  db = await createMockDrizzleClient();
   return { db };
 });
 
@@ -53,4 +58,5 @@ afterEach(() => {
 
 afterAll(() => {
   vi.clearAllMocks();
+  db.$client.close();
 });

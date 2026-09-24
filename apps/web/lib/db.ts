@@ -3,7 +3,7 @@ import "server-only";
 import {
   createDrizzleClient,
   type DatabaseType,
-} from "@workspace/drizzle/client";
+} from "@workspace/drizzle/client/upstashRedis";
 
 import { env } from "./env";
 

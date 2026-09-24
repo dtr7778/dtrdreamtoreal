@@ -1,4 +1,4 @@
-import { createRatelimit } from "@workspace/lib/rate-limit";
+import { createRatelimit } from "@workspace/lib/rate-limit/upstash";
 
 import { redisClient } from "./redis-client";
 
@@ -21,7 +21,7 @@ export const qstashMinRateLimit = createRatelimit({
   requests: 100,
   window: "1 m",
   algorithm: "slidingWindow",
-  prefix: "qstash-ratelimit:min",
+  prefix: "ratelimit:qstash:min",
 });
 
 export const qstashHourlyRateLimit = createRatelimit({
@@ -29,5 +29,21 @@ export const qstashHourlyRateLimit = createRatelimit({
   requests: 1000,
   window: "1 h",
   algorithm: "slidingWindow",
-  prefix: "qstash-ratelimit:hr",
+  prefix: "ratelimit:qstash:hr",
+});
+
+export const bullmqMinRateLimit = createRatelimit({
+  redisClient: redisClient,
+  requests: 100,
+  window: "1 m",
+  algorithm: "slidingWindow",
+  prefix: "ratelimit:bullmq:min",
+});
+
+export const bullmqHourlyRateLimit = createRatelimit({
+  redisClient: redisClient,
+  requests: 1000,
+  window: "1 h",
+  algorithm: "slidingWindow",
+  prefix: "ratelimit:bullmq:hr",
 });
