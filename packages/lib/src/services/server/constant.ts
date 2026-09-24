@@ -17,7 +17,19 @@ export const REFLECT_KEYS = {
   PARAMS: "reflection:parameters:metadata",
   CRON_JOB_CLASS: "reflection:cronJobClass:metadata",
   CRON_JOB_METHOD: "reflection:cronJobMethod:metadata",
+  BULLMQ_WORKER: "reflection:bullmq:worker:metadata",
+  BULLMQ_WORKER_NODE: "reflection:bullmq:workerNode:metadata",
+  BULLMQ_WORKER_EVENT: "reflection:bullmq:workerEvent:metadata",
 };
+
+export const BULL_QUEUE_TOKEN_PREFIX = "bullmq:queue:";
+
+/**
+ * Builds the InversifyJS token used to bind/inject a BullMQ Queue.
+ */
+export function getQueueToken(queueName: string): string {
+  return `${BULL_QUEUE_TOKEN_PREFIX}${queueName}`;
+}
 
 export enum ParameterType {
   REQUEST = "request",

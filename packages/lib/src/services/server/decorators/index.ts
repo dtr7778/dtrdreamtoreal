@@ -1,3 +1,4 @@
+export * from "./bullmq";
 export * from "./Controller.decorator";
 export * from "./CronJob.decorator";
 export * from "./Filter.decorator";

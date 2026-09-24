@@ -10,6 +10,10 @@ import type {
   IParameterMetadata,
   IRouteDefinition,
   IRouteMetadata,
+  IWorkerDefinition,
+  IWorkerEventDefinition,
+  IWorkerMetadata,
+  IWorkerNodeDefinition,
 } from "../types";
 
 export class MetadataExtractorService {
@@ -130,6 +134,55 @@ export class MetadataExtractorService {
       jobClass: cronJobClass,
       jobInstance: dependencyContainer.get(cronJobClass),
       cronJobs,
+    };
+  }
+
+  public static extractWorkerMetadata(
+    dependencyContainer: Container,
+    workerClass: ClassConstructor
+  ): IWorkerMetadata | null {
+    const definition = Reflect.getMetadata(
+      REFLECT_KEYS.BULLMQ_WORKER,
+      workerClass
+    ) as IWorkerDefinition | undefined;
+
+    if (!definition) {
+      return null;
+    }
+
+    // Auto-register the worker so it can be resolved from the container
+    // without requiring an explicit binding.
+    if (!dependencyContainer.isBound(workerClass)) {
+      const binding = dependencyContainer.bind(workerClass).to(workerClass);
+
+      switch (definition.scope) {
+        case "Transient":
+          binding.inTransientScope();
+          break;
+        case "Request":
+          binding.inRequestScope();
+          break;
+        default:
+          binding.inSingletonScope();
+      }
+    }
+
+    const workerNodes =
+      (Reflect.getMetadata(REFLECT_KEYS.BULLMQ_WORKER_NODE, workerClass) as
+        | IWorkerNodeDefinition[]
+        | undefined) ?? [];
+
+    const workerEvents =
+      (Reflect.getMetadata(REFLECT_KEYS.BULLMQ_WORKER_EVENT, workerClass) as
+        | IWorkerEventDefinition[]
+        | undefined) ?? [];
+
+    return {
+      workerClass,
+      workerInstance: dependencyContainer.get(workerClass),
+      definition,
+      workerNodes,
+      workerEvents,
     };
   }
 }
