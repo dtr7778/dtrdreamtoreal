@@ -8,7 +8,7 @@ import {
   AUTH_ROUTES,
   DEFAULT_AUTH_PATH,
   DEFAULT_UNAUTH_PATH,
-  PUBLIC_ROUTES,
+  isPublicPath,
 } from "@/constants";
 import type { RoutePathType } from "@/types";
 
@@ -28,7 +28,7 @@ async function signOut(headers: Headers) {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname as RoutePathType);
+  const isPublicRoute = isPublicPath(pathname);
   const isAuthRoute = AUTH_ROUTES.includes(pathname as RoutePathType);
 
   const sessionCookie = getSessionCookie(request);

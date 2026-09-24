@@ -21,6 +21,14 @@ export const AUTH_ROUTES: Array<RoutePathType> = [
 
 export const PUBLIC_ROUTES: Array<RoutePathType> = [...AUTH_ROUTES, "/"];
 
+export const PUBLIC_ROUTE_PREFIXES = ["/report/"] as const;
+
+export function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_ROUTES.includes(pathname as RoutePathType)) return true;
+
+  return PUBLIC_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export const DEFAULT_PAGE_INDEX: number = 1;
 export const DEFAULT_PAGE_SIZE: number = 20;
 
