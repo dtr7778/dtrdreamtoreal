@@ -3,5 +3,6 @@ export * from "./csv";
 export * from "./formatDate";
 export * from "./formatEnum";
 export * from "./formatError";
+export * from "./permission";
 export * from "./ServiceError";
 export * from "./MailError";
