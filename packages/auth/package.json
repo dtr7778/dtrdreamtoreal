@@ -1,0 +1,60 @@
+{
+  "name": "@workspace/auth",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./access-control": {
+      "import": "./src/access-control.ts",
+      "types": "./src/access-control.ts"
+    },
+    "./auth-client": {
+      "import": "./src/auth-client.ts",
+      "types": "./src/auth-client.ts"
+    },
+    "./ioRedis-secondary-storage": {
+      "import": "./src/secondary-storage/ioRedis.ts",
+      "types": "./src/secondary-storage/ioRedis.ts"
+    },
+    "./upstashRedis-secondary-storage": {
+      "import": "./src/secondary-storage/upstash.ts",
+      "types": "./src/secondary-storage/upstash.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "catalog:",
+    "@workspace/drizzle": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "@workspace/mail": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "ua-parser-js": "catalog:"
+  }
+}
