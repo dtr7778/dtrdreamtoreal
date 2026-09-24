@@ -5,7 +5,7 @@ import {
   UpstashRatelimit,
 } from "./UpstashRateLimit.service";
 
-export interface RatelimitFactoryConfig {
+interface RatelimitFactoryConfig {
   redisClient: ExtendedRedis;
   requests: number;
   window: Duration;
@@ -15,7 +15,7 @@ export interface RatelimitFactoryConfig {
   burst?: number;
 }
 
-export function createRatelimit({
+function createRatelimit({
   redisClient,
   requests,
   window,
@@ -34,3 +34,5 @@ export function createRatelimit({
     burst,
   });
 }
+
+export { createRatelimit, type IUpstashRatelimit, type RatelimitFactoryConfig };

@@ -1,30 +1,29 @@
+import rateLimit from "express-rate-limit";
 import { StatusCodes } from "http-status-codes";
 
-import type { IRatelimit } from "../../rate-limit";
+import type { IIoRedisRatelimit } from "../../rate-limit/IoRedisRateLimit.service";
 import { ApiError } from "../classes/ApiError";
 import { API_MESSAGE } from "../constant";
-import { INextFunction, IRequest, IResponse } from "../types";
+import type { INextFunction, IRequest, IResponse } from "../types";
 
-export function rateLimitMiddleware(ratelimit: IRatelimit) {
-  return async function (req: IRequest, res: IResponse, next: INextFunction) {
-    const { success, limit, remaining, reset } = await ratelimit.limit(
-      `${req.ip}`
-    );
-
-    res.setHeader("X-RateLimit-Limit", limit);
-    res.setHeader("X-RateLimit-Remaining", remaining);
-    res.setHeader("X-RateLimit-Reset", reset);
-
-    if (!success) {
-      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
-      res.setHeader("X-RateLimit-Retry-After", retryAfter);
-
-      throw new ApiError({
-        message: API_MESSAGE.RATE_LIMIT,
-        statusCode: StatusCodes.TOO_MANY_REQUESTS,
-      });
-    }
-
-    next();
-  };
+export function rateLimitMiddleware(ratelimit: IIoRedisRatelimit) {
+  return rateLimit({
+    store: ratelimit.store,
+    windowMs: ratelimit.windowMs,
+    limit: ratelimit.requests,
+    standardHeaders: true,
+    legacyHeaders: true,
+    handler: (
+      _request: IRequest,
+      _response: IResponse,
+      next: INextFunction
+    ) => {
+      next(
+        new ApiError({
+          statusCode: StatusCodes.TOO_MANY_REQUESTS,
+          message: API_MESSAGE.RATE_LIMIT,
+        })
+      );
+    },
+  });
 }

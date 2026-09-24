@@ -6,9 +6,9 @@ import type { Container } from "inversify";
 
 import type { LoggerConfig } from "../logger";
 import {
-  UpstashRatelimit,
-  UpstashRatelimitConfig,
-} from "../rate-limit/upstashRateLimit.service";
+  IoRedisRatelimit,
+  type IoRedisRatelimitConfig,
+} from "../rate-limit/IoRedisRateLimit.service";
 import { ApiResponse } from "./classes";
 import { API_MESSAGE } from "./constant";
 import { createCsrf, type CsrfConfig } from "./createCsrf";
@@ -50,12 +50,13 @@ export interface BaseServerConfig {
   basePath?: string;
   corsConfig: CorsConfig;
   csrfConfig: CsrfConfig;
-  rateLimitConfig: UpstashRatelimitConfig;
+  rateLimitConfig: IoRedisRatelimitConfig;
   loggerConfig: LoggerConfig;
 }
 
 export abstract class BaseServer implements IBaseServer {
   protected readonly app: IApplication;
+  private server?: http.Server;
 
   constructor(config: BaseServerConfig) {
     this.app = express();
@@ -91,7 +92,7 @@ export abstract class BaseServer implements IBaseServer {
     });
     this.app.use(middleware);
 
-    const rateLimit = new UpstashRatelimit(config.rateLimitConfig);
+    const rateLimit = new IoRedisRatelimit(config.rateLimitConfig);
     this.app.use(rateLimitMiddleware(rateLimit));
 
     this.app.use(loggerMiddleware(config.loggerConfig));
@@ -134,9 +135,9 @@ export abstract class BaseServer implements IBaseServer {
   }
 
   public listen(port: number, hostName: string = "0.0.0.0") {
-    const server = http.createServer(this.app);
+    this.server = http.createServer(this.app);
 
-    server.listen(port, hostName, () => {
+    this.server.listen(port, hostName, () => {
       console.log(`🚀 Server running on http://localhost:${port}`);
     });
   }
