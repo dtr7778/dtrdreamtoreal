@@ -1,4 +1,4 @@
-import { BullmqServiceConfig } from "@workspace/lib/bullmq";
+import { BullmqClientServiceConfig } from "@workspace/lib/bullmq";
 
 import {
   BullmqMailerService,
@@ -7,13 +7,13 @@ import {
 import { BullmqMailConfig, MailServiceConfig } from "../types";
 
 type BullmqMailConfigFull = MailServiceConfig &
-  BullmqServiceConfig &
+  BullmqClientServiceConfig &
   BullmqMailConfig;
 
 export function createBullmqMailer(
   configs: BullmqMailConfigFull
 ): IBullmqMailerService {
-  const bullmqConfig: BullmqServiceConfig = {
+  const bullmqConfig: BullmqClientServiceConfig = {
     signingSecret: configs.signingSecret,
     publisher: configs.publisher,
     defaultRetries: configs.defaultRetries,

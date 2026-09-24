@@ -1,4 +1,4 @@
-import { type BullmqServiceConfig } from "@workspace/lib/bullmq";
+import { type BullmqClientServiceConfig } from "@workspace/lib/bullmq";
 
 import {
   BullmqMailConfig,
@@ -20,7 +20,7 @@ export class BullmqMailerService
   constructor(
     public readonly mailConfig: MailServiceConfig,
     bullmqMailConfig: BullmqMailConfig,
-    bullmqConfig: BullmqServiceConfig
+    bullmqConfig: BullmqClientServiceConfig
   ) {
     super(bullmqMailConfig, bullmqConfig);
   }
