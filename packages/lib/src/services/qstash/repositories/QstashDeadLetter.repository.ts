@@ -1,4 +1,4 @@
-import type { ExtendedRedis } from "../../redis";
+import type { ExtendedRedis } from "../../redis/createUpstashRedisClient.factory";
 import { QSTASH_KEY_PREFIX, QSTASH_TTL_SECONDS } from "../constants";
 
 /**
@@ -35,10 +35,7 @@ export class QstashDeadLetterRepository {
       member: messageId,
     });
     await this.redis.expire(this.dlqSetKey(), QSTASH_TTL_SECONDS.deadLetter);
-    await this.redis.expire(
-      this.dlqSortedKey(),
-      QSTASH_TTL_SECONDS.deadLetter
-    );
+    await this.redis.expire(this.dlqSortedKey(), QSTASH_TTL_SECONDS.deadLetter);
   }
 
   /** Remove a message from the dead letter index. */

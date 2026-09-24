@@ -1,4 +1,5 @@
-import { type ExtendedRedis, HashSerializer } from "../../redis";
+import { type ExtendedRedis } from "../../redis/createUpstashRedisClient.factory";
+import { HashSerializer } from "../../redis/HashSerializer";
 import { QSTASH_KEY_PREFIX, QSTASH_TTL_SECONDS } from "../constants";
 import type { ContentType, QstashMessageLog } from "../types";
 
