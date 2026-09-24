@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { env } from "@/lib/env";
-import { mail } from "@/lib/mail";
+import { qstashMail } from "@/lib/mail/qstash-mail";
 import { resend } from "@/lib/resend";
 import { verifyResendWebhook } from "@/lib/resend/verifyResendWebhook";
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await mail.processInboundEmail(data);
+    await qstashMail.processInboundEmail(data);
 
     return ApiResponseJson(
       true,

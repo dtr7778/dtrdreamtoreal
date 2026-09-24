@@ -1,17 +1,17 @@
-import { createMail, IMailService } from "@workspace/mail";
+import { createQstashMailer, IQstashMailerService } from "@workspace/mail";
 
-import { db } from "./db";
-import { env } from "./env";
-import { qstashHourlyRateLimit, qstashMinRateLimit } from "./rate-limit";
-import { redisClient } from "./redis-client";
+import { db } from "../db";
+import { env } from "../env";
+import { qstashHourlyRateLimit, qstashMinRateLimit } from "../rate-limit";
+import { redisClient } from "../redis-client";
 
 const globalForMail = globalThis as unknown as {
-  mail?: IMailService;
+  qstashMail?: IQstashMailerService;
 };
 
-export const mail =
-  globalForMail.mail ??
-  createMail({
+export const qstashMail =
+  globalForMail.qstashMail ??
+  createQstashMailer({
     appName: env.NEXT_PUBLIC_SITE_NAME,
     database: db,
     redisClient,
@@ -32,5 +32,5 @@ export const mail =
   });
 
 if (env.NODE_ENV !== "production") {
-  globalForMail.mail = mail;
+  globalForMail.qstashMail = qstashMail;
 }

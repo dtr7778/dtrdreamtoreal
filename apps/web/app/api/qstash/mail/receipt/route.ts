@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 import { QstashReceiptPayload } from "@workspace/lib/qstash";
 
-import { mail } from "@/lib/mail";
+import { qstashMail } from "@/lib/mail/qstash-mail";
 import { getQstashPayload } from "@/lib/qstash/getQstashPayload";
 import { verifyQstashSignature } from "@/lib/qstash/verifyQstashSignature";
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const payload = await getQstashPayload<QstashReceiptPayload>(clonedReq);
 
-    await mail.handleMailReceipt(payload.sourceMessageId);
+    await qstashMail.handleMailReceipt(payload.sourceMessageId);
 
     return ApiResponseJson(true, "success");
   } catch (err) {

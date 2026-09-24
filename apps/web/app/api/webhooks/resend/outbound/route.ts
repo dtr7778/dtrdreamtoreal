@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { env } from "@/lib/env";
-import { mail } from "@/lib/mail";
+import { qstashMail } from "@/lib/mail/qstash-mail";
 import { verifyResendWebhook } from "@/lib/resend/verifyResendWebhook";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
@@ -31,13 +31,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (eventPayload.type === "email.sent") {
-      await mail.processMailSent(
+      await qstashMail.processMailSent(
         eventPayload.data.email_id,
         eventPayload.data.message_id
       );
     }
     if (eventPayload.type === "email.delivered") {
-      await mail.processMailDelivered(eventPayload.data.email_id);
+      await qstashMail.processMailDelivered(eventPayload.data.email_id);
     }
 
     return ApiResponseJson(

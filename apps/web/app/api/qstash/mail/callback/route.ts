@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 import { MailCallbackPayload } from "@workspace/mail";
 
-import { mail } from "@/lib/mail";
+import { qstashMail } from "@/lib/mail/qstash-mail";
 import { getQstashPayload } from "@/lib/qstash/getQstashPayload";
 import { verifyQstashSignature } from "@/lib/qstash/verifyQstashSignature";
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       MailCallbackPayload & { messageId: string }
     >(clonedReq);
 
-    await mail.processMailCallback(payload, {
+    await qstashMail.processMailCallback(payload, {
       messageId: payload.messageId,
     });
 

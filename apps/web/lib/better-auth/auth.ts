@@ -23,7 +23,7 @@ import { getIp } from "@/utils/getIp";
 
 import { db } from "../db";
 import { env } from "../env";
-import { mail } from "../mail";
+import { qstashMail } from "../mail/qstash-mail";
 import { systemAc, systemRoles } from "./accessControl.system";
 import { redisSecondaryStorage } from "./secondaryStorage";
 
@@ -141,16 +141,17 @@ function createBetterAuth() {
               ctx.context.runInBackgroundOrAwait(
                 (async () => {
                   const { browser, device } = UAParser(currentUserAgent);
-                  const { success, error } = await mail.sendNewDeviceLoginMail({
-                    to: newSession.user.email,
-                    userName: newSession.user.name,
-                    loginTimestamp: Date.now().toString(),
-                    deviceInfo: `${device.type} ${device.model}`,
-                    browser: `${browser.name} ${browser.version}`,
-                    ipAddress: currentIp,
-                    approximateLocation: "not available",
-                    secureAccountUrl: `${env.NEXT_PUBLIC_SITE_URL}/dashboard/settings/reset-password`,
-                  });
+                  const { success, error } =
+                    await qstashMail.sendNewDeviceLoginMail({
+                      to: newSession.user.email,
+                      userName: newSession.user.name,
+                      loginTimestamp: Date.now().toString(),
+                      deviceInfo: `${device.type} ${device.model}`,
+                      browser: `${browser.name} ${browser.version}`,
+                      ipAddress: currentIp,
+                      approximateLocation: "not available",
+                      secureAccountUrl: `${env.NEXT_PUBLIC_SITE_URL}/dashboard/settings/reset-password`,
+                    });
 
                   if (!success && error) {
                     throw new APIError("INTERNAL_SERVER_ERROR", {
@@ -177,13 +178,14 @@ function createBetterAuth() {
             ctx.context.runInBackgroundOrAwait(
               (async () => {
                 const { device } = UAParser(userAgent);
-                const { success, error } = await mail.sendPasswordChangedMail({
-                  to: session.user.email,
-                  userName: session.user.name,
-                  changeTimestamp: Date.now().toString(),
-                  ipAddress: ip,
-                  deviceInfo: `${device.type} ${device.model}`,
-                });
+                const { success, error } =
+                  await qstashMail.sendPasswordChangedMail({
+                    to: session.user.email,
+                    userName: session.user.name,
+                    changeTimestamp: Date.now().toString(),
+                    ipAddress: ip,
+                    deviceInfo: `${device.type} ${device.model}`,
+                  });
 
                 if (!success && error) {
                   throw new APIError("INTERNAL_SERVER_ERROR", {
@@ -204,11 +206,13 @@ function createBetterAuth() {
           if (user != null) {
             ctx.context.runInBackgroundOrAwait(
               (async () => {
-                const { success, error } = await mail.sendWelcomeUserMail({
-                  to: user.email,
-                  userName: user.name,
-                  dashboardUrl: `${env.NEXT_PUBLIC_SITE_URL}/dashboard`,
-                });
+                const { success, error } = await qstashMail.sendWelcomeUserMail(
+                  {
+                    to: user.email,
+                    userName: user.name,
+                    dashboardUrl: `${env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+                  }
+                );
 
                 if (!success && error) {
                   throw new APIError("INTERNAL_SERVER_ERROR", {
@@ -272,7 +276,7 @@ function createBetterAuth() {
       expiresIn: 60 * 60,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
-        const { success, error } = await mail.sendEmailVerificationMail({
+        const { success, error } = await qstashMail.sendEmailVerificationMail({
           to: user.email,
           verifyUrl: url,
           userName: user.name,
@@ -292,7 +296,7 @@ function createBetterAuth() {
       resetPasswordTokenExpiresIn: 60 * 60,
       disableSignUp: true,
       sendResetPassword: async ({ user, url }) => {
-        const { success, error } = await mail.sendPasswordResetMail({
+        const { success, error } = await qstashMail.sendPasswordResetMail({
           to: user.email,
           resetUrl: url,
           userName: user.name,
