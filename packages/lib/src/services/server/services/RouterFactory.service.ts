@@ -4,6 +4,7 @@ import type { Container } from "inversify";
 import type {
   ClassConstructor,
   IControllerMetadata,
+  IInterceptor,
   INextFunction,
   IRequest,
   IRequestHandler,
@@ -45,7 +46,8 @@ export class RouterFactoryService {
 
   public static createControllerRouter(
     dependencyContainer: Container,
-    controllerMetadata: IControllerMetadata
+    controllerMetadata: IControllerMetadata,
+    globalInterceptorClasses: ClassConstructor<IInterceptor>[] = []
   ): IRouter {
     const expressRouter = Router();
     const { controllerInstance, controllerDefinition, registeredRoutes } =
@@ -71,7 +73,8 @@ export class RouterFactoryService {
           routeDefinition,
           controllerDefinition.controllerClass as ClassConstructor,
           controllerMetadata,
-          routeMetadata
+          routeMetadata,
+          globalInterceptorClasses
         );
 
       const allMiddlewareClasses = [

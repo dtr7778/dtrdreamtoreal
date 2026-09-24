@@ -64,6 +64,8 @@ export class MetadataExtractorService {
         Reflect.getMetadata(REFLECT_KEYS.MIDDLEWARE, controllerClass) || [],
       guardClasses:
         Reflect.getMetadata(REFLECT_KEYS.GUARD, controllerClass) || [],
+      interceptorClasses:
+        Reflect.getMetadata(REFLECT_KEYS.INTERCEPTOR, controllerClass) || [],
       exceptionFilters:
         Reflect.getMetadata(REFLECT_KEYS.FILTER, controllerClass) || [],
     };
@@ -96,6 +98,12 @@ export class MetadataExtractorService {
       guardClasses:
         Reflect.getMetadata(
           REFLECT_KEYS.GUARD,
+          controllerClass,
+          handlerMethodName
+        ) || [],
+      interceptorClasses:
+        Reflect.getMetadata(
+          REFLECT_KEYS.INTERCEPTOR,
           controllerClass,
           handlerMethodName
         ) || [],

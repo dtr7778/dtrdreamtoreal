@@ -5,6 +5,7 @@ import { ParameterType, REFLECT_KEYS } from "../constant";
 import type {
   ClassConstructor,
   IControllerMetadata,
+  IInterceptor,
   INextFunction,
   IParameterMetadata,
   IRequest,
@@ -17,6 +18,7 @@ import type {
 import { resolveParameters } from "../utils/parameter.utils";
 import { ExceptionHandlerService } from "./ExceptionHandler.service";
 import { GuardExecutorService } from "./GuardExecutor.service";
+import { InterceptorExecutorService } from "./InterceptorExecutor.service";
 
 export class RouteHandlerFactoryService {
   private static hasResponseDecorator(
@@ -46,11 +48,18 @@ export class RouteHandlerFactoryService {
     routeDefinition: IRouteDefinition,
     controllerClass: ClassConstructor,
     controllerMetadata: IControllerMetadata,
-    routeMetadata: IRouteMetadata
+    routeMetadata: IRouteMetadata,
+    globalInterceptorClasses: ClassConstructor<IInterceptor>[] = []
   ): IRequestHandler {
     const allGuardClasses = [
       ...controllerMetadata.guardClasses,
       ...routeMetadata.guardClasses,
+    ];
+
+    const allInterceptorClasses = [
+      ...globalInterceptorClasses,
+      ...controllerMetadata.interceptorClasses,
+      ...routeMetadata.interceptorClasses,
     ];
 
     const allExceptionFilters = [
@@ -77,30 +86,41 @@ export class RouteHandlerFactoryService {
       };
 
       try {
-        if (allGuardClasses.length > 0) {
-          const areGuardsPassed = await GuardExecutorService.executeAllGuards(
-            dependencyContainer,
-            allGuardClasses,
-            executionContext
-          );
+        // Guards and the handler run inside the interceptor chain so an
+        // interceptor can short-circuit before either executes.
+        const guardedHandler = async (): Promise<unknown> => {
+          if (allGuardClasses.length > 0) {
+            const areGuardsPassed = await GuardExecutorService.executeAllGuards(
+              dependencyContainer,
+              allGuardClasses,
+              executionContext
+            );
 
-          if (!areGuardsPassed) {
-            GuardExecutorService.sendForbiddenResponse(response);
-            return;
+            if (!areGuardsPassed) {
+              GuardExecutorService.sendForbiddenResponse(response);
+              return undefined;
+            }
           }
-        }
 
-        const resolvedParameters = resolveParameters(
-          controllerClass,
-          routeDefinition.handlerMethodName,
-          request,
-          response,
-          nextFunction
-        ) as Parameters<IRequestHandler>;
+          const resolvedParameters = resolveParameters(
+            controllerClass,
+            routeDefinition.handlerMethodName,
+            request,
+            response,
+            nextFunction
+          ) as Parameters<IRequestHandler>;
 
-        const result = await originalHandler.call(
-          controllerInstance,
-          ...resolvedParameters
+          return await originalHandler.call(
+            controllerInstance,
+            ...resolvedParameters
+          );
+        };
+
+        const result = await InterceptorExecutorService.execute(
+          dependencyContainer,
+          allInterceptorClasses,
+          executionContext,
+          guardedHandler
         );
 
         // If method uses @Response decorator, user handles response

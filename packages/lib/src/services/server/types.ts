@@ -48,6 +48,22 @@ export interface IMiddleware<TResult = unknown> {
   ): Promise<TResult> | TResult;
 }
 
+/**
+ * Wraps the guard + handler execution for a route.
+ *
+ * An interceptor receives the execution context and a `next` callback that
+ * runs the inner interceptors, the guards and finally the handler. It may
+ * short-circuit by not calling `next`, transform the resolved value by
+ * returning a different one, or observe/replace errors by wrapping `next` in
+ * a `try/catch`.
+ */
+export interface IInterceptor<TResult = unknown> {
+  intercept(
+    executionContext: IRequestExecutionContext,
+    next: () => Promise<unknown>
+  ): Promise<TResult> | TResult;
+}
+
 export interface IGuard {
   canActivate(
     executionContext: IRequestExecutionContext
@@ -88,12 +104,14 @@ export interface IControllerMetadata {
   registeredRoutes: readonly IRouteDefinition[];
   middlewareClasses: ClassConstructor<IMiddleware>[];
   guardClasses: ClassConstructor<IGuard>[];
+  interceptorClasses: ClassConstructor<IInterceptor>[];
   exceptionFilters: (ClassConstructor<IExceptionFilter> | IExceptionFilter)[];
 }
 
 export interface IRouteMetadata {
   middlewareClasses: ClassConstructor<IMiddleware>[];
   guardClasses: ClassConstructor<IGuard>[];
+  interceptorClasses: ClassConstructor<IInterceptor>[];
   exceptionFilters: (ClassConstructor<IExceptionFilter> | IExceptionFilter)[];
 }
 

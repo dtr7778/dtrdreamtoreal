@@ -13,6 +13,7 @@ export const REFLECT_KEYS = {
   ROUTE_DOCS: "reflection:route:documentation",
   MIDDLEWARE: "reflection:middleware:metadata",
   GUARD: "reflection:guards:metadata",
+  INTERCEPTOR: "reflection:interceptors:metadata",
   FILTER: "reflection:filters:metadata",
   PARAMS: "reflection:parameters:metadata",
   CRON_JOB_CLASS: "reflection:cronJobClass:metadata",

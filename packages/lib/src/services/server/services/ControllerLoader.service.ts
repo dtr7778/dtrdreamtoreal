@@ -3,6 +3,7 @@ import type { Container } from "inversify";
 import type {
   ClassConstructor,
   IApplication,
+  IInterceptor,
   IRouteDefinition,
 } from "../types";
 import { pathNormalize } from "../utils/path.utils";
@@ -26,6 +27,7 @@ export interface IControllerLoaderConfiguration {
   expressApplication: IApplication;
   dependencyContainer: Container;
   controllerClasses: readonly ClassConstructor[];
+  globalInterceptors?: readonly ClassConstructor<IInterceptor>[];
 }
 
 export class ControllerLoader {
@@ -33,6 +35,7 @@ export class ControllerLoader {
     expressApplication,
     dependencyContainer,
     controllerClasses,
+    globalInterceptors = [],
     info: { basePath = "/" },
   }: IControllerLoaderConfiguration): void {
     const isDev = process.env.NODE_ENV === "development";
@@ -63,7 +66,8 @@ export class ControllerLoader {
 
       const controllerRouter = RouterFactoryService.createControllerRouter(
         dependencyContainer,
-        controllerMetadata
+        controllerMetadata,
+        [...globalInterceptors]
       );
 
       const fullControllerPath = pathNormalize(
