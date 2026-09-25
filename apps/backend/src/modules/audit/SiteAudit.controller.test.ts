@@ -8,9 +8,9 @@ import {
   createMockDrizzleClient,
   type MockDatabaseType,
 } from "@workspace/drizzle/client/mock";
-import type { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
-import { createMockRedisClient } from "@workspace/lib/redis/ioRedis/mock";
 import { container, type IApplication } from "@workspace/lib/server";
+import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
+import { createMockRedisClient } from "@workspace/redis/client/ioRedis/mock";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
@@ -43,10 +43,7 @@ describe("SiteAuditController (Integration)", () => {
           }) as unknown as AuthType
       )
       .inSingletonScope();
-    container
-      .bind<AuthMiddleware>(AuthMiddleware)
-      .toSelf()
-      .inSingletonScope();
+    container.bind<AuthMiddleware>(AuthMiddleware).toSelf().inSingletonScope();
     container
       .bind<IAuditService>(CONTAINER_TYPES.AuditService)
       .toDynamicValue(

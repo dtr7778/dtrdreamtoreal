@@ -1,4 +1,5 @@
-import { ExtendedRedis } from "../redis/UpstashRedis.service";
+import { ExtendedRedis } from "@workspace/redis/client/upstash";
+
 import type { Duration, RatelimitAlgorithm } from "./types";
 import {
   type IUpstashRatelimit,

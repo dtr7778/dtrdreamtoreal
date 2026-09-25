@@ -1,7 +1,8 @@
 import type { Job } from "bullmq";
 
-import { HashSerializer } from "../../redis/HashSerializer";
-import { type ExtendedRedis } from "../../redis/IoRedis.service";
+import { type ExtendedRedis } from "@workspace/redis/client/ioRedis";
+import { HashSerializer } from "@workspace/redis/hash-serializer";
+
 import { BULLMQ_KEY_PREFIX, BULLMQ_LOG_DEFAULTS } from "../constants";
 import type {
   BullmqMessageLog,

@@ -1,4 +1,5 @@
-import type { ExtendedRedis } from "../../redis/createUpstashRedisClient.factory";
+import type { ExtendedRedis } from "@workspace/redis/client/upstash";
+
 import { QSTASH_KEY_PREFIX, QSTASH_TTL_SECONDS } from "../constants";
 
 /**

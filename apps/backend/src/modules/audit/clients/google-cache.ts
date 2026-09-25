@@ -6,10 +6,11 @@ import {
   createRatelimit,
   IIoRedisRatelimit,
 } from "@workspace/lib/rate-limit/ioRedis";
-import type { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
+import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
+
+import { httpClient } from "@/lib/http-client";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
-import { httpClient } from "@/lib/http-client";
 
 export interface GoogleApiRequestOptions {
   method?: "GET" | "POST";

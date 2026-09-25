@@ -5,8 +5,8 @@ import {
   MockDatabaseType,
 } from "@workspace/drizzle/client/mock";
 import { createMockRateLimit } from "@workspace/lib/rate-limit/upstash/mock";
-import { createMockRedisClient } from "@workspace/lib/redis/upstash/mock";
 import { createMockSupabaseClient } from "@workspace/lib/supabase/client/mock";
+import { createMockRedisClient } from "@workspace/redis/client/upstash/mock";
 
 let db: MockDatabaseType;
 

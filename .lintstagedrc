@@ -1,4 +1,7 @@
 {
+  "apps/backend/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./apps/backend/eslint.config.mjs"
+  ],
   "apps/web/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./apps/web/eslint.config.js"
   ],
@@ -7,6 +10,15 @@
   ],
   "packages/drizzle/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/drizzle/eslint.config.js"
+  ],
+  "packages/redis/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/redis/eslint.config.js"
+  ],
+  "packages/auth/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/auth/eslint.config.js"
+  ],
+  "packages/contract/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/contract/eslint.config.js"
   ],
   "packages/lib/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/lib/eslint.config.js"

@@ -2,7 +2,7 @@ import {
   type ExtendedRedis,
   IoRedisService,
   type IoRedisServiceConfig,
-} from "./IoRedis.service";
+} from "../IoRedis.service";
 
 function createRedisClient(config: IoRedisServiceConfig): ExtendedRedis {
   const ioRedis = new IoRedisService(config);

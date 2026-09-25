@@ -1,5 +1,5 @@
 import { FileEntityTypeEnumType } from "@workspace/drizzle/zod-db-enums";
-import type { ExtendedRedis } from "@workspace/lib/redis/upstash";
+import type { ExtendedRedis } from "@workspace/redis/client/upstash";
 
 import { DEFAULT_FILE_CACHE_TIMEOUT } from "@/constants";
 

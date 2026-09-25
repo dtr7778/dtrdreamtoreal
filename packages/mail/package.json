@@ -42,6 +42,7 @@
     "@tiptap/react": "catalog:",
     "@workspace/drizzle": "workspace:*",
     "@workspace/lib": "workspace:*",
+    "@workspace/redis": "workspace:*",
     "@workspace/ui": "workspace:*",
     "drizzle-orm": "catalog:",
     "lucide-react": "catalog:",

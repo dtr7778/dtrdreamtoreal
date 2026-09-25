@@ -1,9 +1,10 @@
-import { ExtendedRedis } from "../redis/IoRedis.service";
+import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
+
 import {
   type IIoRedisRatelimit,
   type IoRedisGetRemainingResponse,
-  type IoRedisRatelimitResponse,
   IoRedisRatelimit,
+  type IoRedisRatelimitResponse,
 } from "./IoRedisRateLimit.service";
 import type { Duration } from "./types";
 

@@ -4,7 +4,6 @@ import { createDrizzleClient } from "@workspace/drizzle/client/ioRedis";
 import type { DatabaseType } from "@workspace/drizzle/types";
 import { type BullmqEnqueueResult } from "@workspace/lib/bullmq";
 import { logger, type LoggerType } from "@workspace/lib/logger";
-import { createRedisClient, ExtendedRedis } from "@workspace/lib/redis/ioRedis";
 import { container, LoggerInterceptor } from "@workspace/lib/server";
 import {
   createBullmqMail,
@@ -14,6 +13,10 @@ import {
   RawMailPayload,
   TemplateMailPayload,
 } from "@workspace/mail";
+import {
+  createRedisClient,
+  ExtendedRedis,
+} from "@workspace/redis/client/ioRedis";
 
 import { AuthGuard } from "@/guard/auth.guard";
 import { BullmqSignatureGuard } from "@/guard/bullmq-signature.guard";

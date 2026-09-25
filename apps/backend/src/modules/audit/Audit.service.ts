@@ -2,7 +2,6 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 
-import type { DatabaseType } from "@workspace/drizzle/types";
 import {
   AuditItemTable,
   CwvSnapshotTable,
@@ -14,14 +13,17 @@ import {
   SiteAuditTable,
   UpdateSiteAudit,
 } from "@workspace/drizzle/schemas";
+import type { DatabaseType } from "@workspace/drizzle/types";
 import type { AuditItemStatusEnumType } from "@workspace/drizzle/zod-db-enums";
-import type { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
 import { ApiError } from "@workspace/lib/server";
 import { formatError } from "@workspace/lib/utils";
+import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
 
+import { type RunCheckJobPayload } from "./audit.queue";
+import { type AuditQueueService } from "./AuditQueue.service";
 import {
   CHECKLIST,
   getChecklistItem,
@@ -40,8 +42,6 @@ import { crawlSite } from "./lib/crawl";
 import { httpFetch } from "./lib/http";
 import { parseRobotsTxt, type RobotsData } from "./lib/robots";
 import { fetchSitemapUrls, type SitemapResult } from "./lib/sitemap";
-import { type AuditQueueService } from "./AuditQueue.service";
-import { type RunCheckJobPayload } from "./audit.queue";
 
 export interface AuditServiceDependencies {
   db: DatabaseType;

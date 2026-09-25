@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
-import { createMockRedisClient } from "@workspace/lib/redis/ioRedis/mock";
 import type {
   EmailService,
   EmailThreadService,
@@ -9,6 +7,8 @@ import type {
   SendMailOption,
   TemplateMailPayload,
 } from "@workspace/mail";
+import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
+import { createMockRedisClient } from "@workspace/redis/client/ioRedis/mock";
 
 import { MailService } from "./Mail.service";
 import type { MailQueueService } from "./MailQueue.service";
@@ -79,7 +79,8 @@ const welcomePayload: TemplateMailPayload<"welcome"> = {
 
 describe("MailService.send", () => {
   it("renders, persists and enqueues a templated mail", async () => {
-    const { service, createOutboundEmailRecord, sendMail } = await createService();
+    const { service, createOutboundEmailRecord, sendMail } =
+      await createService();
 
     const result = await service.send(welcomePayload);
 
@@ -131,7 +132,8 @@ describe("MailService.send", () => {
 
 describe("MailService.sendRaw", () => {
   it("sends raw html and defaults the sender to system mail", async () => {
-    const { service, createOutboundEmailRecord, sendMail } = await createService();
+    const { service, createOutboundEmailRecord, sendMail } =
+      await createService();
 
     const payload: RawMailPayload = {
       to: "jane@example.com",

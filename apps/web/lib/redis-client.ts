@@ -1,7 +1,7 @@
 import {
   createRedisClient,
   type ExtendedRedis,
-} from "@workspace/lib/redis/upstash";
+} from "@workspace/redis/client/upstash";
 
 import { env } from "./env";
 

@@ -51,6 +51,7 @@
     "@workspace/drizzle": "workspace:*",
     "@workspace/lib": "workspace:*",
     "@workspace/mail": "workspace:*",
+    "@workspace/redis": "workspace:*",
     "@workspace/ui": "workspace:*",
     "axios": "catalog:",
     "better-auth": "catalog:",

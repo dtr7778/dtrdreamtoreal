@@ -1,6 +1,6 @@
 import type { SecondaryStorage } from "better-auth";
 
-import type { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
+import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 
 /**
  * Build a better-auth {@link SecondaryStorage} backed by an ioredis client.

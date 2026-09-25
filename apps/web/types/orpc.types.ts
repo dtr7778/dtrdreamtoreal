@@ -7,9 +7,9 @@ import type {
 } from "@orpc/contract";
 
 import type { DatabaseType } from "@workspace/drizzle/types";
-import { ExtendedRedis } from "@workspace/lib/redis/upstash";
 import type { ServerSupabaseClient } from "@workspace/lib/supabase/server-client";
 import type { PermissionType, RoleType } from "@workspace/lib/types";
+import { ExtendedRedis } from "@workspace/redis/client/upstash";
 
 import type { AuthSession, AuthUser } from "@/types";
 

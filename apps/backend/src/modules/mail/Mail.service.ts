@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 
-import { type ExtendedRedis } from "@workspace/lib/redis/ioRedis";
 import { MailError } from "@workspace/lib/utils";
 import {
   type EmailService,
@@ -17,6 +16,7 @@ import {
   type TemplateMailPayload,
 } from "@workspace/mail";
 import { renderMailTemplate } from "@workspace/mail/template-registry";
+import { type ExtendedRedis } from "@workspace/redis/client/ioRedis";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
 

@@ -53,6 +53,7 @@
     "@workspace/drizzle": "workspace:*",
     "@workspace/lib": "workspace:*",
     "@workspace/mail": "workspace:*",
+    "@workspace/redis": "workspace:*",
     "better-auth": "catalog:",
     "drizzle-orm": "catalog:",
     "ua-parser-js": "catalog:"

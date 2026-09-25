@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 
-import { ExtendedRedis } from "../redis/UpstashRedis.service";
+import { ExtendedRedis } from "@workspace/redis/client/upstash";
+
 import type { Duration, RatelimitAlgorithm } from "./types";
 
 export type RatelimitResponse = ReturnType<

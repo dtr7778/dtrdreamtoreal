@@ -5,12 +5,12 @@ import express from "express";
 import type { Container } from "inversify";
 
 import { AuthType } from "@workspace/auth";
-import { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
 import {
   BaseServer,
   ClassConstructor,
   LoggerInterceptor,
 } from "@workspace/lib/server";
+import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 
 import pkg from "../package.json";
 import { CONTAINER_TYPES } from "./container/container-types";

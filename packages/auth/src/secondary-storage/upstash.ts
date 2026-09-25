@@ -1,6 +1,6 @@
 import type { SecondaryStorage } from "better-auth";
 
-import type { ExtendedRedis } from "@workspace/lib/redis/upstash";
+import type { ExtendedRedis } from "@workspace/redis/client/upstash";
 
 /**
  * Build a better-auth {@link SecondaryStorage} backed by an Upstash Redis

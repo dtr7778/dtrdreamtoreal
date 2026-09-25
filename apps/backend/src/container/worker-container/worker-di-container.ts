@@ -3,12 +3,15 @@ import { Container } from "inversify";
 import { createDrizzleClient } from "@workspace/drizzle/client/ioRedis";
 import type { DatabaseType } from "@workspace/drizzle/types";
 import { logger, LoggerType } from "@workspace/lib/logger";
-import { createRedisClient, ExtendedRedis } from "@workspace/lib/redis/ioRedis";
 import { EmailService, EmailThreadService } from "@workspace/mail";
 import {
   type IMailTransport,
   ResendMailTransport,
 } from "@workspace/mail/transports";
+import {
+  createRedisClient,
+  ExtendedRedis,
+} from "@workspace/redis/client/ioRedis";
 
 import { env } from "@/env";
 import { AuditService, IAuditService } from "@/modules/audit/Audit.service";

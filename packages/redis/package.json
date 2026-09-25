@@ -1,0 +1,61 @@
+{
+  "name": "@workspace/redis",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    "./client/ioRedis": {
+      "import": "./src/clients/redis-client.ioRedis.ts",
+      "types": "./src/clients/redis-client.ioRedis.ts"
+    },
+    "./client/upstash": {
+      "import": "./src/clients/redis-client.upstash.ts",
+      "types": "./src/clients/redis-client.upstash.ts"
+    },
+    "./client/ioRedis/mock": {
+      "import": "./tests/ioRedis.mock.ts",
+      "types": "./tests/ioRedis.mock.ts"
+    },
+    "./client/upstash/mock": {
+      "import": "./tests/upstashRedis.mock.ts",
+      "types": "./tests/upstashRedis.mock.ts"
+    },
+    "./hash-serializer": {
+      "import": "./src/HashSerializer.ts",
+      "types": "./src/HashSerializer.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/ioredis-mock": "catalog:",
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
+    "eslint": "catalog:",
+    "ioredis-mock": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@upstash/redis": "catalog:",
+    "ioredis": "catalog:"
+  }
+}

@@ -1,4 +1,4 @@
-import type { ExtendedRedis } from "../redis/createUpstashRedisClient.factory";
+import type { ExtendedRedis } from "@workspace/redis/client/upstash";
 
 // ─── Message domain model ───────────────────────────────────────────────────
 

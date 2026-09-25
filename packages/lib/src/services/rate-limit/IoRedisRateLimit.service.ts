@@ -1,6 +1,7 @@
 import { RedisStore } from "rate-limit-redis";
 
-import { ExtendedRedis } from "../redis/IoRedis.service";
+import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
+
 import type { Duration, WindowUnit } from "./types";
 
 const WINDOW_UNIT_IN_MS: Record<WindowUnit, number> = {
@@ -44,9 +45,7 @@ export interface IIoRedisRatelimit {
   /** Consume one request for `identifier` and report the outcome. */
   limit(identifier: string): Promise<IoRedisRatelimitResponse>;
   /** Report the remaining requests for `identifier` without consuming one. */
-  getRemaining(
-    identifier: string
-  ): Promise<IoRedisGetRemainingResponse>;
+  getRemaining(identifier: string): Promise<IoRedisGetRemainingResponse>;
 }
 
 export interface IoRedisRatelimitConfig {

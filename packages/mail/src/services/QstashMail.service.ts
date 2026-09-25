@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { type DatabaseType } from "@workspace/drizzle/types";
 import { EmailTable } from "@workspace/drizzle/schemas";
+import { type DatabaseType } from "@workspace/drizzle/types";
 import {
   IQstashService,
   type QstashPublishOptions,
@@ -11,8 +11,8 @@ import {
 } from "@workspace/lib/qstash";
 import { QstashError } from "@workspace/lib/qstash/error";
 import { type IUpstashRatelimit } from "@workspace/lib/rate-limit/upstash";
-import { type ExtendedRedis } from "@workspace/lib/redis/upstash";
 import { MailError } from "@workspace/lib/utils";
+import { type ExtendedRedis } from "@workspace/redis/client/upstash";
 
 import { IMailTransport } from "../transports";
 import type {
