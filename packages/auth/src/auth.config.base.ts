@@ -10,7 +10,7 @@ import { admin, haveIBeenPwned, oneTap } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
 
-import { type DatabaseType } from "@workspace/drizzle/client";
+import { type DatabaseType } from "@workspace/drizzle/types";
 import {
   AccountTable,
   type InsertUserActivity,
@@ -22,24 +22,31 @@ import {
   VerificationTable,
 } from "@workspace/drizzle/schemas";
 import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
-import type {
-  IBullmqMailerService,
-  IQstashMailerService,
-} from "@workspace/mail";
 
+import { IMailTemplates } from "../../mail/src/services/withMailTemplates.mixin";
 import { systemAc, systemRoles } from "./access-control";
 
-/** The subset of mailer methods the auth hooks rely on. */
-export type AuthMailer = Pick<
-  IQstashMailerService | IBullmqMailerService,
-  | "sendNewDeviceLoginMail"
-  | "sendPasswordChangedMail"
-  | "sendWelcomeUserMail"
+/** Result every mail hook resolves with. */
+export interface AuthMailResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * The five notifications the auth package emits. Each mailer variant (BullMQ,
+ * QStash) supplies its own implementation; the shared config below only knows
+ * this interface.
+ */
+export type AuthMailHooks = Pick<
+  IMailTemplates<AuthMailResult>,
+  | "sendWelcomeMail"
   | "sendEmailVerificationMail"
   | "sendPasswordResetMail"
+  | "sendPasswordChangedMail"
+  | "sendNewDeviceLoginMail"
 >;
 
-export interface CreateBetterAuthConfig {
+export interface CreateBetterAuthBaseConfig {
   baseURL?: BaseURLConfig | undefined;
   secret: string;
   appName: string;
@@ -50,7 +57,7 @@ export interface CreateBetterAuthConfig {
   errorPagePath: string;
   database: DatabaseType;
   secondaryStorage: SecondaryStorage;
-  mailer: AuthMailer;
+  mailHooks: AuthMailHooks;
   google: {
     clientId: string;
     clientSecret: string;
@@ -74,7 +81,21 @@ async function createUserActivity(
   return await database.insert(UserActivityTable).values(value);
 }
 
-export function createBetterAuth(config: CreateBetterAuthConfig) {
+/** Throw when a mail hook reports a failure, mirroring better-auth errors. */
+function assertMailSent(result: AuthMailResult): void {
+  if (!result.success && result.error) {
+    throw new APIError("INTERNAL_SERVER_ERROR", { message: result.error });
+  }
+}
+
+/**
+ * Shared better-auth configuration.
+ *
+ * Mailer-specific factories (`createBetterAuth` for BullMQ,
+ * `createQstashBetterAuth` for QStash) build the {@link AuthMailHooks} and hand
+ * them in here.
+ */
+export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
   const defaultPlugins: Array<BetterAuthPlugin> = [];
 
   if (!config.isDev) {
@@ -188,23 +209,18 @@ export function createBetterAuth(config: CreateBetterAuthConfig) {
               ctx.context.runInBackgroundOrAwait(
                 (async () => {
                   const { browser, device } = UAParser(currentUserAgent);
-                  const { success, error } =
-                    await config.mailer.sendNewDeviceLoginMail({
-                      to: newSession.user.email,
-                      userName: newSession.user.name,
-                      loginTimestamp: Date.now().toString(),
-                      deviceInfo: `${device.type} ${device.model}`,
-                      browser: `${browser.name} ${browser.version}`,
-                      ipAddress: currentIp,
-                      approximateLocation: "not available",
-                      secureAccountUrl: `${config.siteUrl}/dashboard/settings/reset-password`,
-                    });
+                  const result = await config.mailHooks.sendNewDeviceLoginMail({
+                    to: newSession.user.email,
+                    userName: newSession.user.name,
+                    loginTimestamp: Date.now().toString(),
+                    deviceInfo: `${device.type} ${device.model}`,
+                    browser: `${browser.name} ${browser.version}`,
+                    ipAddress: currentIp,
+                    approximateLocation: "not available",
+                    secureAccountUrl: `${config.siteUrl}/dashboard/settings/reset-password`,
+                  });
 
-                  if (!success && error) {
-                    throw new APIError("INTERNAL_SERVER_ERROR", {
-                      message: error,
-                    });
-                  }
+                  assertMailSent(result);
                 })()
               );
             }
@@ -225,20 +241,15 @@ export function createBetterAuth(config: CreateBetterAuthConfig) {
             ctx.context.runInBackgroundOrAwait(
               (async () => {
                 const { device } = UAParser(userAgent);
-                const { success, error } =
-                  await config.mailer.sendPasswordChangedMail({
-                    to: session.user.email,
-                    userName: session.user.name,
-                    changeTimestamp: Date.now().toString(),
-                    ipAddress: ip,
-                    deviceInfo: `${device.type} ${device.model}`,
-                  });
+                const result = await config.mailHooks.sendPasswordChangedMail({
+                  to: session.user.email,
+                  userName: session.user.name,
+                  changeTimestamp: Date.now().toString(),
+                  ipAddress: ip,
+                  deviceInfo: `${device.type} ${device.model}`,
+                });
 
-                if (!success && error) {
-                  throw new APIError("INTERNAL_SERVER_ERROR", {
-                    message: error,
-                  });
-                }
+                assertMailSent(result);
               })()
             );
           }
@@ -253,18 +264,13 @@ export function createBetterAuth(config: CreateBetterAuthConfig) {
           if (user != null) {
             ctx.context.runInBackgroundOrAwait(
               (async () => {
-                const { success, error } =
-                  await config.mailer.sendWelcomeUserMail({
-                    to: user.email,
-                    userName: user.name,
-                    dashboardUrl: `${config.siteUrl}/dashboard`,
-                  });
+                const result = await config.mailHooks.sendWelcomeMail({
+                  to: user.email,
+                  userName: user.name,
+                  dashboardUrl: `${config.siteUrl}/dashboard`,
+                });
 
-                if (!success && error) {
-                  throw new APIError("INTERNAL_SERVER_ERROR", {
-                    message: error,
-                  });
-                }
+                assertMailSent(result);
               })()
             );
           }
@@ -322,16 +328,13 @@ export function createBetterAuth(config: CreateBetterAuthConfig) {
       expiresIn: 60 * 60,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
-        const { success, error } =
-          await config.mailer.sendEmailVerificationMail({
-            to: user.email,
-            verifyUrl: url,
-            userName: user.name,
-          });
+        const result = await config.mailHooks.sendEmailVerificationMail({
+          to: user.email,
+          userName: user.name,
+          verifyUrl: url,
+        });
 
-        if (!success && error) {
-          throw error;
-        }
+        assertMailSent(result);
       },
     },
     emailAndPassword: {
@@ -343,15 +346,13 @@ export function createBetterAuth(config: CreateBetterAuthConfig) {
       resetPasswordTokenExpiresIn: 60 * 60,
       disableSignUp: true,
       sendResetPassword: async ({ user, url }) => {
-        const { success, error } = await config.mailer.sendPasswordResetMail({
+        const result = await config.mailHooks.sendPasswordResetMail({
           to: user.email,
-          resetUrl: url,
           userName: user.name,
+          resetUrl: url,
         });
 
-        if (!success && error) {
-          throw error;
-        }
+        assertMailSent(result);
       },
     },
     plugins: [
@@ -373,4 +374,4 @@ export function createBetterAuth(config: CreateBetterAuthConfig) {
   });
 }
 
-export type AuthType = ReturnType<typeof createBetterAuth>;
+export type AuthType = ReturnType<typeof createBetterAuthBase>;

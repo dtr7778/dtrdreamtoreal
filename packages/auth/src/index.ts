@@ -1,6 +1,3 @@
-export { createBetterAuth } from "./auth.config";
-export type {
-  AuthMailer,
-  CreateBetterAuthConfig,
-  AuthType,
-} from "./auth.config";
+export { createBullmqBetterAuth } from "./auth.config.bullmq";
+export { createQstashBetterAuth } from "./auth.config.qstash";
+export type { AuthType } from "./auth.config.base";

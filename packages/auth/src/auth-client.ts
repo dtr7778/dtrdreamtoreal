@@ -8,7 +8,7 @@ import {
 import { createAuthClient } from "better-auth/react";
 
 import { systemAc, systemRoles } from "./access-control";
-import type { AuthType } from "./auth.config";
+import type { AuthType } from "./auth.config.base";
 
 export interface CreateClientAuthConfig {
   /** Base URL of the auth server (the app that mounts `/api/auth`). */
