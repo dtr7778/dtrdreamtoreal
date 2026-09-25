@@ -2,13 +2,13 @@ import { join } from "node:path";
 
 import { config } from "dotenv";
 
-import { createDrizzleClient } from "../clients/drizzle-client";
+import { createDrizzleClientBase } from "../clients/drizzle-client.base";
 
 config({
   path: [join(process.cwd(), "../../.env")],
 });
 
-export const db = createDrizzleClient({
+export const db = createDrizzleClientBase({
   databaseUrl: process.env.DATABASE_URL!,
   isProd: false,
   operationMode: "seed",

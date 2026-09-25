@@ -14,17 +14,17 @@
     "access": "restricted"
   },
   "exports": {
-    "./client": {
-      "import": "./src/clients/drizzle-client.ts",
-      "types": "./src/clients/drizzle-client.ts"
+    "./types": {
+      "import": "./src/types/index.ts",
+      "types": "./src/types/index.ts"
     },
     "./client/ioRedis": {
-      "import": "./src/clients/drizzle-client-withIoRedis.ts",
-      "types": "./src/clients/drizzle-client-withIoRedis.ts"
+      "import": "./src/clients/drizzle-client.ioRedis.ts",
+      "types": "./src/clients/drizzle-client.ioRedis.ts"
     },
     "./client/upstash": {
-      "import": "./src/clients/drizzle-client-withUpstashRedis.ts",
-      "types": "./src/clients/drizzle-client-withUpstashRedis.ts"
+      "import": "./src/clients/drizzle-client.upstash.ts",
+      "types": "./src/clients/drizzle-client.upstash.ts"
     },
     "./client/mock": {
       "import": "./tests/drizzle-client.mock.ts",

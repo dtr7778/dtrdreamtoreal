@@ -1,9 +1,8 @@
 import { type CacheConfig } from "drizzle-orm/cache/core/types";
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import { IoredisCache, type RedisType } from "../IoRedisCache";
-import * as schema from "../schemas";
-import { createConnection } from "./createConnection";
+import type { DatabaseType } from "../types";
+import { createDrizzleClientBase } from "./drizzle-client.base";
 
 interface DrizzleClientConfigs {
   databaseUrl: string;
@@ -17,8 +16,6 @@ interface DrizzleClientConfigs {
   showDBLog?: boolean;
 }
 
-export type DatabaseType = PostgresJsDatabase<typeof schema>;
-
 export function createDrizzleClient({
   databaseUrl,
   isProd,
@@ -28,17 +25,13 @@ export function createDrizzleClient({
   redisCacheConfig = { ex: 60 },
   redisCacheGlobal = true,
 }: DrizzleClientConfigs): DatabaseType {
-  const connection = createConnection(databaseUrl, isProd, operationMode);
-
-  let cache: IoredisCache | undefined = undefined;
-
-  if (redis && operationMode !== "seed") {
-    cache = new IoredisCache(redis, redisCacheConfig, redisCacheGlobal);
-  }
-
-  return drizzle(connection, {
-    schema,
-    logger: showDBLog,
-    cache,
+  return createDrizzleClientBase({
+    databaseUrl,
+    isProd,
+    operationMode,
+    showDBLog,
+    cache: redis
+      ? new IoredisCache(redis, redisCacheConfig, redisCacheGlobal)
+      : undefined,
   });
 }
