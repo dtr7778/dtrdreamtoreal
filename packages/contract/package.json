@@ -33,6 +33,7 @@
     "@tanstack/react-query": "catalog:",
     "@workspace/drizzle": "workspace:*",
     "@workspace/lib": "workspace:*",
+    "@workspace/mail": "workspace:*",
     "axios": "catalog:",
     "zod": "catalog:"
   }
