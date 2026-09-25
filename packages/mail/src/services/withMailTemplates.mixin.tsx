@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, toPlainText } from "react-email";
 
@@ -22,9 +23,7 @@ import RoleChangedMail, {
 import SuspiciousLoginMail, {
   SuspiciousLoginMailProps,
 } from "../templates/auth/SuspiciousLoginMail";
-import WelcomeUserMail, {
-  WelcomeUserMailProps,
-} from "../templates/auth/WelcomeUserMail";
+import WelcomeMail, { WelcomeMailProps } from "../templates/auth/WelcomeMail";
 import ContactReplyMail, {
   ContactReplyMailProps,
 } from "../templates/contact/ContactReplyMail";
@@ -39,11 +38,11 @@ import IntegrationErrorMail, {
 } from "../templates/integration/IntegrationErrorMail";
 import { MailServiceConfig, SendMailOption } from "../types";
 
-type WelcomeUserEmailOptions = Omit<
+type WelcomeEmailOptions = Omit<
   SendMailOption,
   "from" | "subject" | "text" | "html"
 > &
-  Omit<WelcomeUserMailProps, "appName" | "supportMail">;
+  Omit<WelcomeMailProps, "appName" | "supportMail">;
 
 type EmailVerificationMailOptions = Omit<
   SendMailOption,
@@ -113,7 +112,7 @@ type ContactReplyEmailOptions = Omit<
 
 /** Template-based `send*Mail` methods shared by every mail service. */
 export interface IMailTemplates<TResult> {
-  sendWelcomeUserMail(options: WelcomeUserEmailOptions): Promise<TResult>;
+  sendWelcomeMail(options: WelcomeEmailOptions): Promise<TResult>;
 
   sendEmailVerificationMail(
     options: EmailVerificationMailOptions
@@ -162,7 +161,7 @@ type AbstractConstructor<T> = abstract new (...args: any[]) => T;
  *
  * @param Base - the transport service (QStash/BullMQ) to extend.
  * @returns an abstract class that renders a mail template and delegates the
- * actual send to {@link MailTemplateTransport.sendMail}.
+ * actual send to the host service's `sendMail` method.
  */
 export function withMailTemplates<
   TResult,
@@ -202,15 +201,15 @@ export function withMailTemplates<
       );
     }
 
-    public async sendWelcomeUserMail({
+    public async sendWelcomeMail({
       to,
       ...options
-    }: WelcomeUserEmailOptions): Promise<TResult> {
+    }: WelcomeEmailOptions): Promise<TResult> {
       return this.sendMailTemplate(
         `${this.mailConfig.appName} <${this.mailConfig.systemMail}>`,
         to,
         `Welcome to ${this.mailConfig.appName}`,
-        <WelcomeUserMail
+        <WelcomeMail
           supportMail={this.mailConfig.supportMail}
           appName={this.mailConfig.appName}
           {...options}

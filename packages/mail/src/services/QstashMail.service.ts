@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 
+import { type DatabaseType } from "@workspace/drizzle/types";
 import { EmailTable } from "@workspace/drizzle/schemas";
 import {
   IQstashService,
@@ -9,20 +10,19 @@ import {
   QstashServiceConfig,
 } from "@workspace/lib/qstash";
 import { QstashError } from "@workspace/lib/qstash/error";
+import { type IUpstashRatelimit } from "@workspace/lib/rate-limit/upstash";
+import { type ExtendedRedis } from "@workspace/lib/redis/upstash";
 import { MailError } from "@workspace/lib/utils";
 
+import { IMailTransport } from "../transports";
 import type {
   InboundEmailPayload,
   InboundEmailResult,
-  MailCallbackPayload,
-  QstashMailConfig,
   QstashMailResult,
-  SendMailBatchItem,
   SendMailOption,
 } from "../types";
-import type { IMailTransport } from "../types";
 import { EmailService } from "./Email.service";
-import { ThreadService } from "./Thread.service";
+import { EmailThreadService } from "./EmailThread.service";
 
 /** Route key used to register and publish mail messages. */
 const MAIL_ROUTE_KEY = "mail";
@@ -40,6 +40,29 @@ interface PreparedMail {
   dedupKey: string;
 }
 
+export interface MailCallbackPayload {
+  emailId: string;
+  threadId?: string | undefined;
+}
+
+export interface SendMailBatchItem {
+  /** The mail to send. */
+  options: SendMailOption;
+  /** Whether this is a system mail (skips thread creation). Defaults to true. */
+  isSystemMail?: boolean;
+}
+
+export interface QstashMailConfig {
+  database: DatabaseType;
+  redisClient: ExtendedRedis;
+  minRatelimit: IUpstashRatelimit;
+  hourRatelimit: IUpstashRatelimit;
+  callbackUrl: string;
+  receiptCallbackUrl: string;
+  failureCallbackUrl: string;
+  dedupWindowSeconds?: number;
+}
+
 export interface IQstashMailService extends IQstashService {
   processMailCallback(
     payload: MailCallbackPayload,
@@ -49,6 +72,11 @@ export interface IQstashMailService extends IQstashService {
     payload: InboundEmailPayload
   ): Promise<InboundEmailResult>;
   processMailSent(resendId: string, resendMessageId: string): Promise<void>;
+  processMailFailed(resendId: string): Promise<void>;
+  processMailBounced(resendId: string): Promise<void>;
+  processMailComplained(resendId: string): Promise<void>;
+  processMailSuppressed(resendId: string): Promise<void>;
+  processMailDeliveryDelayed(resendId: string): Promise<void>;
   processMailDelivered(resendId: string): Promise<void>;
   sendMail(
     options: SendMailOption,
@@ -75,7 +103,7 @@ export abstract class QstashMailService
   protected readonly qstashMailConfig: QstashMailConfig & {
     dedupWindowSeconds: number;
   };
-  private threadService: ThreadService;
+  private EmailthreadService: EmailThreadService;
   private emailService: EmailService;
 
   constructor(
@@ -86,7 +114,7 @@ export abstract class QstashMailService
     super(qstashConfig);
     this.qstashMailConfig = this.normalizeQstashMailConfig(qstashMailConfig);
 
-    this.threadService = new ThreadService(qstashMailConfig.database);
+    this.EmailthreadService = new EmailThreadService(qstashMailConfig.database);
     this.emailService = new EmailService(qstashMailConfig.database);
 
     this.registerCallbackHandler<MailCallbackPayload>(
@@ -304,7 +332,7 @@ export abstract class QstashMailService
 
     let threadId: string | undefined = undefined;
     if (!isSystemMail) {
-      threadId = await this.threadService.findOrCreateThread({
+      threadId = await this.EmailthreadService.findOrCreateThread({
         threadId: options.threadId,
         subject: `Te: ${options.subject}`,
         contactEmail: primaryRecipient.email,
@@ -481,6 +509,56 @@ export abstract class QstashMailService
       {
         status: "sent",
         resendMessageId: this.cleanMessageId(resendMessageId),
+      },
+      this.qstashMailConfig.database
+    );
+  }
+
+  public async processMailFailed(resendId: string): Promise<void> {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "failed",
+      },
+      this.qstashMailConfig.database
+    );
+  }
+
+  public async processMailBounced(resendId: string): Promise<void> {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "bounced",
+      },
+      this.qstashMailConfig.database
+    );
+  }
+
+  public async processMailComplained(resendId: string): Promise<void> {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "complained",
+      },
+      this.qstashMailConfig.database
+    );
+  }
+
+  public async processMailSuppressed(resendId: string): Promise<void> {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "suppressed",
+      },
+      this.qstashMailConfig.database
+    );
+  }
+
+  public async processMailDeliveryDelayed(resendId: string): Promise<void> {
+    await this.emailService.updateEmailByResendId(
+      resendId,
+      {
+        status: "delivered",
       },
       this.qstashMailConfig.database
     );

@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
 
-import { DatabaseType } from "@workspace/drizzle/client";
 import {
   EmailThreadTable,
   InsertEmailThread,
 } from "@workspace/drizzle/schemas";
+import { DatabaseType } from "@workspace/drizzle/types";
 
-export class ThreadService {
+export class EmailThreadService {
   constructor(private readonly database: DatabaseType) {}
 
   private resolveDB(database?: DatabaseType): DatabaseType {

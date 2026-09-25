@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { CreateEmailOptions } from "resend";
 
-import { DatabaseType } from "@workspace/drizzle/client";
 import {
   EmailAttachmentTable,
   EmailRecipientTable,
@@ -11,6 +10,7 @@ import {
   InsertEmailRecipient,
   UpdateEmail,
 } from "@workspace/drizzle/schemas";
+import { DatabaseType } from "@workspace/drizzle/types";
 
 import { InboundEmailPayload, SendMailOption } from "../types";
 
@@ -169,7 +169,10 @@ export class EmailService {
   }
 
   /** Format a persisted recipient back into an RFC 5322 address. */
-  private formatAddress(recipient: { email: string; name: string | null }): string {
+  private formatAddress(recipient: {
+    email: string;
+    name: string | null;
+  }): string {
     return recipient.name
       ? `${recipient.name} <${recipient.email}>`
       : recipient.email;

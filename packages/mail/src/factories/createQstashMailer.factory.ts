@@ -1,11 +1,12 @@
-import { QstashServiceConfig } from "@workspace/lib/qstash";
+import { type QstashServiceConfig } from "@workspace/lib/qstash";
 
+import { type QstashMailConfig } from "../services/QstashMail.service";
 import {
-  IQstashMailerService,
+  type IQstashMailerService,
   QstashMailerService,
 } from "../services/QstashMailer.service";
 import { ResendMailTransport } from "../transports/ResendMail.transport";
-import { MailServiceConfig, QstashMailConfig } from "../types";
+import type { MailServiceConfig } from "../types";
 
 type QstashMailerConfig = MailServiceConfig &
   QstashServiceConfig &

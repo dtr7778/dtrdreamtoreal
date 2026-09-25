@@ -1,13 +1,16 @@
-import { QstashServiceConfig } from "@workspace/lib/qstash";
+import { type QstashServiceConfig } from "@workspace/lib/qstash";
 
+import { type IMailTransport } from "../transports";
+import type { MailServiceConfig, QstashMailResult } from "../types";
 import {
-  IMailTransport,
-  MailServiceConfig,
-  QstashMailConfig,
-  QstashMailResult,
-} from "../types";
-import { IQstashMailService, QstashMailService } from "./QstashMail.service";
-import { IMailTemplates, withMailTemplates } from "./withMailTemplates.mixin";
+  type IQstashMailService,
+  type QstashMailConfig,
+  QstashMailService,
+} from "./QstashMail.service";
+import {
+  type IMailTemplates,
+  withMailTemplates,
+} from "./withMailTemplates.mixin";
 
 export interface IQstashMailerService
   extends IQstashMailService, IMailTemplates<QstashMailResult> {}

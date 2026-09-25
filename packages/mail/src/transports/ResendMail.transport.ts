@@ -2,7 +2,11 @@ import { CreateEmailOptions, Resend } from "resend";
 
 import { MailError } from "@workspace/lib/utils";
 
-import type { IMailTransport, MailSendResult } from "../types";
+import type { MailSendResult } from "../types";
+
+export interface IMailTransport {
+  send(options: CreateEmailOptions): Promise<MailSendResult>;
+}
 
 export class ResendMailTransport implements IMailTransport {
   private readonly resend: Resend;
