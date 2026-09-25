@@ -16,6 +16,8 @@ export function errorMiddleware(
 
   const errorData = error.toApiResponse();
 
+  console.log(errorData);
+
   return res.status(errorData.statusCode).json(errorData);
 }
 
