@@ -69,6 +69,7 @@
     "@upstash/qstash": "catalog:",
     "@upstash/ratelimit": "catalog:",
     "@upstash/redis": "catalog:",
+    "axios": "catalog:",
     "bullmq": "catalog:",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
