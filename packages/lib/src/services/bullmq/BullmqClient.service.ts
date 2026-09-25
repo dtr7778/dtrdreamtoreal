@@ -2,7 +2,9 @@ import { formatError } from "../../utils";
 import { BullmqError } from "./BullmqError";
 import { signBullmqPayload } from "./signature";
 import type {
+  BullmqBatchEnqueueResult,
   BullmqClientServiceConfig,
+  BullmqEnqueueBatchRequest,
   BullmqEnqueueOptions,
   BullmqEnqueueRequest,
   BullmqEnqueueResult,
@@ -84,12 +86,44 @@ export class BullmqClientService implements IBullmqClientService {
     } catch (err) {
       throw err instanceof BullmqError
         ? err
-        : new BullmqError(
-            `Failed to enqueue BullMQ job: ${formatError(err)}`,
-            "BULLMQ_ENQUEUE_FAILED",
-            500,
-            { queue: options.queue, job: options.job }
-          );
+        : new BullmqError(formatError(err), "BULLMQ_ENQUEUE_FAILED", 500, {
+            queue: options.queue,
+            job: options.job,
+          });
+    }
+  }
+
+  /**
+   * Sign and enqueue a batch of item payloads in a single transport call.
+   *
+   * The whole array is signed once; the backend validates and fans it out into
+   * individual jobs.
+   */
+  protected async enqueueBatch<T>(
+    options: BullmqEnqueueOptions<T[]>
+  ): Promise<BullmqBatchEnqueueResult[]> {
+    const payloads = options.payload;
+
+    const request: BullmqEnqueueBatchRequest<T> = {
+      queue: options.queue,
+      job: options.job,
+      payloads,
+      jobIds: payloads.map(() => this.generateJobId()),
+      ...(options.retries !== undefined && { retries: options.retries }),
+      ...(options.delay !== undefined && { delay: options.delay }),
+    };
+
+    try {
+      const signature = this.signPayload(request.payloads);
+
+      return await this.publisher.enqueueBatch(request, signature);
+    } catch (err) {
+      throw err instanceof BullmqError
+        ? err
+        : new BullmqError(formatError(err), "BULLMQ_ENQUEUE_FAILED", 500, {
+            queue: options.queue,
+            job: options.job,
+          });
     }
   }
 

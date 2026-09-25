@@ -29,6 +29,38 @@ export interface BullmqEnqueueResult {
   queue: string;
 }
 
+/** Per-item result of an {@link IBullmqPublisher.enqueueBatch} call. */
+export interface BullmqBatchEnqueueResult {
+  success: boolean;
+  /** Backend job/message id (present when `success`). */
+  messageId?: string;
+  /** Queue the item was enqueued on (present when `success`). */
+  queue?: string;
+  /** Failure reason (present when not `success`). */
+  error?: string;
+}
+
+/**
+ * Canonical batch enqueue request handed to an {@link IBullmqPublisher}.
+ *
+ * A single transport call carries every item; the backend fans them out into
+ * individual jobs and reports one result per item, in order.
+ */
+export interface BullmqEnqueueBatchRequest<T> {
+  /** Logical queue key, used by the publisher to pick the backend contract. */
+  queue: string;
+  /** Job name forwarded to the backend queue. */
+  job: string;
+  /** Item payloads, in caller order. */
+  payloads: T[];
+  /** Generated job ids, one per payload. */
+  jobIds: string[];
+  /** Delivery attempts override. */
+  retries?: number;
+  /** Delay delivery by this many seconds. */
+  delay?: number;
+}
+
 /**
  * Transport used by {@link BullmqService} to reach the backend broker.
  *
@@ -41,6 +73,11 @@ export interface IBullmqPublisher {
     request: BullmqEnqueueRequest<T>,
     signature: string
   ): Promise<BullmqEnqueueResult>;
+  /** Enqueue several signed item payloads in a single transport call. */
+  enqueueBatch<T>(
+    request: BullmqEnqueueBatchRequest<T>,
+    signature: string
+  ): Promise<BullmqBatchEnqueueResult[]>;
 }
 
 // ─── Configuration ──────────────────────────────────────────────────────────
