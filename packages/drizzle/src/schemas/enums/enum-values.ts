@@ -33,9 +33,12 @@ export const EMAIL_STATUS = [
   "draft",
   "queued",
   "sent",
+  "received",
   "delivered",
+  "delivery_delayed",
   "bounced",
   "complained",
+  "suppressed",
   "failed",
 ] as const;
 export const EMAIL_EVENT_TYPE = [
