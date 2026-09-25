@@ -1,58 +1,13 @@
 import type { RouteType } from "next/dist/lib/load-custom-routes";
 
-import type {
-  ActionTypeEnumType,
-  PermissionLevelEnumType,
-  ResourceTypeEnumType,
-  RoleEnumType,
-} from "@workspace/drizzle/zod-db-enums";
-
-import { permissionSeparator } from "@/constants";
+import type { AuthType } from "@workspace/auth";
+import { type PermissionStrType } from "@workspace/lib/types";
 
 export type RoutePathType = __next_route_internal_types__.RouteImpl<RouteType>;
 
-export type AuthUser = {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  email: string;
-  emailVerified: boolean;
-  name: string;
-  image?: string | null | undefined;
-  banned?: boolean | null | undefined;
-  role?: string | null | undefined;
-  banReason?: string | null | undefined;
-  banExpires?: Date | null | undefined;
-  timezone?: string | null | undefined;
-  locale?: string | null | undefined;
-  currency?: string | null | undefined;
-};
+export type AuthUser = AuthType["$Infer"]["Session"]["user"];
 
-export type AuthSession = {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  expiresAt: Date;
-  token: string;
-  ipAddress?: string | null | undefined;
-  userAgent?: string | null | undefined;
-  impersonatedBy?: string | null | undefined;
-};
-
-export type RoleType = {
-  roleName: RoleEnumType;
-};
-
-export type PermissionStrType =
-  `${PermissionLevelEnumType}${typeof permissionSeparator}${ResourceTypeEnumType}${typeof permissionSeparator}${ActionTypeEnumType}`;
-
-export type PermissionType = {
-  name: PermissionStrType;
-  level: PermissionLevelEnumType;
-  resource: ResourceTypeEnumType;
-  action: ActionTypeEnumType;
-};
+export type AuthSession = AuthType["$Infer"]["Session"]["session"];
 
 export interface FieldError<TFieldNames> {
   fieldName: TFieldNames;

@@ -6,11 +6,12 @@ import type {
   InferContractRouterOutputs,
 } from "@orpc/contract";
 
-import type { DatabaseType } from "@workspace/drizzle/client";
-import { ExtendedRedis } from "@workspace/lib/redis";
+import type { DatabaseType } from "@workspace/drizzle/types";
+import { ExtendedRedis } from "@workspace/lib/redis/upstash";
 import type { ServerSupabaseClient } from "@workspace/lib/supabase/server-client";
+import type { PermissionType, RoleType } from "@workspace/lib/types";
 
-import type { AuthSession, AuthUser, PermissionType, RoleType } from "@/types";
+import type { AuthSession, AuthUser } from "@/types";
 
 export interface ORPCContext {
   reqHeaders: Readonly<NextRequest["headers"]>;

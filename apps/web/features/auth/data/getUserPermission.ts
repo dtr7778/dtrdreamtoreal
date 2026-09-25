@@ -4,17 +4,16 @@ import { cache } from "react";
 
 import { eq, inArray } from "drizzle-orm";
 
-import type { DatabaseType } from "@workspace/drizzle/client";
 import {
   PermissionTable,
   RolePermissionTable,
   RoleTable,
   UserRoleTable,
 } from "@workspace/drizzle/schemas";
+import type { DatabaseType } from "@workspace/drizzle/types";
+import type { PermissionType, RoleType } from "@workspace/lib/types";
 
 import { db } from "@/lib/db";
-
-import { PermissionType, RoleType } from "@/types";
 
 export async function getUserRolesAndPermission(
   userId: string,
@@ -22,7 +21,7 @@ export async function getUserRolesAndPermission(
 ): Promise<{
   roles: Array<RoleType>;
   permissions: Array<PermissionType>;
-} | null> {
+}> {
   const systemRoles = await database
     .select({
       id: RoleTable.id,

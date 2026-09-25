@@ -3,12 +3,13 @@ import { NextRequest } from "next/server";
 import { ORPCError } from "@orpc/client";
 
 import { RoleEnumType } from "@workspace/drizzle/zod-db-enums";
+import type { PermissionStrType } from "@workspace/lib/types";
+import { hasPermission } from "@workspace/lib/utils";
 
 import { auth } from "@/lib/better-auth/auth";
-import { hasPermission } from "@/lib/permission";
 
 import { getUserRolesAndPermission } from "@/features/auth/data/getUserPermission";
-import { AuthSession, AuthUser, PermissionStrType } from "@/types";
+import { AuthSession, AuthUser } from "@/types";
 import { ORPCContext } from "@/types/orpc.types";
 
 import { baseOs } from "../orpc.base";

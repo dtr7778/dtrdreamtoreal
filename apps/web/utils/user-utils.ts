@@ -4,12 +4,11 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { RoleEnumSchema, RoleEnumType } from "@workspace/drizzle/zod-db-enums";
-
-import { hasPermission } from "@/lib/permission";
+import { PermissionStrType } from "@workspace/lib/types";
+import { hasPermission } from "@workspace/lib/utils";
 
 import { DEFAULT_AUTH_PATH } from "@/constants";
 import { getAuthUserWithRolesAndPermissionsCache } from "@/features/auth/data/getAuthUser";
-import { PermissionStrType } from "@/types";
 
 export function isAdmin(roles: Array<{ roleName: RoleEnumType | string }>) {
   return roles.some(

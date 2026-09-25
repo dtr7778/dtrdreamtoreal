@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     "@workspace/lib",
     "@workspace/mail",
     "@workspace/contract",
+    "@workspace/auth",
   ],
   allowedDevOrigins: [process.env.NGROK_URL!],
   typedRoutes: true,

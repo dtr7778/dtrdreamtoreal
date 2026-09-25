@@ -1,10 +1,7 @@
-import { hasPermission } from "@/lib/permission";
+import { PermissionType } from "@workspace/lib/types";
+import { hasPermission } from "@workspace/lib/utils";
 
-import {
-  PermissionType,
-  SidebarGroupMenuLinkType,
-  SidebarMenuLinkType,
-} from "@/types";
+import { SidebarGroupMenuLinkType, SidebarMenuLinkType } from "@/types";
 
 export function filterSidebarMenu(
   menuItems: Array<SidebarGroupMenuLinkType>,

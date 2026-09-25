@@ -2,9 +2,11 @@ import { createStore } from "zustand";
 import { combine, devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
+import { PermissionType, RoleType } from "@workspace/lib/types";
+
 import { env } from "@/lib/env";
 
-import { AuthSession, AuthUser, PermissionType, RoleType } from "@/types";
+import { AuthSession, AuthUser } from "@/types";
 
 export interface AuthStoreState {
   user: AuthUser;

@@ -26,7 +26,6 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "catalog:",
     "@bprogress/next": "^3.2.12",
     "@hookform/resolvers": "catalog:",
     "@hugeicons/core-free-icons": "catalog:",
@@ -47,6 +46,7 @@
     "@tiptap/react": "catalog:",
     "@upstash/qstash": "catalog:",
     "@upstash/redis": "catalog:",
+    "@workspace/auth": "workspace:*",
     "@workspace/contract": "workspace:*",
     "@workspace/drizzle": "workspace:*",
     "@workspace/lib": "workspace:*",
@@ -83,7 +83,7 @@
     "@types/react-dom": "catalog:",
     "@types/web-push": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "@workspace/eslint-config": "workspace:^",
+    "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "@workspace/vitest-config": "workspace:*",
     "babel-plugin-react-compiler": "^1.0.0",

@@ -8,8 +8,6 @@ export const DEFAULT_UNAUTH_PATH: RoutePathType = "/login";
 export const RESET_PASSWORD_PATH: RoutePathType = "/reset-password";
 export const ERROR_PAGE_PATH: RoutePathType = "/error";
 
-export const permissionSeparator = ".";
-
 export const SUPPORTED_OAUTH_PROVIDERS = ["google"] as const;
 
 export const AUTH_ROUTES: Array<RoutePathType> = [
