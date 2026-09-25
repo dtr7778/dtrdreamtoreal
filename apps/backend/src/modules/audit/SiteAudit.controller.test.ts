@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
+import type { AuthType } from "@workspace/auth";
 import {
   createMockDrizzleClient,
   type MockDatabaseType,
@@ -13,6 +14,7 @@ import { container, type IApplication } from "@workspace/lib/server";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
+import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import { SiteAuditController } from "@/modules/audit/SiteAudit.controller";
 
 import { type IAuditService } from "./Audit.service";
@@ -31,6 +33,19 @@ describe("SiteAuditController (Integration)", () => {
     container
       .bind<ExtendedRedis>(CONTAINER_TYPES.Redis)
       .toDynamicValue(() => createMockRedisClient())
+      .inSingletonScope();
+    container
+      .bind<AuthType>(CONTAINER_TYPES.Auth)
+      .toDynamicValue(
+        () =>
+          ({
+            api: { getSession: vi.fn(async () => null) },
+          }) as unknown as AuthType
+      )
+      .inSingletonScope();
+    container
+      .bind<AuthMiddleware>(AuthMiddleware)
+      .toSelf()
       .inSingletonScope();
     container
       .bind<IAuditService>(CONTAINER_TYPES.AuditService)

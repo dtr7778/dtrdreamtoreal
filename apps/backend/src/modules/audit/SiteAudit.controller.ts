@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 
 import { contracts, type ContractsType } from "@workspace/contract";
-import type { DatabaseType } from "@workspace/drizzle/client";
+import type { DatabaseType } from "@workspace/drizzle/types";
 import { userProfileColumns } from "@workspace/drizzle/helpers";
 import {
   buildPaginateOptions,
@@ -26,11 +26,20 @@ import {
   Patch,
   Post,
   RequestValidator,
+  UseGuards,
+  UseMiddlewares,
 } from "@workspace/lib/server";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
+import { RequirePermissions } from "@/decorators/permission.decorator";
+import { AuthGuard } from "@/guard/auth.guard";
+import { PermissionGuard } from "@/guard/permission.guard";
 import { BaseController } from "@/helpers/BaseController";
+import {
+  AuthMiddleware,
+  RolePermissionMiddleware,
+} from "@/middlewares/auth.middleware";
 
 import { type IAuditService } from "./Audit.service";
 
@@ -63,6 +72,8 @@ export interface ISiteController {
   scope: "Singleton",
   tags: ["Site audits"],
 })
+@UseMiddlewares(AuthMiddleware, RolePermissionMiddleware)
+@UseGuards(AuthGuard, PermissionGuard)
 export class SiteAuditController
   extends BaseController
   implements ISiteController
@@ -77,6 +88,7 @@ export class SiteAuditController
   }
 
   @Get("/", contracts.siteAudit.list)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.list")
   public async list(
     @RequestValidator(contracts.siteAudit.list.input)
     { query }: ContractsType["siteAudit"]["list"]["input"]
@@ -143,6 +155,7 @@ export class SiteAuditController
   }
 
   @Get("/:id/items", contracts.siteAudit.listAuditItems)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
   public async listRunItems(
     @RequestValidator(contracts.siteAudit.listAuditItems.input)
     { params, query }: ContractsType["siteAudit"]["listAuditItems"]["input"]
@@ -183,6 +196,7 @@ export class SiteAuditController
   }
 
   @Post("/", contracts.siteAudit.create)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.create")
   public async create(
     @RequestValidator(contracts.siteAudit.create.input)
     { body }: ContractsType["siteAudit"]["create"]["input"]
@@ -202,6 +216,7 @@ export class SiteAuditController
   }
 
   @Get("/:id", contracts.siteAudit.get)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
   public async get(
     @RequestValidator(contracts.siteAudit.get.input)
     { params }: ContractsType["siteAudit"]["get"]["input"]
@@ -241,7 +256,8 @@ export class SiteAuditController
       .leftJoin(UserRoleTable, eq(UserRoleTable.userId, UserTable.id))
       .leftJoin(RoleTable, eq(RoleTable.id, UserRoleTable.roleId))
       .where(eq(SiteAuditTable.id, params.id))
-      .limit(1);
+      .limit(1)
+      .groupBy(SiteAuditTable.id, FileTable.id, CompanyTable.id, UserTable.id);
 
     if (!siteData) {
       throw this.apiError({
@@ -258,6 +274,7 @@ export class SiteAuditController
   }
 
   @Get("/:id/results", contracts.siteAudit.getResult)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
   public async getRunResults(
     @RequestValidator(contracts.siteAudit.getResult.input)
     { params }: ContractsType["siteAudit"]["getResult"]["input"]
@@ -272,6 +289,7 @@ export class SiteAuditController
   }
 
   @Patch("/:id", contracts.siteAudit.update)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.update")
   public async update(
     @RequestValidator(contracts.siteAudit.update.input)
     { params, body }: ContractsType["siteAudit"]["update"]["input"]
@@ -297,6 +315,7 @@ export class SiteAuditController
   }
 
   @Delete("/:id", contracts.siteAudit.delete)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.delete")
   public async remove(
     @RequestValidator(contracts.siteAudit.delete.input)
     { params }: ContractsType["siteAudit"]["delete"]["input"]
@@ -326,6 +345,7 @@ export class SiteAuditController
   }
 
   @Get("/:id/cwv/history", contracts.siteAudit.cwv.list)
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
   public async history(
     @RequestValidator(contracts.siteAudit.cwv.list.input)
     { params, query }: ContractsType["siteAudit"]["cwv"]["list"]["input"]
