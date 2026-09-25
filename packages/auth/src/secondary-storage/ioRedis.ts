@@ -71,5 +71,3 @@ export function createSecondaryStorage(
     },
   };
 }
-
-export type { ExtendedRedis };

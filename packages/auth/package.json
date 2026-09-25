@@ -30,7 +30,7 @@
       "import": "./src/secondary-storage/ioRedis.ts",
       "types": "./src/secondary-storage/ioRedis.ts"
     },
-    "./upstashRedis-secondary-storage": {
+    "./upstash-secondary-storage": {
       "import": "./src/secondary-storage/upstash.ts",
       "types": "./src/secondary-storage/upstash.ts"
     }
