@@ -4,11 +4,7 @@ import { injectable } from "inversify";
 import { type QueueJobInput } from "@workspace/lib/bullmq";
 import { InjectQueue } from "@workspace/lib/server";
 
-import {
-  type MailJobData,
-  mailQueue,
-  type MailRetryJobData,
-} from "./mail.queue";
+import { type MailJobData, mailQueue } from "./mail.queue";
 
 type MailQueueKey = keyof typeof mailQueue.jobs & string;
 
@@ -24,11 +20,6 @@ export class MailQueueService {
   /** Enqueue a persisted email for the backend worker to send. */
   public async sendMail(data: MailJobData): Promise<EnqueueResult> {
     return this.addJob("send", data, { delay: data.delayMs });
-  }
-
-  /** Enqueue a retry/scheduled re-send of a persisted email. */
-  public async retryMail(data: MailRetryJobData): Promise<EnqueueResult> {
-    return this.addJob("retry", data, { delay: data.delayMs });
   }
 
   private async addJob<K extends MailQueueKey>(

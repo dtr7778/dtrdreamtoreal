@@ -16,8 +16,8 @@ export const mailQueue = createQueueContract({
     send: {
       name: "send-mail",
       input: z.object({
-        emailId: z.string().min(1),
-        threadId: z.string().optional(),
+        emailId: z.uuid().min(1),
+        threadId: z.uuid().optional(),
         /** Optional delay (ms) before the send is attempted. */
         delayMs: z.number().int().nonnegative().optional(),
       }),
@@ -29,27 +29,8 @@ export const mailQueue = createQueueContract({
         removeOnFail: { count: 5000 },
       },
     },
-    retry: {
-      name: "retry-mail",
-      input: z.object({
-        emailId: z.string().min(1),
-        threadId: z.string().optional(),
-        /** Delay (ms) before the retry is attempted. */
-        delayMs: z.number().int().nonnegative().optional(),
-      }),
-      output: z.object({ resendId: z.string() }),
-      options: {
-        attempts: 5,
-        backoff: { type: "exponential", delay: 2000 },
-        removeOnComplete: { count: 1000 },
-        removeOnFail: { count: 5000 },
-      },
-    },
   },
 });
 
 export type MailJobData = QueueJobInput<typeof mailQueue, "send">;
 export type MailJob = QueueJob<typeof mailQueue, "send">;
-
-export type MailRetryJobData = QueueJobInput<typeof mailQueue, "retry">;
-export type MailRetryJob = QueueJob<typeof mailQueue, "retry">;

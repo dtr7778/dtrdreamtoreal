@@ -1,13 +1,17 @@
 import type { Job } from "bullmq";
+import { eq } from "drizzle-orm";
 import { inject } from "inversify";
 
+import { type DatabaseType } from "@workspace/drizzle/types";
+import { EmailTable } from "@workspace/drizzle/schemas";
 import { type LoggerType } from "@workspace/lib/logger";
 import { OnWorkerEvent, Worker, WorkerNode } from "@workspace/lib/server";
-import { type IMailProcessor } from "@workspace/mail";
+import type { EmailService } from "@workspace/mail";
+import { type IMailTransport } from "@workspace/mail/transports";
 
 import { WORKER_CONTAINER_TYPES } from "@/container/worker-container/worker-container-types";
 
-import { type MailJob, mailQueue, type MailRetryJob } from "./mail.queue";
+import { type MailJob, mailQueue } from "./mail.queue";
 
 /**
  * Sends persisted outbound emails and applies inbound/status updates.
@@ -23,40 +27,32 @@ export class MailWorker {
   private readonly inFlight = new Set<string>();
 
   constructor(
-    @inject(WORKER_CONTAINER_TYPES.MailProcessorService)
-    private readonly mailProcessor: IMailProcessor,
+    @inject(WORKER_CONTAINER_TYPES.Drizzle)
+    private readonly database: DatabaseType,
+    @inject(WORKER_CONTAINER_TYPES.EmailService)
+    private readonly emailService: EmailService,
+    @inject(WORKER_CONTAINER_TYPES.ResendMailTransport)
+    private readonly mailTransport: IMailTransport,
     @inject(WORKER_CONTAINER_TYPES.Logger)
     private readonly log: LoggerType
   ) {}
 
   @WorkerNode(mailQueue.jobs.send)
   public async send(job: MailJob): Promise<{ resendId: string }> {
-    const { resendId } = await this.mailProcessor.sendPersistedEmail(
+    const options = await this.emailService.buildOutboundEmailOptions(
       job.data.emailId
     );
+
+    const resendId = await this.mailTransport.send(options);
+
+    await this.database
+      .update(EmailTable)
+      .set({ resendId })
+      .where(eq(EmailTable.id, job.data.emailId));
 
     this.log.info(
       { jobId: job.id, emailId: job.data.emailId, resendId },
       "mail sent"
-    );
-
-    return { resendId };
-  }
-
-  @WorkerNode(mailQueue.jobs.retry)
-  public async retry(job: MailRetryJob): Promise<{ resendId: string }> {
-    const { resendId } = await this.mailProcessor.sendPersistedEmail(
-      job.data.emailId
-    );
-
-    this.log.warn(
-      {
-        jobId: job.id,
-        emailId: job.data.emailId,
-        resendId,
-        attemptsMade: job.attemptsMade,
-      },
-      "mail re-sent"
     );
 
     return { resendId };
@@ -84,7 +80,13 @@ export class MailWorker {
     if (job?.id) this.inFlight.delete(job.id);
 
     if (job) {
-      await this.mailProcessor.processMailFailed(job.data.emailId);
+      await this.emailService.updateEmailByResendId(
+        job.data.emailId,
+        {
+          status: "failed",
+        },
+        this.database
+      );
     }
 
     this.log.error(

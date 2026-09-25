@@ -1,88 +1,108 @@
+import { eq } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 import { Resend, type WebhookEventPayload } from "resend";
 
+import { type DatabaseType } from "@workspace/drizzle/types";
+import { EmailTable } from "@workspace/drizzle/schemas";
 import {
   Controller,
   type IRequest,
   Post,
   Request,
+  UseGuards,
 } from "@workspace/lib/server";
-import { type IMailProcessor } from "@workspace/mail";
+import { type EmailService, InboundEmailPayload } from "@workspace/mail";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
-import { WORKER_CONTAINER_TYPES } from "@/container/worker-container/worker-container-types";
+import { RequireResendWebhook } from "@/decorators/resend-webhook.decorator";
 import { env } from "@/env";
+import { ResendWebhookGuard } from "@/guard/resend-webhook.guard";
 import { BaseController } from "@/helpers/BaseController";
-
-import { MailQueueService } from "./MailQueue.service";
 
 @Controller({
   path: "/mails/resend",
   scope: "Singleton",
   tags: ["Resend mail"],
 })
+@UseGuards(ResendWebhookGuard)
 export class ResendMailController extends BaseController {
   private readonly resend: Resend;
 
   constructor(
-    @inject(WORKER_CONTAINER_TYPES.MailProcessorService)
-    private readonly mailProcessor: IMailProcessor,
-    @inject(CONTAINER_TYPES.MailQueueService)
-    private readonly mailQueue: MailQueueService
+    @inject(CONTAINER_TYPES.Drizzle)
+    private readonly database: DatabaseType,
+    @inject(CONTAINER_TYPES.EmailService)
+    private readonly emailService: EmailService
   ) {
     super();
     this.resend = new Resend(env.RESEND_API_KEY);
   }
 
-  /** Read a single (possibly repeated) request header as a string. */
-  private getHeader(request: IRequest, name: string): string | undefined {
-    const value = request.headers[name];
+  /** Read the verified webhook event attached by `ResendWebhookGuard`. */
+  private getWebhookEvent(request: IRequest): WebhookEventPayload {
+    const event = request.resendWebhookEventPayload;
 
-    return Array.isArray(value) ? value[0] : value;
-  }
-
-  /**
-   * Verify a Resend (svix) webhook signature against the raw request body and
-   * return the decoded event.
-   */
-  private verifyWebhook(
-    request: IRequest,
-    webhookSecret: string
-  ): WebhookEventPayload {
-    const id = this.getHeader(request, "svix-id");
-    const timestamp = this.getHeader(request, "svix-timestamp");
-    const signature = this.getHeader(request, "svix-signature");
-    const payload = request.rawBody;
-
-    if (!id || !timestamp || !signature || !payload) {
-      throw this.apiError({
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: API_MESSAGE.GENERAL.RESEND.INVALID_REQUEST,
-      });
-    }
-
-    try {
-      return this.resend.webhooks.verify({
-        payload,
-        headers: { id, timestamp, signature },
-        webhookSecret,
-      });
-    } catch {
+    if (!event) {
       throw this.apiError({
         statusCode: StatusCodes.UNAUTHORIZED,
         message: API_MESSAGE.GENERAL.RESEND.INVALID_REQUEST,
       });
     }
+
+    return event;
+  }
+
+  /** Strip the surrounding angle brackets from a message id. */
+  private cleanMessageId(messageId: string): string {
+    return messageId.replace(/^<|>$/g, "");
+  }
+
+  /**
+   * Resolve the thread an inbound mail belongs to by matching its
+   * `In-Reply-To` header, then any `References` header, against previously
+   * stored `resendMessageId`s.
+   */
+  private async resolveInboundThreadId(
+    payload: InboundEmailPayload
+  ): Promise<string | undefined> {
+    const inReplyTo = payload.headers?.["in-reply-to"];
+
+    if (inReplyTo) {
+      const [originalEmail] = await this.database
+        .select({ threadId: EmailTable.threadId })
+        .from(EmailTable)
+        .where(eq(EmailTable.resendMessageId, this.cleanMessageId(inReplyTo)))
+        .limit(1);
+
+      if (originalEmail?.threadId) return originalEmail.threadId;
+    }
+
+    if (!payload.headers?.references) return undefined;
+
+    const referenceIds = payload.headers.references
+      .split(/\s+/)
+      .map(this.cleanMessageId)
+      .filter(Boolean);
+
+    for (const refId of referenceIds) {
+      const [email] = await this.database
+        .select({ threadId: EmailTable.threadId })
+        .from(EmailTable)
+        .where(eq(EmailTable.resendMessageId, refId))
+        .limit(1);
+
+      if (email?.threadId) return email.threadId;
+    }
+
+    return undefined;
   }
 
   @Post("/inbound")
+  @RequireResendWebhook("inbound")
   public async inboundMail(@Request() request: IRequest) {
-    const eventPayload = this.verifyWebhook(
-      request,
-      env.RESEND_INBOUND_WEBHOOK_SECRET
-    );
+    const eventPayload = this.getWebhookEvent(request);
 
     if (eventPayload.type !== "email.received") {
       throw this.apiError({
@@ -102,32 +122,114 @@ export class ResendMailController extends BaseController {
       });
     }
 
-    const result = await this.mailProcessor.processInboundEmail(data);
+    const threadId = await this.resolveInboundThreadId(data);
+
+    const { emailId } = await this.emailService.createInboundEmailRecord(
+      {
+        ...data,
+        message_id: this.cleanMessageId(data.message_id),
+        threadId,
+      },
+      this.database
+    );
 
     return this.response({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.WEBHOOK_QUEUED,
-      data: result,
+      data: {
+        success: true,
+        emailId,
+        threadId,
+      },
     });
   }
 
   @Post("/outbound")
+  @RequireResendWebhook("outbound")
   public async outboundMail(@Request() request: IRequest) {
-    const eventPayload = this.verifyWebhook(
-      request,
-      env.RESEND_OUTBOUND_WEBHOOK_SECRET
+    const eventPayload = this.getWebhookEvent(request);
+
+    if (eventPayload.type !== "email.delivered") {
+      throw this.apiError({
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: API_MESSAGE.GENERAL.RESEND.INVALID_REQUEST,
+      });
+    }
+
+    await this.emailService.updateEmailByResendId(
+      eventPayload.data.email_id,
+      {
+        status: "delivered",
+      },
+      this.database
     );
+
+    return this.response({
+      statusCode: StatusCodes.ACCEPTED,
+      message: API_MESSAGE.MAIL.WEBHOOK_QUEUED,
+      data: null,
+    });
+  }
+
+  @Post("/email-event")
+  @RequireResendWebhook("outbound")
+  public async emailEvent(@Request() request: IRequest) {
+    const eventPayload = this.getWebhookEvent(request);
 
     switch (eventPayload.type) {
       case "email.sent":
-        await this.mailProcessor.processMailSent(
+        await this.emailService.updateEmailByResendId(
           eventPayload.data.email_id,
-          eventPayload.data.message_id
+          {
+            status: "sent",
+            resendMessageId: this.cleanMessageId(eventPayload.data.message_id),
+          },
+          this.database
         );
         break;
-      case "email.delivered":
-        await this.mailProcessor.processMailDelivered(
-          eventPayload.data.email_id
+      case "email.failed":
+        await this.emailService.updateEmailByResendId(
+          eventPayload.data.email_id,
+          {
+            status: "failed",
+          },
+          this.database
+        );
+        break;
+      case "email.bounced":
+        await this.emailService.updateEmailByResendId(
+          eventPayload.data.email_id,
+          {
+            status: "bounced",
+          },
+          this.database
+        );
+        break;
+      case "email.complained":
+        await this.emailService.updateEmailByResendId(
+          eventPayload.data.email_id,
+          {
+            status: "complained",
+          },
+          this.database
+        );
+        break;
+      case "email.suppressed":
+        await this.emailService.updateEmailByResendId(
+          eventPayload.data.email_id,
+          {
+            status: "suppressed",
+          },
+          this.database
+        );
+        break;
+      case "email.delivery_delayed":
+        await this.emailService.updateEmailByResendId(
+          eventPayload.data.email_id,
+          {
+            status: "delivery_delayed",
+          },
+          this.database
         );
         break;
       default:
