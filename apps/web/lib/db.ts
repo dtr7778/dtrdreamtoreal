@@ -1,9 +1,7 @@
 import "server-only";
 
-import {
-  createDrizzleClient,
-  type DatabaseType,
-} from "@workspace/drizzle/client/upstashRedis";
+import { createDrizzleClient } from "@workspace/drizzle/client/upstash";
+import type { DatabaseType } from "@workspace/drizzle/types";
 
 import { env } from "./env";
 

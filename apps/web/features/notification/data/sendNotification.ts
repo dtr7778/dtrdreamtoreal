@@ -4,7 +4,7 @@ import {
   WebPushError,
 } from "web-push";
 
-import { type DatabaseType } from "@workspace/drizzle/client";
+import { type DatabaseType } from "@workspace/drizzle/types";
 import {
   InsertNotification,
   NotificationSettingsTable,

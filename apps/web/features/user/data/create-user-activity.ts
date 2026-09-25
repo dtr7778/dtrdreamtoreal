@@ -1,4 +1,4 @@
-import type { DatabaseType } from "@workspace/drizzle/client";
+import type { DatabaseType } from "@workspace/drizzle/types";
 import {
   type InsertUserActivity,
   UserActivityTable,
