@@ -1,10 +1,16 @@
 import { join } from "node:path";
 
+import { toNodeHandler } from "better-auth/node";
 import express from "express";
 import type { Container } from "inversify";
 
+import { AuthType } from "@workspace/auth";
 import { ExtendedRedis } from "@workspace/lib/redis/ioRedis";
-import { BaseServer, ClassConstructor } from "@workspace/lib/server";
+import {
+  BaseServer,
+  ClassConstructor,
+  LoggerInterceptor,
+} from "@workspace/lib/server";
 
 import pkg from "../package.json";
 import { CONTAINER_TYPES } from "./container/container-types";
@@ -23,10 +29,7 @@ export class Server extends BaseServer {
       version: pkg.version,
       csrfConfig: {
         secret: env.CSRF_TOKEN,
-      },
-      loggerConfig: {
-        serviceName: "Backend",
-        logLevel: env.API_LOG_LEVEL,
+        ignoredPaths: ["/mails"],
       },
       corsConfig: {
         allowedOrigins: env.CORS_ORIGIN,
@@ -35,6 +38,13 @@ export class Server extends BaseServer {
         window: "10 s",
         requests: 10,
         redisClient: container.get<ExtendedRedis>(CONTAINER_TYPES.Redis),
+      },
+      interceptors: [LoggerInterceptor],
+      beforeBodyParser: (app) => {
+        app.all(
+          "/api/auth/*splat",
+          toNodeHandler(container.get<AuthType>(CONTAINER_TYPES.Auth))
+        );
       },
       controllerClasses,
       cronJobClasses,

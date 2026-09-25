@@ -3,13 +3,19 @@ export const CONTAINER_TYPES = {
   Redis: Symbol.for("Redis"),
   Logger: Symbol.for("Logger"),
 
+  EmailService: Symbol.for("EmailService"),
+  EmailThreadService: Symbol.for("EmailThreadService"),
+
+  Auth: Symbol.for("Auth"),
+  Mailer: Symbol.for("Mailer"),
+
   GoogleApiCache: Symbol.for("GoogleApiCache"),
 
   PsiClient: Symbol.for("PsiClient"),
   CruxClient: Symbol.for("CruxClient"),
 
+  MailService: Symbol.for("MailService"),
   MailQueueService: Symbol.for("MailQueueService"),
-  MailProcessorService: Symbol.for("MailProcessorService"),
   QueueSignatureService: Symbol.for("QueueSignatureService"),
   AuditQueueService: Symbol.for("AuditQueueService"),
   AuditService: Symbol.for("AuditService"),

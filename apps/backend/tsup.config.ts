@@ -24,6 +24,7 @@ const options: OutputOptions = createBuildConfig({
       destination: join(process.cwd(), "dist", "public"),
     },
   ],
+  watch: ["src"],
   ignoreWatch: ["node_modules", "dist", "test", "./src/**/*.test.ts"],
   dependencies: pkg.dependencies,
   internalScope: "@workspace",

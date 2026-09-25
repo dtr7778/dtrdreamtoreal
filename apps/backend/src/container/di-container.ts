@@ -1,20 +1,36 @@
-import {
-  createDrizzleClient,
-  type DatabaseType,
-} from "@workspace/drizzle/client/ioRedis";
+import { AuthType, createBullmqBetterAuth } from "@workspace/auth";
+import { createSecondaryStorage } from "@workspace/auth/ioRedis-secondary-storage";
+import { createDrizzleClient } from "@workspace/drizzle/client/ioRedis";
+import type { DatabaseType } from "@workspace/drizzle/types";
+import { type BullmqEnqueueResult } from "@workspace/lib/bullmq";
 import { logger, type LoggerType } from "@workspace/lib/logger";
 import { createRedisClient, ExtendedRedis } from "@workspace/lib/redis/ioRedis";
-import { container } from "@workspace/lib/server";
-import { createMailProcessor, type IMailProcessor } from "@workspace/mail";
+import { container, LoggerInterceptor } from "@workspace/lib/server";
+import {
+  createBullmqMail,
+  EmailService,
+  EmailThreadService,
+  type IBullmqMailService,
+  RawMailPayload,
+  TemplateMailPayload,
+} from "@workspace/mail";
 
-import { QueueSignatureService } from "@/helpers/QueueSignature.service";
-import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
+import { AuthGuard } from "@/guard/auth.guard";
+import { BullmqSignatureGuard } from "@/guard/bullmq-signature.guard";
+import { PermissionGuard } from "@/guard/permission.guard";
+import { ResendWebhookGuard } from "@/guard/resend-webhook.guard";
+import {
+  AuthMiddleware,
+  RolePermissionMiddleware,
+} from "@/middlewares/auth.middleware";
 import { AuditService, IAuditService } from "@/modules/audit/Audit.service";
 import { AuditCronService } from "@/modules/audit/AuditCron.service";
+import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
 import { CruxClient } from "@/modules/audit/clients/crux.client";
 import { GoogleApiCache } from "@/modules/audit/clients/google-cache";
 import { PsiClient } from "@/modules/audit/clients/psi.client";
 import { MailController } from "@/modules/mail/Mail.controller";
+import { MailService } from "@/modules/mail/Mail.service";
 import { MailQueueService } from "@/modules/mail/MailQueue.service";
 import { ResendMailController } from "@/modules/mail/ResendMail.controller";
 
@@ -22,6 +38,12 @@ import { env } from "../env";
 import { SiteAuditController } from "../modules/audit/SiteAudit.controller";
 import { CONTAINER_TYPES } from "./container-types";
 
+container.bind<LoggerInterceptor>(LoggerInterceptor).toConstantValue(
+  new LoggerInterceptor({
+    serviceName: "Backend",
+    logLevel: env.API_LOG_LEVEL,
+  })
+);
 container
   .bind<ExtendedRedis>(CONTAINER_TYPES.Redis)
   .toDynamicValue(() =>
@@ -56,6 +78,17 @@ container
   .inRequestScope();
 
 container
+  .bind<EmailService>(CONTAINER_TYPES.EmailService)
+  .toConstantValue(
+    new EmailService(container.get<DatabaseType>(CONTAINER_TYPES.Drizzle))
+  );
+container
+  .bind<EmailThreadService>(CONTAINER_TYPES.EmailThreadService)
+  .toConstantValue(
+    new EmailThreadService(container.get<DatabaseType>(CONTAINER_TYPES.Drizzle))
+  );
+
+container
   .bind<GoogleApiCache>(CONTAINER_TYPES.GoogleApiCache)
   .to(GoogleApiCache)
   .inSingletonScope();
@@ -83,18 +116,101 @@ container
   .to(MailQueueService)
   .inSingletonScope();
 container
-  .bind<IMailProcessor>(CONTAINER_TYPES.MailProcessorService)
+  .bind<MailService>(CONTAINER_TYPES.MailService)
+  .toDynamicValue(
+    () =>
+      new MailService(
+        container.get<EmailService>(CONTAINER_TYPES.EmailService),
+        container.get<EmailThreadService>(CONTAINER_TYPES.EmailThreadService),
+        container.get<MailQueueService>(CONTAINER_TYPES.MailQueueService),
+        container.get<ExtendedRedis>(CONTAINER_TYPES.Redis),
+        {
+          appName: env.APP_NAME,
+          supportMail: env.SUPPORT_MAIL,
+          systemMail: env.SYSTEM_MAIL,
+          dedupWindowSeconds: 300,
+        }
+      )
+  )
+  .inSingletonScope();
+container
+  .bind<IBullmqMailService>(CONTAINER_TYPES.Mailer)
   .toDynamicValue(() =>
-    createMailProcessor({
-      database: container.get<DatabaseType>(CONTAINER_TYPES.Drizzle),
-      resendApiKey: env.RESEND_API_KEY,
+    createBullmqMail({
+      signingSecret: env.BULLMQ_SIGNING_SECRET,
+      publisher: {
+        async enqueue(request) {
+          const mailService = container.get<MailService>(
+            CONTAINER_TYPES.MailService
+          );
+
+          const result =
+            request.job === "sendRaw"
+              ? await mailService.sendRaw(request.payload as RawMailPayload)
+              : await mailService.send(request.payload as TemplateMailPayload);
+
+          return {
+            messageId: result.jobId,
+            queue: result.queue,
+          } satisfies BullmqEnqueueResult;
+        },
+        async enqueueBatch(request) {
+          const mailService = container.get<MailService>(
+            CONTAINER_TYPES.MailService
+          );
+
+          const results =
+            request.job === "sendRawBatch"
+              ? await mailService.sendRawBatch(
+                  request.payloads as RawMailPayload[]
+                )
+              : await mailService.sendBatch(
+                  request.payloads as TemplateMailPayload[]
+                );
+
+          return results.map((result) => ({
+            success: result.success,
+            messageId: result.jobId,
+            queue: result.queue,
+            error: result.error,
+          }));
+        },
+      },
+      defaultRetries: 3,
     })
   )
   .inSingletonScope();
 container
-  .bind<QueueSignatureService>(CONTAINER_TYPES.QueueSignatureService)
-  .to(QueueSignatureService)
+  .bind<AuthType>(CONTAINER_TYPES.Auth)
+  .toDynamicValue(() =>
+    createBullmqBetterAuth({
+      baseURL: env.BETTER_AUTH_URL,
+      secret: env.BETTER_AUTH_SECRET,
+      appName: env.APP_NAME,
+      siteUrl: env.SITE_URL,
+      isDev: env.NODE_ENV !== "production",
+      trustedOrigins: env.CORS_ORIGIN,
+      errorPagePath: "/error",
+      database: container.get<DatabaseType>(CONTAINER_TYPES.Drizzle),
+      secondaryStorage: createSecondaryStorage(
+        container.get<ExtendedRedis>(CONTAINER_TYPES.Redis)
+      ),
+      mailer: container.get<IBullmqMailService>(CONTAINER_TYPES.Mailer),
+      google: {
+        clientId: env.GOOGLE_AUTH_CLIENT_ID,
+        clientSecret: env.GOOGLE_AUTH_CLIENT_SECRET,
+        redirectURI: `${env.SITE_URL}/api/auth/callback/google`,
+      },
+    })
+  )
   .inSingletonScope();
+
+container.bind(AuthMiddleware).toSelf().inSingletonScope();
+container.bind(RolePermissionMiddleware).toSelf().inSingletonScope();
+container.bind(AuthGuard).toSelf().inSingletonScope();
+container.bind(PermissionGuard).toSelf().inSingletonScope();
+container.bind(BullmqSignatureGuard).toSelf().inSingletonScope();
+container.bind(ResendWebhookGuard).toSelf().inSingletonScope();
 
 // cron jobs
 container.bind<AuditCronService>(AuditCronService).toSelf().inSingletonScope();

@@ -3,5 +3,15 @@ export const WORKER_CONTAINER_TYPES = {
   Redis: Symbol.for("Redis"),
   Logger: Symbol.for("Logger"),
 
-  MailProcessorService: Symbol.for("MailProcessorService"),
+  EmailService: Symbol.for("EmailService"),
+  EmailThreadService: Symbol.for("EmailThreadService"),
+
+  GoogleApiCache: Symbol.for("GoogleApiCache"),
+  PsiClient: Symbol.for("PsiClient"),
+  CruxClient: Symbol.for("CruxClient"),
+
+  ResendMailTransport: Symbol.for("ResendMailTransport"),
+
+  AuditService: Symbol.for("AuditService"),
+  AuditQueueService: Symbol.for("AuditQueueService"),
 };

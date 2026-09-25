@@ -2,7 +2,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 
-import type { DatabaseType } from "@workspace/drizzle/client";
+import type { DatabaseType } from "@workspace/drizzle/types";
 import {
   AuditItemTable,
   CwvSnapshotTable,

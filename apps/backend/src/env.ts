@@ -48,6 +48,14 @@ export const env = createEnv({
     GOOGLE_CRUX_API_KEY: z.string().default(""),
     RESEND_INBOUND_WEBHOOK_SECRET: z.string().min(1),
     RESEND_OUTBOUND_WEBHOOK_SECRET: z.string().min(1),
+    APP_NAME: z.string().min(1).default("DTR"),
+    SITE_URL: z.url(),
+    SUPPORT_MAIL: z.email(),
+    SYSTEM_MAIL: z.email(),
+    BETTER_AUTH_URL: z.url(),
+    BETTER_AUTH_SECRET: z.string().min(1),
+    GOOGLE_AUTH_CLIENT_ID: z.string().min(1),
+    GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -72,6 +80,14 @@ export const env = createEnv({
           GOOGLE_CRUX_BASE_URL: "https://chromeuxreport.googleapis.com/v1",
           RESEND_INBOUND_WEBHOOK_SECRET: "resend_inbound_webhook_secret",
           RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
+          APP_NAME: "My App",
+          SITE_URL: "http://localhost:3000",
+          SUPPORT_MAIL: "support@example.com",
+          SYSTEM_MAIL: "notifications@example.com",
+          BETTER_AUTH_URL: "http://localhost:8000",
+          BETTER_AUTH_SECRET: "secret",
+          GOOGLE_AUTH_CLIENT_ID: "client_id",
+          GOOGLE_AUTH_CLIENT_SECRET: "client_secret",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -94,5 +110,13 @@ export const env = createEnv({
             process.env.RESEND_INBOUND_WEBHOOK_SECRET,
           RESEND_OUTBOUND_WEBHOOK_SECRET:
             process.env.RESEND_OUTBOUND_WEBHOOK_SECRET,
+          APP_NAME: process.env.APP_NAME,
+          SITE_URL: process.env.SITE_URL,
+          SUPPORT_MAIL: process.env.SUPPORT_MAIL,
+          SYSTEM_MAIL: process.env.SYSTEM_MAIL,
+          BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+          BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+          GOOGLE_AUTH_CLIENT_ID: process.env.GOOGLE_AUTH_CLIENT_ID,
+          GOOGLE_AUTH_CLIENT_SECRET: process.env.GOOGLE_AUTH_CLIENT_SECRET,
         },
 });

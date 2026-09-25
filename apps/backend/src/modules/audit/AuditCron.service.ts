@@ -1,6 +1,6 @@
 import { inject } from "inversify";
 
-import type { DatabaseType } from "@workspace/drizzle/client";
+import type { DatabaseType } from "@workspace/drizzle/types";
 import { SiteAuditTable } from "@workspace/drizzle/schemas";
 import { CwvStrategyEnumSchema } from "@workspace/drizzle/zod-db-enums";
 import { CronJob, CronJobClass } from "@workspace/lib/server";
