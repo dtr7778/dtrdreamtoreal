@@ -1,4 +1,4 @@
-import { ExtractObjectKeys } from "../zod/paginateInputZodSchema";
+import { ExtractObjectKeys } from "../paginateInputZodSchema";
 import { nodeFieldValidatorZodSchema } from "./nodeFieldValidatorZodSchema";
 import { searchFilterZodSchema } from "./searchFilterZodSchema";
 import { z } from "./zod";

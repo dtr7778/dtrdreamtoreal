@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { ApiResponse } from "../classes";
 import { INextFunction, IRequest, IResponse } from "../types";
-import { apiResponse } from "../utils";
+import { sendApiResponse } from "../utils";
 
 export function notFoundHandler(
   req: IRequest,
@@ -10,7 +10,7 @@ export function notFoundHandler(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: INextFunction
 ) {
-  return apiResponse(res)(
+  return sendApiResponse(res)(
     new ApiResponse({
       statusCode: StatusCodes.NOT_FOUND,
       message: `Route '${req.originalUrl}' not found`,

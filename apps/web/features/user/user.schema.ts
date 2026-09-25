@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
-import { emailField } from "@workspace/lib/zod";
+import { emailField } from "@workspace/lib/schemas";
 
 export const userUpdateSchema = z.object({
   displayRole: z.string().nullable(),

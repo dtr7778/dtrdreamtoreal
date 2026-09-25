@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { PermissionStrType, PermissionType } from "../../src/types";
-import { hasPermission } from "../../src/utils/permission";
+import type { PermissionStrType, PermissionType } from "../types";
+import { hasPermission } from "./permission";
 
 function permission(
   level: PermissionType["level"],

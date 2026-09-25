@@ -9,7 +9,7 @@ import {
   PermissionLevelEnumSchema,
   ResourceTypeEnumSchema,
 } from "@workspace/drizzle/zod-db-enums";
-import { apiOutputZodSchema } from "@workspace/lib/zod";
+import { apiOutputZodSchema } from "@workspace/lib/schemas";
 
 import { baseContract } from "@/server/orpc.contract-base";
 import { InferContractRouterType } from "@/types/orpc.types";

@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { stringToArray } from "../zod";
+import { stringToArray } from "..";
 
 export function searchFilterZodSchema<T extends z.ZodObject<z.ZodRawShape>>(
   zodSchema?: T

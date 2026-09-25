@@ -4,12 +4,12 @@ import {
   nodeApiOutputZodSchema,
   nodePaginateInputZodSchema,
   z,
-} from "@workspace/lib/node-zod";
+} from "@workspace/lib/schemas/node";
 import type { InferContractType } from "@workspace/lib/types";
 import {
   paginateOutputZodSchema,
   stringBooleanSchema,
-} from "@workspace/lib/zod";
+} from "@workspace/lib/schemas";
 
 import { createContract } from "../createContract";
 

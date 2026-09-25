@@ -1,6 +1,6 @@
 import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
-import type { ContractOutputs } from "../../../types";
+import type { ContractOutputs } from "../../types";
 import { REFLECT_KEYS } from "../constant";
 import type {
   IControllerDefinition,

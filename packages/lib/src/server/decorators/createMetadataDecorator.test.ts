@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   createMetadataDecorator,
   getAllAndMergeMetadata,
-} from "../../src/services/server/decorators/createMetadataDecorator";
+} from "./createMetadataDecorator";
 
 const KEY = "test:metadata";
 

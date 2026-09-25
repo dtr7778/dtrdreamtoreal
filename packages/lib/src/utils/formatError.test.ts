@@ -1,7 +1,7 @@
 import { AxiosError, type AxiosResponse } from "axios";
 import { describe, expect, it } from "vitest";
 
-import { formatError } from "../../src/utils/formatError";
+import { formatError } from "./formatError";
 
 function axiosErrorWith(data: unknown, message = "Request failed with status code 400") {
   const response = {

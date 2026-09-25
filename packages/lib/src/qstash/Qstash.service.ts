@@ -1,6 +1,6 @@
 import { Client, type PublishBatchRequest, Receiver } from "@upstash/qstash";
 
-import { formatError } from "../../utils";
+import { formatError } from "../utils";
 import { QSTASH_DEFAULTS } from "./constants";
 import { HandlerRegistry } from "./HandlerRegistry";
 import {

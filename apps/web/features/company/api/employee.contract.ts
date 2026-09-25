@@ -10,7 +10,7 @@ import {
   apiOutputZodSchema,
   paginateInputZodSchema,
   paginateOutputZodSchema,
-} from "@workspace/lib/zod";
+} from "@workspace/lib/schemas";
 
 import { userProfileSchema } from "@/features/user/user.api-schema";
 import { InferContractRouterType } from "@/types/orpc.types";

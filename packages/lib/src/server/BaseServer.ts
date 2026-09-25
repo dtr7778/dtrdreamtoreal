@@ -35,7 +35,7 @@ import type {
   IRequest,
   IResponse,
 } from "./types";
-import { apiResponse } from "./utils";
+import { sendApiResponse } from "./utils";
 
 export interface IBaseServer {
   getApp(): IApplication;
@@ -66,7 +66,7 @@ export abstract class BaseServer implements IBaseServer {
     this.app.set("trust proxy", 1);
 
     this.app.get("/health", (_req: IRequest, res: IResponse) => {
-      apiResponse(res)(
+      sendApiResponse(res)(
         new ApiResponse({
           statusCode: StatusCodes.OK,
           message: API_MESSAGE.HEALTH,
@@ -88,7 +88,7 @@ export abstract class BaseServer implements IBaseServer {
     this.app.get("/csrf-token", (req, res) => {
       const token = generateToken(req);
       setCsrfCookie(res, token);
-      apiResponse(res)(
+      sendApiResponse(res)(
         new ApiResponse({
           statusCode: StatusCodes.OK,
           message: API_MESSAGE.GET_CSRF_TOKEN,

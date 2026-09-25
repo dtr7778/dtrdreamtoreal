@@ -5,7 +5,7 @@ import { inject } from "inversify";
 import {
   createRatelimit,
   IIoRedisRatelimit,
-} from "@workspace/lib/rate-limit/ioRedis";
+} from "@workspace/lib/rate-limit/ioredis";
 import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 
 import { httpClient } from "@/lib/http-client";

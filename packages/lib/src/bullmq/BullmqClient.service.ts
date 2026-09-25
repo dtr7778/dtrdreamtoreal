@@ -1,4 +1,4 @@
-import { formatError } from "../../utils";
+import { formatError } from "../utils";
 import { BullmqError } from "./BullmqError";
 import { signBullmqPayload } from "./signature";
 import type {

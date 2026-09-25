@@ -32,6 +32,11 @@ function appendMetadata(
   }
 }
 
+export type MetadataDecorator = (
+  target: object | NewableFunction,
+  propertyKey?: string | symbol
+) => void;
+
 /**
  * Creates a class/method decorator that accumulates values under
  * `metadataKey`.
@@ -52,9 +57,9 @@ function appendMetadata(
  */
 export function createMetadataDecorator<T>(
   metadataKey: string
-): (...values: T[]) => MethodDecorator & ClassDecorator {
+): (...values: T[]) => MetadataDecorator {
   return (...values: T[]) =>
-    (target: object | NewableFunction, propertyKey?: string | symbol) => {
+    (target, propertyKey) => {
       appendMetadata(metadataKey, values, target, propertyKey);
     };
 }

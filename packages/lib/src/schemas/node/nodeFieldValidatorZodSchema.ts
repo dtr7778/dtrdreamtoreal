@@ -1,4 +1,4 @@
-import { stringArraySchema } from "../zod";
+import { stringArraySchema } from "..";
 
 export function nodeFieldValidatorZodSchema<
   TKey extends "searchFields",

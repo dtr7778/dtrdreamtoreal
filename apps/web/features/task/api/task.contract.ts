@@ -9,7 +9,7 @@ import {
   apiOutputZodSchema,
   paginateInputZodSchema,
   paginateOutputZodSchema,
-} from "@workspace/lib/zod";
+} from "@workspace/lib/schemas";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { userProfileSchema } from "@/features/user/user.api-schema";

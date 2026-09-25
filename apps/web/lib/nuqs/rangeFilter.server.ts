@@ -3,7 +3,7 @@ import "server-only";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { parseAsIsoDate, parseAsStringLiteral } from "nuqs/server";
 
-import { RangeSearchEnumSchema } from "@workspace/lib/zod";
+import { RangeSearchEnumSchema } from "@workspace/lib/schemas";
 
 export function createRangeFilterServer(now: Date = new Date()) {
   return {

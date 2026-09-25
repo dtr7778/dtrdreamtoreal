@@ -12,7 +12,7 @@ import {
 import { CalendarDays, CalendarRange, ChevronDown, X } from "lucide-react";
 
 import { formatDateWithTimezone, formatEnumValue } from "@workspace/lib/utils";
-import { RangeSearchEnum, RangeSearchEnumSchema } from "@workspace/lib/zod";
+import { RangeSearchEnum, RangeSearchEnumSchema } from "@workspace/lib/schemas";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,

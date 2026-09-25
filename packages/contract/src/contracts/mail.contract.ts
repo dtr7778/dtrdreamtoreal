@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { nodeApiOutputZodSchema } from "@workspace/lib/node-zod";
+import { nodeApiOutputZodSchema } from "@workspace/lib/schemas/node";
 import { InferContractType } from "@workspace/lib/types";
 import {
   mailBatchItemResultSchema,

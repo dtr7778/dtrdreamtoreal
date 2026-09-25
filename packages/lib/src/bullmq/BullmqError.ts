@@ -1,4 +1,4 @@
-import { ServiceError } from "../../utils";
+import { ServiceError } from "../utils";
 
 /**
  * Stable error codes emitted by the BullMQ producer.

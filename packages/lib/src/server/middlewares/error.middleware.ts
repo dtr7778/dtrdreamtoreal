@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
-import { MailError } from "../../../utils";
+import { MailError } from "../../utils";
 import { ApiError } from "../classes";
 import { API_MESSAGE } from "../constant";
 import type { INextFunction, IRequest, IResponse } from "../types";
@@ -15,8 +15,6 @@ export function errorMiddleware(
   const error: ApiError = getServerError(err);
 
   const errorData = error.toApiResponse();
-
-  console.log(errorData);
 
   return res.status(errorData.statusCode).json(errorData);
 }

@@ -12,9 +12,9 @@ import type { IResponse } from "../types";
  *   message: "Success",
  *   data: user
  * });
- * return apiResponse(res)(result);
+ * return sendApiResponse(res)(result);
  */
-export function apiResponse<T = unknown>(res: IResponse) {
+export function sendApiResponse<T = unknown>(res: IResponse) {
   return function (apiResponseInstance: ApiResponse<T>) {
     return res.status(apiResponseInstance.statusCode).json({
       statusCode: apiResponseInstance.statusCode,

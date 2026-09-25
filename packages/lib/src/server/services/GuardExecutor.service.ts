@@ -9,7 +9,7 @@ import type {
   IRequestExecutionContext,
   IResponse,
 } from "../types";
-import { apiResponse } from "../utils";
+import { sendApiResponse } from "../utils";
 
 export class GuardExecutorService {
   public static async executeAllGuards(
@@ -31,7 +31,7 @@ export class GuardExecutorService {
   }
 
   public static sendForbiddenResponse(response: IResponse): void {
-    apiResponse(response)(
+    sendApiResponse(response)(
       new ApiResponse({
         success: false,
         message: API_MESSAGE.FORBIDDEN,

@@ -5,7 +5,7 @@ import {
   SocialMediaPlatfromTypeEnumSchema,
   SocialMediaTypeEnumSchema,
 } from "@workspace/drizzle/zod-db-enums";
-import { emptyStrSchema } from "@workspace/lib/zod";
+import { emptyStrSchema } from "@workspace/lib/schemas";
 
 export const socialMediaCreateSchema = z.object({
   type: SocialMediaTypeEnumSchema,

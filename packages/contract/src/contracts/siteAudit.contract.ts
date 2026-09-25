@@ -16,9 +16,9 @@ import {
 import {
   nodeApiOutputZodSchema,
   nodePaginateInputZodSchema,
-} from "@workspace/lib/node-zod";
+} from "@workspace/lib/schemas/node";
 import { InferContractType } from "@workspace/lib/types";
-import { paginateOutputZodSchema } from "@workspace/lib/zod";
+import { paginateOutputZodSchema } from "@workspace/lib/schemas";
 
 import { createContract } from "../createContract";
 

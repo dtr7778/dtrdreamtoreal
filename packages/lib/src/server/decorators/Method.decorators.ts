@@ -1,4 +1,4 @@
-import type { ContractOutputs } from "../../../types";
+import type { ContractOutputs } from "../../types";
 import { REFLECT_KEYS } from "../constant";
 import type { IRouteDefinition } from "../types";
 import { pathNormalize } from "../utils/path.utils";
