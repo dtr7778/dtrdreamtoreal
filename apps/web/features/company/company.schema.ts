@@ -76,6 +76,10 @@ export const companyCreateSchema = z.object({
   email: emptyStrSchema.pipe(z.email().optional()).optional(),
   phone: emptyStrSchema.optional(),
   description: emptyStrSchema.optional(),
+  context: z.record(
+    z.string(),
+    z.union([z.string(), z.array(z.string())]).optional()
+  ),
   employees: z.array(employeeCreateSchema.omit({ companyId: true })),
   socialMedia: z.array(socialMediaCreateSchema),
   addresses: z.array(addressCreateSchema),

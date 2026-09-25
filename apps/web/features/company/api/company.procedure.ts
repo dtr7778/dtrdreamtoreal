@@ -220,6 +220,14 @@ export const companyDetailsProcedure = companyImpl.details
     });
   });
 
+function sanitizeContext(
+  context: Record<string, string | string[] | undefined>
+): Record<string, string | string[]> {
+  return Object.fromEntries(
+    Object.entries(context).filter(([, value]) => value !== undefined)
+  ) as Record<string, string | string[]>;
+}
+
 export const companyCreateProcedure = companyImpl.create
   .use(
     userPermissionMiddleware(["system.company.manage", "system.company.create"])
@@ -238,7 +246,7 @@ export const companyCreateProcedure = companyImpl.create
           employSize: inputCompany.employSize,
           email: inputCompany.email,
           phone: inputCompany.phone,
-          description: inputCompany.description,
+          context: sanitizeContext(inputCompany.context),
           createdBy: context.user.id,
         } satisfies InsertCompany)
         .returning();
@@ -353,7 +361,13 @@ export const companyUpdateProcedure = companyImpl.update
     userPermissionMiddleware(["system.company.manage", "system.company.update"])
   )
   .handler(async ({ context, input, errors }) => {
-    const { companyId, addresses, socialMedia, ...restInput } = input;
+    const {
+      companyId,
+      addresses,
+      socialMedia,
+      context: contextInput,
+      ...restInput
+    } = input;
 
     const [existing] = await context.db
       .select({ id: CompanyTable.id })
@@ -363,11 +377,19 @@ export const companyUpdateProcedure = companyImpl.update
 
     if (!existing) throw errors.NOT_FOUND();
 
+    const hasCompanyUpdate =
+      Object.keys(restInput).length > 0 || contextInput !== undefined;
+
     const companyData = await context.db.transaction(async (tx) => {
       let updatedCompanyData: CompanyDataModel;
 
-      if (Object.keys(restInput).length > 0) {
-        const updateData: UpdateCompany = { ...restInput };
+      if (hasCompanyUpdate) {
+        const updateData: UpdateCompany = {
+          ...restInput,
+          ...(contextInput !== undefined
+            ? { context: sanitizeContext(contextInput) }
+            : {}),
+        };
 
         const [companyData] = await tx
           .update(CompanyTable)

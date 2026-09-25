@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   foreignKey,
   index,
+  jsonb,
   pgTable,
   text,
   uuid,
@@ -34,6 +35,9 @@ export const CompanyTable = pgTable(
     email: varchar("email", { length: 255 }),
     phone: varchar("phone", { length: 50 }),
     description: text("description"),
+    context: jsonb("context")
+      .$type<Record<string, string | string[]>>()
+      .notNull(),
 
     createdBy: uuid("created_by").notNull(),
     createdAt: db_created_at,
