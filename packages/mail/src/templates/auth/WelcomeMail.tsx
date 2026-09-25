@@ -1,22 +1,23 @@
+/** @jsxRuntime automatic */
 import { Section, Text } from "react-email";
 
 import { EmailButton } from "../../components/EmailButton";
 import { EmailHeading, EmailLayout } from "../../components/EmailLayout";
 import { EmailLink } from "../../components/EmailLink";
 
-export interface WelcomeUserMailProps {
+export interface WelcomeMailProps {
   userName: string;
   appName: string;
   supportMail: string;
   dashboardUrl: string;
 }
 
-export default function WelcomeUserMail({
+export default function WelcomeMail({
   userName,
   appName,
   supportMail,
   dashboardUrl,
-}: WelcomeUserMailProps) {
+}: WelcomeMailProps) {
   return (
     <EmailLayout
       appName={appName}
@@ -52,9 +53,9 @@ export default function WelcomeUserMail({
   );
 }
 
-WelcomeUserMail.PreviewProps = {
+WelcomeMail.PreviewProps = {
   userName: "Jane Smith",
   appName: "App name",
   supportMail: "help@app-name.com",
   dashboardUrl: "http://localhost:3000/dashboard",
-} as WelcomeUserMailProps;
+} as WelcomeMailProps;

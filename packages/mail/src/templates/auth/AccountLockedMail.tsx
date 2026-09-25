@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic */
 import { Column, Row, Section, Text } from "react-email";
 
 import { EmailButton } from "../../components/EmailButton";

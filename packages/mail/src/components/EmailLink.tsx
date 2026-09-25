@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic */
 import { Link } from "react-email";
 
 export function EmailLink({

@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic */
 import { Button } from "react-email";
 
 export function EmailButton({

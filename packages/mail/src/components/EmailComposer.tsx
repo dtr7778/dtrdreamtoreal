@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic */
 "use client";
 
 import { forwardRef, useCallback, useRef, useState } from "react";

@@ -1,3 +1,4 @@
+/** @jsxRuntime automatic */
 import { Column, Row, Text } from "react-email";
 
 import {
