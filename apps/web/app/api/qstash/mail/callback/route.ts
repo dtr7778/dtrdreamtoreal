@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import { MailCallbackPayload } from "@workspace/mail";
+import { type MailCallbackPayload } from "@workspace/mail";
 
 import { qstashMail } from "@/lib/mail/qstash-mail";
 import { getQstashPayload } from "@/lib/qstash/getQstashPayload";

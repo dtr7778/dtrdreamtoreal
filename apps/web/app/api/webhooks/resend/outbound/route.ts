@@ -18,10 +18,7 @@ export async function POST(req: NextRequest) {
       env.RESEND_OUTBOUND_WEBHOOK_SECRET
     );
 
-    if (
-      eventPayload.type !== "email.sent" &&
-      eventPayload.type !== "email.delivered"
-    ) {
+    if (eventPayload.type !== "email.delivered") {
       return ApiResponseJson(
         true,
         API_MESSAGES.GENERAL.RESEND.BAD_REQUEST,
@@ -30,15 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (eventPayload.type === "email.sent") {
-      await qstashMail.processMailSent(
-        eventPayload.data.email_id,
-        eventPayload.data.message_id
-      );
-    }
-    if (eventPayload.type === "email.delivered") {
-      await qstashMail.processMailDelivered(eventPayload.data.email_id);
-    }
+    await qstashMail.processMailDelivered(eventPayload.data.email_id);
 
     return ApiResponseJson(
       true,

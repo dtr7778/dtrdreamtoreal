@@ -1,69 +1,97 @@
 import {
   BULLMQ_TRANSPORT_HEADERS,
   type BullmqEnqueueResult,
-  type IBullmqPublisher,
 } from "@workspace/lib/bullmq";
-import { createBullmqMailer, type IBullmqMailerService } from "@workspace/mail";
+import {
+  createBullmqMail,
+  type IBullmqMailService,
+  type RawMailPayload,
+  type TemplateMailPayload,
+} from "@workspace/mail";
 
 import { apiClient } from "../api";
-import { db } from "../db";
 import { env } from "../env";
-import { redisClient } from "../redis-client";
-
-/** Payload carried by the `mail/send` job. */
-interface MailJobPayload {
-  emailId: string;
-  threadId?: string;
-}
-
-/**
- * {@link IBullmqPublisher} for the mail queue.
- *
- * Calls the internal `apiClient.mail.send` contract with just the email id
- * (+ optional thread id) and the HMAC signature. The backend worker loads the
- * persisted email from the shared database and sends it.
- */
-const mailBullmqPublisher: IBullmqPublisher = {
-  async enqueue(request, signature) {
-    const payload = request.payload as MailJobPayload;
-
-    const response = await apiClient.mail.send.callApi({
-      input: { body: payload },
-      config: {
-        headers: {
-          [BULLMQ_TRANSPORT_HEADERS.signature]: signature,
-        },
-      },
-    });
-
-    return {
-      messageId: response.data.jobId,
-      queue: response.data.queue,
-    } satisfies BullmqEnqueueResult;
-  },
-};
 
 const globalForBullmqMail = globalThis as unknown as {
-  bullmqMail?: IBullmqMailerService;
+  bullmqMail?: IBullmqMailService;
 };
 
 /**
- * BullMQ-backed mail service. It renders and persists the email, then enqueues
- * it on the backend `mail` queue; the backend worker performs the send and
- * updates the shared email record.
+ * BullMQ mail publisher used by the web app. It signs the template/raw payload
+ * and ships it to the backend `POST /mails` / `POST /mails/raw` endpoints; the
+ * backend renders, dedupes, persists and enqueues.
  */
 export const bullmqMail =
   globalForBullmqMail.bullmqMail ??
-  createBullmqMailer({
-    appName: env.NEXT_PUBLIC_SITE_NAME,
-    database: db,
-    redisClient,
-    supportMail: env.SUPPORT_MAIL,
-    systemMail: env.SYSTEM_MAIL,
+  createBullmqMail({
     signingSecret: env.BULLMQ_SIGNING_SECRET,
-    publisher: mailBullmqPublisher,
+    publisher: {
+      async enqueue(request, signature) {
+        const config = {
+          headers: {
+            [BULLMQ_TRANSPORT_HEADERS.signature]: signature,
+          },
+        };
+
+        if (request.job === "sendRaw") {
+          const response = await apiClient.mail.raw.callApi({
+            input: { body: request.payload as RawMailPayload },
+            config,
+          });
+
+          return {
+            messageId: response.data.jobId,
+            queue: response.data.queue,
+          } satisfies BullmqEnqueueResult;
+        }
+
+        const response = await apiClient.mail.send.callApi({
+          input: { body: request.payload as TemplateMailPayload },
+          config,
+        });
+
+        return {
+          messageId: response.data.jobId,
+          queue: response.data.queue,
+        } satisfies BullmqEnqueueResult;
+      },
+      async enqueueBatch(request, signature) {
+        const config = {
+          headers: {
+            [BULLMQ_TRANSPORT_HEADERS.signature]: signature,
+          },
+        };
+
+        if (request.job === "sendRawBatch") {
+          const response = await apiClient.mail.rawBatch.callApi({
+            input: { body: { items: request.payloads as RawMailPayload[] } },
+            config,
+          });
+
+          return response.data.results.map((result) => ({
+            success: result.success,
+            messageId: result.jobId,
+            queue: result.queue,
+            error: result.error,
+          }));
+        }
+
+        const response = await apiClient.mail.sendBatch.callApi({
+          input: {
+            body: { items: request.payloads as TemplateMailPayload[] },
+          },
+          config,
+        });
+
+        return response.data.results.map((result) => ({
+          success: result.success,
+          messageId: result.jobId,
+          queue: result.queue,
+          error: result.error,
+        }));
+      },
+    },
     defaultRetries: 3,
-    dedupWindowSeconds: 300,
   });
 
 if (env.NODE_ENV !== "production") {
