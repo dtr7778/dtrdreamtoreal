@@ -3,6 +3,14 @@ import { Container } from "inversify";
 import { createDrizzleClient } from "@workspace/drizzle/client/ioRedis";
 import type { DatabaseType } from "@workspace/drizzle/types";
 import { logger, LoggerType } from "@workspace/lib/logger";
+import {
+  createServerClient,
+  type ServerSupabaseClient,
+} from "@workspace/lib/supabase/server-client";
+import {
+  createStorage,
+  type IStorageService,
+} from "@workspace/lib/supabase/storage";
 import { EmailService, EmailThreadService } from "@workspace/mail";
 import {
   type IMailTransport,
@@ -20,6 +28,10 @@ import {
   IAuditLogService,
 } from "@/modules/audit/AuditLog.service";
 import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
+import {
+  AuditReportImageService,
+  type IAuditReportImageService,
+} from "@/modules/audit/AuditReport.service";
 import { CruxClient } from "@/modules/audit/clients/crux.client";
 import { GoogleApiCache } from "@/modules/audit/clients/google-cache";
 import { PsiClient } from "@/modules/audit/clients/psi.client";
@@ -62,6 +74,28 @@ container
   .inRequestScope();
 
 container
+  .bind<ServerSupabaseClient>(WORKER_CONTAINER_TYPES.Supabase)
+  .toDynamicValue(() =>
+    createServerClient({
+      url: env.SUPABASE_URL,
+      key: env.SUPABASE_SECRET_KEY,
+    })
+  )
+  .inSingletonScope();
+container
+  .bind<IStorageService>(WORKER_CONTAINER_TYPES.Storage)
+  .toDynamicValue(() =>
+    createStorage({
+      supabaseClient: container.get<ServerSupabaseClient>(
+        WORKER_CONTAINER_TYPES.Supabase
+      ),
+      bucket: env.SUPABASE_STORAGE_BUCKET_NAME,
+      bucketIsPublic: true,
+    })
+  )
+  .inSingletonScope();
+
+container
   .bind<EmailService>(WORKER_CONTAINER_TYPES.EmailService)
   .toConstantValue(
     new EmailService(
@@ -97,6 +131,12 @@ container
 container
   .bind<IAuditLogService>(WORKER_CONTAINER_TYPES.AuditLogService)
   .to(AuditLogService)
+  .inSingletonScope();
+container
+  .bind<IAuditReportImageService>(
+    WORKER_CONTAINER_TYPES.AuditReportImageService
+  )
+  .to(AuditReportImageService)
   .inSingletonScope();
 container
   .bind<IAuditService>(WORKER_CONTAINER_TYPES.AuditService)

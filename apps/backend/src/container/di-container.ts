@@ -6,6 +6,14 @@ import { type BullmqEnqueueResult } from "@workspace/lib/bullmq";
 import { logger, type LoggerType } from "@workspace/lib/logger";
 import { container, LoggerInterceptor } from "@workspace/lib/server";
 import {
+  createServerClient,
+  type ServerSupabaseClient,
+} from "@workspace/lib/supabase/server-client";
+import {
+  createStorage,
+  type IStorageService,
+} from "@workspace/lib/supabase/storage";
+import {
   createBullmqMail,
   EmailService,
   EmailThreadService,
@@ -33,6 +41,10 @@ import {
   IAuditLogService,
 } from "@/modules/audit/AuditLog.service";
 import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
+import {
+  AuditReportImageService,
+  type IAuditReportImageService,
+} from "@/modules/audit/AuditReport.service";
 import { CruxClient } from "@/modules/audit/clients/crux.client";
 import { GoogleApiCache } from "@/modules/audit/clients/google-cache";
 import { PsiClient } from "@/modules/audit/clients/psi.client";
@@ -85,6 +97,28 @@ container
   .inRequestScope();
 
 container
+  .bind<ServerSupabaseClient>(CONTAINER_TYPES.Supabase)
+  .toDynamicValue(() =>
+    createServerClient({
+      url: env.SUPABASE_URL,
+      key: env.SUPABASE_SECRET_KEY,
+    })
+  )
+  .inSingletonScope();
+container
+  .bind<IStorageService>(CONTAINER_TYPES.Storage)
+  .toDynamicValue(() =>
+    createStorage({
+      supabaseClient: container.get<ServerSupabaseClient>(
+        CONTAINER_TYPES.Supabase
+      ),
+      bucket: env.SUPABASE_STORAGE_BUCKET_NAME,
+      bucketIsPublic: true,
+    })
+  )
+  .inSingletonScope();
+
+container
   .bind<EmailService>(CONTAINER_TYPES.EmailService)
   .toConstantValue(
     new EmailService(container.get<DatabaseType>(CONTAINER_TYPES.Drizzle))
@@ -117,6 +151,10 @@ container
 container
   .bind<IAuditLogService>(CONTAINER_TYPES.AuditLogService)
   .to(AuditLogService)
+  .inSingletonScope();
+container
+  .bind<IAuditReportImageService>(CONTAINER_TYPES.AuditReportImageService)
+  .to(AuditReportImageService)
   .inSingletonScope();
 container
   .bind<IAuditService>(CONTAINER_TYPES.AuditService)

@@ -56,6 +56,9 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: z.string().min(1),
     GOOGLE_AUTH_CLIENT_ID: z.string().min(1),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
+    SUPABASE_URL: z.url(),
+    SUPABASE_SECRET_KEY: z.string().min(1),
+    SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -88,6 +91,9 @@ export const env = createEnv({
           BETTER_AUTH_SECRET: "secret",
           GOOGLE_AUTH_CLIENT_ID: "client_id",
           GOOGLE_AUTH_CLIENT_SECRET: "client_secret",
+          SUPABASE_URL: "https://example.supabase.co",
+          SUPABASE_SECRET_KEY: "supabase_secret_key",
+          SUPABASE_STORAGE_BUCKET_NAME: "bucket",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -118,5 +124,9 @@ export const env = createEnv({
           BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
           GOOGLE_AUTH_CLIENT_ID: process.env.GOOGLE_AUTH_CLIENT_ID,
           GOOGLE_AUTH_CLIENT_SECRET: process.env.GOOGLE_AUTH_CLIENT_SECRET,
+          SUPABASE_URL: process.env.SUPABASE_URL,
+          SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+          SUPABASE_STORAGE_BUCKET_NAME:
+            process.env.SUPABASE_STORAGE_BUCKET_NAME,
         },
 });

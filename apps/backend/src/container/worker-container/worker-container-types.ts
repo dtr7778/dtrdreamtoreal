@@ -2,6 +2,8 @@ export const WORKER_CONTAINER_TYPES = {
   Drizzle: Symbol.for("Drizzle"),
   Redis: Symbol.for("Redis"),
   Logger: Symbol.for("Logger"),
+  Supabase: Symbol.for("Supabase"),
+  Storage: Symbol.for("Storage"),
 
   EmailService: Symbol.for("EmailService"),
   EmailThreadService: Symbol.for("EmailThreadService"),
@@ -15,4 +17,5 @@ export const WORKER_CONTAINER_TYPES = {
   AuditService: Symbol.for("AuditService"),
   AuditQueueService: Symbol.for("AuditQueueService"),
   AuditLogService: Symbol.for("AuditLogService"),
+  AuditReportImageService: Symbol.for("AuditReportImageService"),
 };

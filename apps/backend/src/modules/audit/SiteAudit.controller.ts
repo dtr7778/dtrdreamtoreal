@@ -34,6 +34,7 @@ import {
   UseGuards,
   UseMiddlewares,
 } from "@workspace/lib/server";
+import { type IStorageService } from "@workspace/lib/supabase/storage";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
@@ -106,7 +107,9 @@ export class SiteAuditController
     @inject(CONTAINER_TYPES.AuditService)
     private readonly auditService: IAuditService,
     @inject(CONTAINER_TYPES.AuditLogService)
-    private readonly auditLog: IAuditLogService
+    private readonly auditLog: IAuditLogService,
+    @inject(CONTAINER_TYPES.Storage)
+    private readonly storage: IStorageService
   ) {
     super();
   }

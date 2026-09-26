@@ -25,6 +25,7 @@ import { CONTAINER_TYPES } from "@/container/container-types";
 import { type RunCheckJobPayload } from "./audit.queue";
 import { type IAuditLogService } from "./AuditLog.service";
 import { type AuditQueueService } from "./AuditQueue.service";
+import { type IAuditReportImageService } from "./AuditReport.service";
 import {
   CHECKLIST,
   getChecklistItem,
@@ -97,6 +98,8 @@ export class AuditService implements IAuditService {
     private readonly auditQueue: AuditQueueService,
     @inject(CONTAINER_TYPES.AuditLogService)
     private readonly auditLog: IAuditLogService,
+    @inject(CONTAINER_TYPES.AuditReportImageService)
+    private readonly auditReportImage: IAuditReportImageService,
     @inject(CONTAINER_TYPES.PsiClient)
     private readonly psi: PsiClient,
     @inject(CONTAINER_TYPES.CruxClient)
@@ -514,6 +517,12 @@ export class AuditService implements IAuditService {
         updatedAt: new Date(),
       })
       .where(eq(SiteAuditTable.id, siteAuditId));
+
+    try {
+      await this.auditReportImage.generateReportImage(siteAuditId);
+    } catch {
+      // Swallowed intentionally; the audit is already marked completed.
+    }
   }
 
   private buildContext(

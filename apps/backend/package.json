@@ -52,10 +52,13 @@
     "zocker": "catalog:"
   },
   "dependencies": {
+    "@fontsource/inter": "catalog:",
+    "@resvg/resvg-wasm": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@workspace/auth": "workspace:*",
     "@workspace/contract": "workspace:*",
     "@workspace/drizzle": "workspace:*",
+    "@workspace/generate-image": "workspace:*",
     "@workspace/lib": "workspace:*",
     "@workspace/mail": "workspace:*",
     "@workspace/redis": "workspace:*",
@@ -68,6 +71,7 @@
     "inversify": "catalog:",
     "node-cron": "catalog:",
     "resend": "catalog:",
+    "satori": "catalog:",
     "zod": "catalog:"
   }
 }
