@@ -6,10 +6,12 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@workspace/ui",
     "@workspace/drizzle",
+    "@workspace/redis",
     "@workspace/lib",
     "@workspace/mail",
     "@workspace/contract",
     "@workspace/auth",
+    "@workspace/ai",
   ],
   allowedDevOrigins: [process.env.NGROK_URL!],
   typedRoutes: true,

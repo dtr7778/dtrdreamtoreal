@@ -41,7 +41,9 @@
     "BACKEND_PORT",
     "CSRF_TOKEN",
     "API_LOG_LEVEL",
-    "CORS_ORIGIN"
+    "CORS_ORIGIN",
+    "OPENROUTER_API_KEY",
+    "OPENROUTER_MODEL"
   ],
   "tasks": {
     "build": {

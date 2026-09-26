@@ -46,6 +46,7 @@
     "@tiptap/react": "catalog:",
     "@upstash/qstash": "catalog:",
     "@upstash/redis": "catalog:",
+    "@workspace/ai": "workspace:*",
     "@workspace/auth": "workspace:*",
     "@workspace/contract": "workspace:*",
     "@workspace/drizzle": "workspace:*",

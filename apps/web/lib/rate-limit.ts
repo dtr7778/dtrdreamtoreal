@@ -16,6 +16,14 @@ export const publicRateLimit = createRatelimit({
   algorithm: "fixedWindow",
 });
 
+export const aiRateLimit = createRatelimit({
+  redisClient: redisClient,
+  requests: 20,
+  window: "1 h",
+  algorithm: "slidingWindow",
+  prefix: "ratelimit:ai",
+});
+
 export const qstashMinRateLimit = createRatelimit({
   redisClient: redisClient,
   requests: 100,

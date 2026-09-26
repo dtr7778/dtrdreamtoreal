@@ -34,6 +34,8 @@ export const env = createEnv({
     SUPABASE_SECRET_KEY: z.string().min(1),
     WEB_PUSH_PRIVATE_KEY: z.string().min(1),
     SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
+    OPENROUTER_API_KEY: z.string().min(1),
+    OPENROUTER_MODEL: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -80,6 +82,8 @@ export const env = createEnv({
           NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: "public_key",
           WEB_PUSH_PRIVATE_KEY: "private_key",
           SUPABASE_STORAGE_BUCKET_NAME: "bucket",
+          OPENROUTER_API_KEY: "sk-or-test-key",
+          OPENROUTER_MODEL: "google/gemini-2.5-flash-lite",
           NEXT_PUBLIC_BACKEND_URL: "http://localhost:8000/api/v1",
         }
       : {
@@ -117,6 +121,8 @@ export const env = createEnv({
           WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY,
           SUPABASE_STORAGE_BUCKET_NAME:
             process.env.SUPABASE_STORAGE_BUCKET_NAME,
+          OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+          OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
           NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
         },
 });
