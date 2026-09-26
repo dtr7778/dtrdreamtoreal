@@ -31,6 +31,11 @@ export function DeleteDialog({
 }: DeleteDialogProps) {
   const [inputValue, setInputValue] = useState("");
 
+  const handleDelete = () => {
+    onDelete();
+    setInputValue("");
+  };
+
   return (
     <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
       <AlertDialogContent>
@@ -75,7 +80,7 @@ export function DeleteDialog({
               className="flex-1"
               disabled={isDisable || inputValue !== "CONFIRM"}
               aria-disabled={isDisable || inputValue !== "CONFIRM"}
-              onClick={onDelete}
+              onClick={handleDelete}
             >
               Delete
             </Button>
