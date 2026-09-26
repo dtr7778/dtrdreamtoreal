@@ -1,5 +1,5 @@
-import type { DatabaseType } from "../types";
 import * as schema from "../schemas";
+import type { DatabaseType } from "../types";
 
 export async function clearAll(db: DatabaseType) {
   console.log("🧹 Clearing existing data...");
@@ -12,7 +12,10 @@ export async function clearAll(db: DatabaseType) {
     await tx.delete(schema.CompanyAddressTable);
     await tx.delete(schema.CompanyEmailThreadTable);
     await tx.delete(schema.CompanySocialTable);
+    await tx.delete(schema.CompanyAiUsageTable);
     await tx.delete(schema.CompanyTable);
+
+    await tx.delete(schema.AiUsageTable);
 
     await tx.delete(schema.ContactSubmissionReplyTable);
     await tx.delete(schema.ContactUserTable);

@@ -16,7 +16,7 @@ import { useTableQueryState } from "@/hooks/use-table-query-state";
 import { orpcTQClient } from "@/server/orpc.client";
 
 import { ListCompanyEmailThreadsContractType } from "../../api/company.contract";
-import { CompanyEmailThreadCreateDialog } from "./CompanyEmailThreadCreateDialog";
+import { CompanyEmailThreadCreateDialog } from "./email-step/CompanyEmailThreadCreateDialog";
 
 export function CompanyEmailsStep({ companyId }: { companyId: string }) {
   const { filters, setSearchFilter, setFilters } = useTableQueryState({});

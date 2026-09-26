@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import { parseAsBoolean, useQueryState } from "nuqs";
 import { UseFormReturn } from "react-hook-form";
 
-import { useStreamCompanyDescription } from "@/features/company/api/company.api.hook";
-import type {
+import {
   AiUsageType,
   CompanyCreateType,
 } from "@/features/company/company.schema";
-import useSessionStorage from "@/hooks/use-session-storage";
+import { useDescriptionGenerator } from "@/features/company/hooks/use-description-generator";
 
 interface UseCompanyDescriptionOptions {
   form: UseFormReturn<CompanyCreateType>;
@@ -27,13 +26,34 @@ export function useCompanyDescription({
     "ai-description",
     parseAsBoolean.withDefault(false)
   );
-  const [aiPreview, setAiPreview] = useSessionStorage("ai-preview", "");
 
-  const [isStreamingCompleted, setIsStreamingCompleted] =
-    useSessionStorage<boolean>("is-stream-completed", false);
-  const [showStreamingAlert, setShowStreamingAlert] = useState(false);
-
-  const { start, stop, isStreaming } = useStreamCompanyDescription();
+  const {
+    isStreaming,
+    aiPreview,
+    isStreamingCompleted,
+    setIsStreamingCompleted,
+    showStreamingAlert,
+    setShowStreamingAlert,
+    startGenerating,
+    stopGenerating,
+    resetDescription: resetGenerator,
+  } = useDescriptionGenerator({
+    getInput: () => {
+      const { name, industry, website, context } = form.getValues();
+      return { name, industry, website, context };
+    },
+    onDescription: (description) => {
+      form.setValue("description", description, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    },
+    onUsage: onAiUsage,
+    storageKeys: {
+      preview: "ai-preview",
+      completed: "is-stream-completed",
+    },
+  });
 
   const openAiDialog = useCallback(() => {
     void setAiDialogOpen(true);
@@ -44,44 +64,18 @@ export function useCompanyDescription({
     onClose?.();
   }, [onClose, setAiDialogOpen]);
 
-  const generateDescription = useCallback(() => {
-    const { name, industry, website, context } = form.getValues();
-
-    setAiPreview("");
-    setIsStreamingCompleted(false);
-
-    start(
-      { name, industry, website, context },
-      {
-        onDelta: (description) => {
-          setAiPreview(description);
-          form.setValue("description", description, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-        },
-        onDone: ({ usage }) => {
-          onAiUsage(usage);
-          setIsStreamingCompleted(true);
-        },
-      }
-    );
-  }, [form, start, setAiPreview, onAiUsage, setIsStreamingCompleted]);
-
   const resetDescription = useCallback(() => {
-    setAiPreview("");
-    onAiUsage(undefined);
-    setShowStreamingAlert(false);
+    resetGenerator();
     setAiDialogOpen(false);
-  }, [setAiPreview, onAiUsage, setAiDialogOpen]);
+  }, [resetGenerator, setAiDialogOpen]);
 
   return {
     aiDialogOpen,
     openAiDialog,
     closeAiDialog,
     isStreaming,
-    generateDescription,
-    stopDescription: stop,
+    startGenerating,
+    stopGenerating,
     aiPreview,
     showStreamingAlert,
     setShowStreamingAlert,

@@ -70,7 +70,12 @@ export function ContactDetails({ contactId }: { contactId: string }) {
                 <CardHeader>
                   <CardTitle>{`Replies (${data.replies.length})`}</CardTitle>
                   <CardAction>
-                    <ReplyCreateDialog contactId={data.id} />
+                    <ReplyCreateDialog
+                      contactId={data.id}
+                      disabled={
+                        data.status === "spam" || data.status === "closed"
+                      }
+                    />
                   </CardAction>
                 </CardHeader>
                 <CardContent>

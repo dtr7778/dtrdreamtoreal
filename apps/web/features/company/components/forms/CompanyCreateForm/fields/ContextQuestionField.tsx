@@ -11,18 +11,20 @@ import { CompanyCreateType } from "@/features/company/company.schema";
 import { ContextQuestion } from "../data/context-questions";
 import { ContextArrayField } from "./ContextArrayField";
 
-export function ContextQuestionField({
+export function ContextQuestionField<
+  TFieldValues extends { context: CompanyCreateType["context"] },
+>({
   question,
   control,
   disabled,
 }: {
   question: ContextQuestion;
-  control: Control<CompanyCreateType>;
+  control: Control<TFieldValues>;
   disabled?: boolean;
 }) {
   "use no memo";
 
-  const name = `context.${question.name}` as Path<CompanyCreateType>;
+  const name = `context.${question.name}` as Path<TFieldValues>;
 
   if (question.type === "array") {
     return (

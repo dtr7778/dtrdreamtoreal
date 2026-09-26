@@ -43,7 +43,7 @@ export function CompanyCreateFormProvider({
 }: CompanyCreateFormProviderProps) {
   "use no memo";
 
-  const [draft, setDraft, removeDraft] = useSessionStorage<CompanyCreateDraft>(
+  const [draft, setDraft] = useSessionStorage<CompanyCreateDraft>(
     "company-create-draft",
     INITIAL_DRAFT
   );
@@ -98,8 +98,8 @@ export function CompanyCreateFormProvider({
     openAiDialog,
     closeAiDialog,
     isStreaming,
-    generateDescription,
-    stopDescription,
+    startGenerating,
+    stopGenerating,
     aiPreview,
     showStreamingAlert,
     setShowStreamingAlert,
@@ -114,7 +114,9 @@ export function CompanyCreateFormProvider({
 
   const { mutate, isPending } = useCreateCompany<keyof CompanyCreateType>({
     onSuccess: () => {
-      removeDraft();
+      setDraft(INITIAL_DRAFT);
+      resetDescription();
+      removeAiUsages();
     },
     onValidationErrors: (fields) => {
       fields.forEach(({ fieldName, message }) => {
@@ -166,11 +168,11 @@ export function CompanyCreateFormProvider({
   );
 
   const handleResetAll = useCallback(() => {
+    setDraft(INITIAL_DRAFT);
     resetForm(COMPANY_CREATE_DEFAULTS);
     resetDescription();
-    removeDraft();
     removeAiUsages();
-  }, [resetForm, resetDescription, removeDraft, removeAiUsages]);
+  }, [resetForm, resetDescription, setDraft, removeAiUsages]);
 
   const formValue = useMemo<CompanyFormContextValue>(
     () => ({
@@ -204,8 +206,8 @@ export function CompanyCreateFormProvider({
       openAiDialog,
       closeAiDialog,
       isStreaming,
-      generateDescription,
-      stopGeneratingDescription: stopDescription,
+      startGenerating,
+      stopGenerating,
       aiPreview,
       aiUsages,
       showStreamingAlert,
@@ -218,8 +220,8 @@ export function CompanyCreateFormProvider({
       openAiDialog,
       closeAiDialog,
       isStreaming,
-      generateDescription,
-      stopDescription,
+      startGenerating,
+      stopGenerating,
       aiPreview,
       aiUsages,
       showStreamingAlert,

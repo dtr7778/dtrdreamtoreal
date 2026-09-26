@@ -36,7 +36,7 @@ import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { useTableQueryState } from "@/hooks/use-table-query-state";
 import { orpcTQClient } from "@/server/orpc.client";
 
-import { ListEmployeeContractType } from "../../api/employee.contract";
+import { ListEmployeeContractType } from "../../../api/employee.contract";
 
 export function CompanyEmployeesStep({ companyId }: { companyId: string }) {
   const { filters, setSearchFilter, setFilters } = useTableQueryState({});

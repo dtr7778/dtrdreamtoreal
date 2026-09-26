@@ -28,9 +28,14 @@ export async function seedCompanies(
     .generateMany(seedConfigs.targets.companies)
     .map((company) => {
       const createdBy = faker.helpers.arrayElement(users);
+      const industry = faker.commerce.department();
+
       return {
         ...company,
-        industry: faker.commerce.department(),
+        context: {
+          whatWeDo: industry,
+        },
+        industry: industry,
         description: faker.helpers.maybe(
           () => faker.lorem.sentences({ min: 1, max: 3 }),
           { probability: 0.5 }

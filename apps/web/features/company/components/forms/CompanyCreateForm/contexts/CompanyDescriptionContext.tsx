@@ -11,8 +11,8 @@ export type CompanyDescriptionContextValue = {
   closeAiDialog: () => void;
 
   isStreaming: boolean;
-  generateDescription: () => void;
-  stopGeneratingDescription: () => void;
+  startGenerating: () => void;
+  stopGenerating: () => void;
 
   aiPreview: string;
   aiUsages: AiUsageType[];

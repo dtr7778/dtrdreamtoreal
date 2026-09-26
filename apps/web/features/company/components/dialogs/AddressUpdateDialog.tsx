@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RotateCcw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
@@ -54,17 +55,13 @@ export function AddressUpdateDialog({
   });
 
   const defaultValuesRef = useRef(defaultValues);
-  useEffect(() => {
-    defaultValuesRef.current = defaultValues;
-  }, [defaultValues]);
-
-  useEffect(() => {
-    if (open) {
-      form.reset({ addresses: defaultValuesRef.current });
-    }
-  }, [open, form]);
 
   const formId = "address_update_form";
+  const isDirty = form.formState.isDirty;
+
+  const handleReset = () => {
+    form.reset({ addresses: defaultValuesRef.current });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,10 +85,30 @@ export function AddressUpdateDialog({
           </form>
         </DialogResponsiveBody>
         <DialogStickyFooter>
+          <p className="me-auto hidden text-xs text-muted-foreground sm:block">
+            {isDirty
+              ? "Your changes will be saved."
+              : "Modify a field to enable saving."}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleReset}
+            disabled={!isDirty || isPending}
+          >
+            <RotateCcw className="size-3.5" />
+            Reset
+          </Button>
           <DialogClose render={<Button variant="outline" />}>
             Cancel
           </DialogClose>
-          <ButtonSpinner form={formId} isLoading={isPending} type="submit">
+          <ButtonSpinner
+            form={formId}
+            isLoading={isPending}
+            type="submit"
+            variant={isDirty ? "default" : "outline"}
+            disabled={!isDirty}
+          >
             Save
           </ButtonSpinner>
         </DialogStickyFooter>

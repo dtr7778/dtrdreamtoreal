@@ -9,18 +9,26 @@ import {
   FileText,
   Globe,
   Mail,
+  Pen,
   Phone,
   Users,
 } from "lucide-react";
 
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 
 import { QueryStateBoundary } from "@/lib/tanstack/query/QueryStateBoundary";
 
@@ -33,12 +41,18 @@ import { SocialMediaCard } from "@/features/company/components/SocialMediaCard";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/server/orpc.client";
 
-import { useUpdateCompany } from "../../api/company.api.hook";
-import { CompanyUpdateType } from "../../company.schema";
+import { useUpdateCompany } from "../../../api/company.api.hook";
+import { CompanyUpdateType } from "../../../company.schema";
+import { CompanyContextUpdateDialog } from "../../dialogs/CompanyContextUpdateDialog";
+import { CompanyUpdateDialog } from "../../dialogs/CompanyUpdateDialog";
+import { CompanyAiUsageCard } from "./CompanyAiUsageCard";
+import { CompanyContextCard } from "./CompanyContextCard";
 
 export function CompanyDetailsStep({ companyId }: { companyId: string }) {
   const [openSocialMediaDialog, setOpenSocialMediaDialog] = useState(false);
   const [openAddressDialog, setOpenAddressDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openContextDialog, setOpenContextDialog] = useState(false);
 
   const canUpdate = usePermissionCheck([
     "system.company.manage",
@@ -55,8 +69,18 @@ export function CompanyDetailsStep({ companyId }: { companyId: string }) {
     keyof CompanyUpdateType
   >({
     onSuccess: () => {
-      setOpenSocialMediaDialog(false);
-      setOpenAddressDialog(false);
+      if (openSocialMediaDialog) {
+        setOpenSocialMediaDialog(false);
+      }
+      if (openAddressDialog) {
+        setOpenAddressDialog(false);
+      }
+      if (openUpdateDialog) {
+        setOpenUpdateDialog(false);
+      }
+      if (openContextDialog) {
+        setOpenContextDialog(false);
+      }
     },
   });
 
@@ -80,6 +104,25 @@ export function CompanyDetailsStep({ companyId }: { companyId: string }) {
                       Company Information
                     </h3>
                   </CardTitle>
+
+                  <CardAction>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            size="icon-sm"
+                            variant="outline"
+                            onClick={() => setOpenUpdateDialog(true)}
+                          />
+                        }
+                      >
+                        <Pen />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Update</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardAction>
                 </CardHeader>
                 <Separator />
                 <CardContent className="space-y-4">
@@ -161,6 +204,12 @@ export function CompanyDetailsStep({ companyId }: { companyId: string }) {
                   )}
                 </CardContent>
               </Card>
+              <CompanyContextCard
+                context={data.context}
+                onEdit={
+                  canUpdate ? () => setOpenContextDialog(true) : undefined
+                }
+              />
               <AddressCard
                 addresses={data.addresses}
                 onEdit={
@@ -176,6 +225,7 @@ export function CompanyDetailsStep({ companyId }: { companyId: string }) {
                   canUpdate ? () => setOpenSocialMediaDialog(true) : undefined
                 }
               />
+              <CompanyAiUsageCard usages={data.aiUsages} />
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -224,6 +274,23 @@ export function CompanyDetailsStep({ companyId }: { companyId: string }) {
             </div>
           </div>
 
+          <CompanyUpdateDialog
+            open={openUpdateDialog}
+            onOpenChange={setOpenUpdateDialog}
+            isPending={isPending}
+            defaultValues={{
+              name: data.name,
+              legalName: data.legalName ?? "",
+              email: data.email ?? "",
+              phone: data.phone ?? "",
+              employSize: data.employSize ?? "",
+              industry: data.industry ?? "",
+              website: data.website ?? "",
+              description: data.description ?? "",
+            }}
+            onSubmit={(value) => updateCompany({ ...value, companyId })}
+          />
+
           <SocialMediaUpdateDialog
             open={openSocialMediaDialog}
             onOpenChange={setOpenSocialMediaDialog}
@@ -262,6 +329,21 @@ export function CompanyDetailsStep({ companyId }: { companyId: string }) {
             }))}
             onSubmit={({ addresses }) =>
               updateCompany({ companyId, addresses })
+            }
+          />
+
+          <CompanyContextUpdateDialog
+            open={openContextDialog}
+            onOpenChange={setOpenContextDialog}
+            isPending={isPending}
+            companyId={companyId}
+            companyName={data.name}
+            companyIndustry={data.industry}
+            companyWebsite={data.website}
+            defaultValues={data.context}
+            defaultDescription={data.description}
+            onSubmit={({ context, description }) =>
+              updateCompany({ companyId, context, description })
             }
           />
         </>

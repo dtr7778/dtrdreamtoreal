@@ -3,6 +3,7 @@ import z from "zod";
 
 import {
   selectAddressSchema,
+  selectAiUsageSchema,
   selectCompanySchema,
   selectEmailSchema,
   selectEmailThreadSchema,
@@ -126,6 +127,7 @@ const companyDetailsContract = companyBaseContract
           industry: true,
           employSize: true,
           description: true,
+          context: true,
           createdAt: true,
           updatedAt: true,
         })
@@ -137,6 +139,20 @@ const companyDetailsContract = companyBaseContract
             })
           ),
           socialMedia: z.array(selectSocialMediaSchema),
+          aiUsages: z.array(
+            selectAiUsageSchema.pick({
+              id: true,
+              provider: true,
+              model: true,
+              activity: true,
+              promptTokens: true,
+              completionTokens: true,
+              totalTokens: true,
+              cost: true,
+              latencyMs: true,
+              createdAt: true,
+            })
+          ),
           employeeCount: z.number(),
         })
     )

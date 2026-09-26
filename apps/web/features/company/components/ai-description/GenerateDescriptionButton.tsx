@@ -4,27 +4,36 @@ import { CircleStop, RefreshCw, Sparkles } from "lucide-react";
 
 import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { cn } from "@workspace/ui/lib/utils";
 
-import { useCompanyDescriptionContext } from "../contexts/CompanyDescriptionContext";
+interface GenerateDescriptionButtonProps {
+  isStreaming: boolean;
+  isStreamingCompleted: boolean;
+  onGenerate: () => void;
+  onStop: () => void;
+  className?: string;
+}
 
-export function GenerateDescriptionButton() {
-  "use no memo";
-
-  const {
-    isStreaming,
-    generateDescription,
-    stopGeneratingDescription,
-    isStreamingCompleted,
-  } = useCompanyDescriptionContext();
-
+export function GenerateDescriptionButton({
+  isStreaming,
+  isStreamingCompleted,
+  onGenerate,
+  onStop,
+  className,
+}: GenerateDescriptionButtonProps) {
   return (
-    <div className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-center">
+    <div
+      className={cn(
+        "flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:justify-center",
+        className
+      )}
+    >
       {isStreaming && (
         <Button
           type="button"
           variant="outline"
           className="sm:w-fit"
-          onClick={stopGeneratingDescription}
+          onClick={onStop}
         >
           <CircleStop className="size-4" />
           <span>Stop</span>
@@ -36,7 +45,7 @@ export function GenerateDescriptionButton() {
         variant={isStreamingCompleted ? "outline" : "default"}
         className="sm:w-fit"
         disabled={isStreaming}
-        onClick={generateDescription}
+        onClick={onGenerate}
       >
         {isStreaming ? (
           <Spinner />

@@ -28,9 +28,9 @@ import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/server/orpc.client";
 
 import { useDeleteCompany } from "../../api/company.api.hook";
-import { CompanyDetailsStep } from "./CompanyDetailsStep";
 import { CompanyEmailsStep } from "./CompanyEmailsStep";
-import { CompanyEmployeesStep } from "./CompanyEmployeesStep";
+import { CompanyDetailsStep } from "./details-step/CompanyDetailsStep";
+import { CompanyEmployeesStep } from "./email-step/CompanyEmployeesStep";
 
 export function CompanyDetails({ companyId }: { companyId: string }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);

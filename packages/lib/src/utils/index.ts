@@ -1,6 +1,7 @@
 export * from "./apiResponse";
 export * from "./csv";
 export * from "./formatDate";
+export * from "./formatCurrency";
 export * from "./formatEnum";
 export * from "./formatError";
 export * from "./permission";

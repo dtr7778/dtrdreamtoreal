@@ -9,14 +9,17 @@ function ButtonSpinner({
   children,
   isLoading,
   size = "default",
+  disabled,
   ...props
 }: ButtonSpinnerProps) {
+  const isDisabled = isLoading || disabled;
+
   return (
     <Button
       {...props}
       size={size}
-      disabled={isLoading}
-      aria-disabled={isLoading}
+      disabled={isDisabled}
+      aria-disabled={isDisabled}
     >
       {isLoading && <Spinner />}
       {isLoading && size?.startsWith("icon") ? null : children}

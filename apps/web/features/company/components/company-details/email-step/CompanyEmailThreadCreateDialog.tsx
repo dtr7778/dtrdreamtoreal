@@ -22,11 +22,11 @@ import {
 import { FieldGroup } from "@workspace/ui/components/field";
 import { InputField } from "@workspace/ui/components/form-fields/InputField";
 
-import { useCreateCompanyEmailThread } from "../../api/company.api.hook";
+import { useCreateCompanyEmailThread } from "../../../api/company.api.hook";
 import {
   companyThreadCreateSchema,
   CompanyThreadCreateType,
-} from "../../company.schema";
+} from "../../../company.schema";
 
 export function CompanyEmailThreadCreateDialog({
   companyId,

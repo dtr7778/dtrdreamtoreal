@@ -1,5 +1,5 @@
 import { implement, ORPCError } from "@orpc/server";
-import { and, count, eq, inArray, isNotNull, SQL } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, SQL } from "drizzle-orm";
 
 import {
   type CompanyDescriptionAnswer,
@@ -168,6 +168,7 @@ export const companyDetailsProcedure = companyImpl.details
         phone: CompanyTable.phone,
         createdByUser: userProfileColumns,
         description: CompanyTable.description,
+        context: CompanyTable.context,
         createdAt: CompanyTable.createdAt,
         updatedAt: CompanyTable.updatedAt,
       })
@@ -225,10 +226,32 @@ export const companyDetailsProcedure = companyImpl.details
       )
       .where(eq(CompanySocialTable.companyId, companyData.id));
 
+    const aiUsages = await context.db
+      .select({
+        id: AiUsageTable.id,
+        provider: AiUsageTable.provider,
+        model: AiUsageTable.model,
+        activity: AiUsageTable.activity,
+        promptTokens: AiUsageTable.promptTokens,
+        completionTokens: AiUsageTable.completionTokens,
+        totalTokens: AiUsageTable.totalTokens,
+        cost: AiUsageTable.cost,
+        latencyMs: AiUsageTable.latencyMs,
+        createdAt: AiUsageTable.createdAt,
+      })
+      .from(AiUsageTable)
+      .innerJoin(
+        CompanyAiUsageTable,
+        eq(CompanyAiUsageTable.aiUsageId, AiUsageTable.id)
+      )
+      .where(eq(CompanyAiUsageTable.companyId, companyData.id))
+      .orderBy(desc(AiUsageTable.createdAt));
+
     return apiResponse(API_MESSAGES.COMPANY.GET_DETAILS, {
       ...companyData,
       addresses,
       socialMedia,
+      aiUsages,
     });
   });
 
@@ -386,6 +409,7 @@ export const companyGenerateDescriptionProcedure =
       userPermissionMiddleware([
         "system.company.manage",
         "system.company.create",
+        "system.company.update",
       ])
     )
     .handler(async function* ({ context, input }) {

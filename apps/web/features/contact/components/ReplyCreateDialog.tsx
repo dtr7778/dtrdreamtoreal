@@ -23,7 +23,13 @@ import { TextareaField } from "@workspace/ui/components/form-fields/TextareaFiel
 import { useContactReplyCreate } from "../api/contact.api.hook";
 import { createReplySchema, CreateReplyType } from "../contact.schema";
 
-export function ReplyCreateDialog({ contactId }: { contactId: string }) {
+export function ReplyCreateDialog({
+  contactId,
+  disabled,
+}: {
+  contactId: string;
+  disabled?: boolean;
+}) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<CreateReplyType>({
@@ -31,6 +37,7 @@ export function ReplyCreateDialog({ contactId }: { contactId: string }) {
     defaultValues: {
       reply: "",
     },
+    disabled,
   });
 
   const { mutate, isPending } = useContactReplyCreate({
@@ -51,7 +58,9 @@ export function ReplyCreateDialog({ contactId }: { contactId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button />}>Add Reply</DialogTrigger>
+      <DialogTrigger render={<Button disabled={disabled} />}>
+        Add Reply
+      </DialogTrigger>
       <DialogResponsiveContent>
         <DialogStickyHeader>
           <DialogTitle>Create Reply</DialogTitle>

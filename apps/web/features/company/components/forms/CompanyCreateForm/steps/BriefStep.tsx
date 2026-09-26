@@ -13,8 +13,8 @@ import { FieldDescription, FieldGroup } from "@workspace/ui/components/field";
 import { useCompanyFormContext } from "../contexts/CompanyFormContext";
 import { formAnimationVariants } from "../data/company-form.constants";
 import { contextSections } from "../data/context-questions";
-import { AiDescriptionDialog } from "../description/AiDescriptionDialog";
 import { ContextQuestionField } from "../fields/ContextQuestionField";
+import { GenerateDescriptionDialog } from "../GenerateDescriptionDialog";
 
 export function BriefStep() {
   "use no memo";
@@ -66,7 +66,7 @@ export function BriefStep() {
         ))}
       </Accordion>
 
-      <AiDescriptionDialog />
+      <GenerateDescriptionDialog />
     </motion.div>
   );
 }
