@@ -18,5 +18,6 @@ export const CONTAINER_TYPES = {
   MailQueueService: Symbol.for("MailQueueService"),
   QueueSignatureService: Symbol.for("QueueSignatureService"),
   AuditQueueService: Symbol.for("AuditQueueService"),
+  AuditLogService: Symbol.for("AuditLogService"),
   AuditService: Symbol.for("AuditService"),
 };

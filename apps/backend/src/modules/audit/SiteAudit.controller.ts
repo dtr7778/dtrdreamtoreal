@@ -1,9 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
+import { z } from "zod";
 
 import { contracts, type ContractsType } from "@workspace/contract";
-import type { DatabaseType } from "@workspace/drizzle/types";
 import { userProfileColumns } from "@workspace/drizzle/helpers";
 import {
   buildPaginateOptions,
@@ -19,13 +19,18 @@ import {
   UserRoleTable,
   UserTable,
 } from "@workspace/drizzle/schemas";
+import type { DatabaseType } from "@workspace/drizzle/types";
 import {
   Controller,
   Delete,
   Get,
+  type IRequest,
+  type IResponse,
   Patch,
   Post,
+  Request,
   RequestValidator,
+  Response,
   UseGuards,
   UseMiddlewares,
 } from "@workspace/lib/server";
@@ -42,6 +47,23 @@ import {
 } from "@/middlewares/auth.middleware";
 
 import { type IAuditService } from "./Audit.service";
+import { type IAuditLogService } from "./AuditLog.service";
+import { type AuditLogEvent } from "./AuditLog.types";
+
+const streamLogsInputSchema = z.object({
+  params: z.object({ id: z.uuid() }),
+  query: z.object({
+    lastEventId: z.coerce.number().int().nonnegative().optional(),
+  }),
+});
+
+const AUDIT_LOG_HEARTBEAT_MS = 15_000;
+
+function writeAuditLogEvent(response: IResponse, event: AuditLogEvent): void {
+  response.write(`id: ${event.sequence}\n`);
+  response.write(`event: audit-log\n`);
+  response.write(`data: ${JSON.stringify(event)}\n\n`);
+}
 
 export interface ISiteController {
   list(
@@ -82,7 +104,9 @@ export class SiteAuditController
     @inject(CONTAINER_TYPES.Drizzle)
     private readonly db: DatabaseType,
     @inject(CONTAINER_TYPES.AuditService)
-    private readonly auditService: IAuditService
+    private readonly auditService: IAuditService,
+    @inject(CONTAINER_TYPES.AuditLogService)
+    private readonly auditLog: IAuditLogService
   ) {
     super();
   }
@@ -286,6 +310,85 @@ export class SiteAuditController
       message: API_MESSAGE.SITE_AUDIT.GET_RESULT,
       data: results,
     });
+  }
+
+  /**
+   * Server-Sent Events stream of a run's execution log. Serves persisted events
+   * for finished runs and live-tails the Redis stream for in-progress runs.
+   * Reconnects resume from `Last-Event-ID` (or `?lastEventId=`) without duplicates.
+   */
+  @Get("/:id/logs")
+  @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
+  public async streamLogs(
+    @RequestValidator(streamLogsInputSchema)
+    {
+      params,
+      query,
+    }: { params: { id: string }; query: { lastEventId?: number } },
+    @Request() request: IRequest,
+    @Response() response: IResponse
+  ): Promise<void> {
+    const [site] = await this.db
+      .select({ id: SiteAuditTable.id, status: SiteAuditTable.status })
+      .from(SiteAuditTable)
+      .where(eq(SiteAuditTable.id, params.id))
+      .limit(1);
+
+    if (!site) {
+      throw this.apiError({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: API_MESSAGE.SITE_AUDIT.NOT_FOUND,
+      });
+    }
+
+    const headerLastEventId = request.headers["last-event-id"];
+    const afterSequence =
+      query.lastEventId ??
+      (typeof headerLastEventId === "string"
+        ? Number.parseInt(headerLastEventId, 10) || 0
+        : 0);
+
+    response.status(StatusCodes.OK);
+    response.setHeader("Content-Type", "text/event-stream");
+    response.setHeader("Cache-Control", "no-cache, no-transform");
+    response.setHeader("Connection", "keep-alive");
+    response.setHeader("X-Accel-Buffering", "no");
+    response.flushHeaders();
+
+    const abortController = new AbortController();
+    request.on("close", () => abortController.abort());
+
+    const heartbeat = setInterval(() => {
+      if (!response.writableEnded) response.write(`: ping\n\n`);
+    }, AUDIT_LOG_HEARTBEAT_MS);
+
+    try {
+      const history = await this.auditLog.getHistory(params.id, afterSequence);
+
+      let lastSequence = afterSequence;
+      for (const event of history.events) {
+        writeAuditLogEvent(response, event);
+        lastSequence = event.sequence;
+      }
+
+      const isLive = site.status === "running" || site.status === "pending";
+      if (history.source === "redis" && isLive) {
+        for await (const event of this.auditLog.tail(params.id, {
+          afterSequence: lastSequence,
+          signal: abortController.signal,
+        })) {
+          writeAuditLogEvent(response, event);
+          lastSequence = event.sequence;
+        }
+      }
+    } catch (error) {
+      // Headers are already sent, so the exception filter cannot respond
+      // anyway. Client disconnects (aborted tail) are expected here.
+      if (!response.headersSent) throw error;
+    } finally {
+      clearInterval(heartbeat);
+      if (!response.writableEnded) response.end();
+    }
   }
 
   @Patch("/:id", contracts.siteAudit.update)

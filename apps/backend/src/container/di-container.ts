@@ -28,6 +28,10 @@ import {
 } from "@/middlewares/auth.middleware";
 import { AuditService, IAuditService } from "@/modules/audit/Audit.service";
 import { AuditCronService } from "@/modules/audit/AuditCron.service";
+import {
+  AuditLogService,
+  IAuditLogService,
+} from "@/modules/audit/AuditLog.service";
 import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
 import { CruxClient } from "@/modules/audit/clients/crux.client";
 import { GoogleApiCache } from "@/modules/audit/clients/google-cache";
@@ -109,6 +113,10 @@ container
 container
   .bind<AuditQueueService>(CONTAINER_TYPES.AuditQueueService)
   .to(AuditQueueService)
+  .inSingletonScope();
+container
+  .bind<IAuditLogService>(CONTAINER_TYPES.AuditLogService)
+  .to(AuditLogService)
   .inSingletonScope();
 container
   .bind<IAuditService>(CONTAINER_TYPES.AuditService)

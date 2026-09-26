@@ -15,6 +15,10 @@ import {
 
 import { env } from "@/env";
 import { AuditService, IAuditService } from "@/modules/audit/Audit.service";
+import {
+  AuditLogService,
+  IAuditLogService,
+} from "@/modules/audit/AuditLog.service";
 import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
 import { CruxClient } from "@/modules/audit/clients/crux.client";
 import { GoogleApiCache } from "@/modules/audit/clients/google-cache";
@@ -89,6 +93,10 @@ container
 container
   .bind<AuditQueueService>(WORKER_CONTAINER_TYPES.AuditQueueService)
   .to(AuditQueueService)
+  .inSingletonScope();
+container
+  .bind<IAuditLogService>(WORKER_CONTAINER_TYPES.AuditLogService)
+  .to(AuditLogService)
   .inSingletonScope();
 container
   .bind<IAuditService>(WORKER_CONTAINER_TYPES.AuditService)

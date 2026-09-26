@@ -3,6 +3,9 @@ export const AUDIT_REDIS_KEYS = {
   progress: (auditRunId: string) => `audit:run:${auditRunId}:progress`,
   total: (auditRunId: string) => `audit:run:${auditRunId}:total`,
   idempotency: (jobId: string) => `audit:job:${jobId}:lock`,
+  logStream: (siteAuditId: string) => `audit:log:${siteAuditId}`,
+  logSequence: (siteAuditId: string) => `audit:log:${siteAuditId}:sequence`,
+  finalized: (siteAuditId: string) => `audit:run:${siteAuditId}:finalized`,
 } as const;
 
 export const AUDIT_DEFAULTS = {
@@ -14,6 +17,8 @@ export const AUDIT_DEFAULTS = {
   jobRetries: 3,
   maxPagesPerCheck: 5,
   maxFanOutMessages: 400,
+  logStreamMaxLen: 5000,
+  logStreamTtlSeconds: 60 * 60 * 24,
 } as const;
 
 export const AUDIT_CRON = {

@@ -21,6 +21,7 @@ import { AuditStatusEnum } from "../../enums/db-enums";
 import { CompanyTable } from "../employee";
 import { UserTable } from "../user";
 import { AuditItemTable } from "./auditItem.table";
+import { AuditLogTable } from "./auditLog.table";
 import { CwvSnapshotTable } from "./cwvSnapshot.table";
 
 export const SiteAuditTable = pgTable(
@@ -81,6 +82,7 @@ export const SiteAuditRelations = relations(
       relationName: "SiteAuditToTriggeredBy",
     }),
     auditItems: many(AuditItemTable, { relationName: "AuditItemToSiteAudit" }),
+    auditLogs: many(AuditLogTable, { relationName: "AuditLogToSiteAudit" }),
     cwvSnapshots: many(CwvSnapshotTable, {
       relationName: "CwvSnapshotToSiteAudit",
     }),

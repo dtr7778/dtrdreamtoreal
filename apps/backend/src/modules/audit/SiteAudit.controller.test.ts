@@ -18,6 +18,7 @@ import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import { SiteAuditController } from "@/modules/audit/SiteAudit.controller";
 
 import { type IAuditService } from "./Audit.service";
+import { type IAuditLogService } from "./AuditLog.service";
 
 describe("SiteAuditController (Integration)", () => {
   let app: IApplication;
@@ -55,6 +56,18 @@ describe("SiteAuditController (Integration)", () => {
             storeCwv: vi.fn(),
             getResults: vi.fn(),
           }) as unknown as IAuditService
+      )
+      .inSingletonScope();
+    container
+      .bind<IAuditLogService>(CONTAINER_TYPES.AuditLogService)
+      .toDynamicValue(
+        () =>
+          ({
+            publish: vi.fn(),
+            getHistory: vi.fn(),
+            tail: vi.fn(),
+            persistRun: vi.fn(),
+          }) as unknown as IAuditLogService
       )
       .inSingletonScope();
     container

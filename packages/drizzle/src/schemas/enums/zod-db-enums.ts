@@ -4,6 +4,8 @@ import {
   ACTION_TYPE,
   ADDRESS_TYPE,
   AUDIT_ITEM_STATUS,
+  AUDIT_LOG_EVENT_TYPE,
+  AUDIT_LOG_LEVEL,
   AUDIT_STATUS,
   CONTACT_STATUS,
   CWV_SOURCE,
@@ -96,3 +98,11 @@ export type CwvStrategyEnumType = z.infer<typeof CwvStrategyEnumSchema>;
 
 export const CwvSourceEnumSchema = z.enum(CWV_SOURCE);
 export type CwvSourceEnumType = z.infer<typeof CwvSourceEnumSchema>;
+
+export const AuditLogLevelEnumSchema = z.enum(AUDIT_LOG_LEVEL);
+export type AuditLogLevelEnumType = z.infer<typeof AuditLogLevelEnumSchema>;
+
+export const AuditLogEventTypeEnumSchema = z.enum(AUDIT_LOG_EVENT_TYPE);
+export type AuditLogEventTypeEnumType = z.infer<
+  typeof AuditLogEventTypeEnumSchema
+>;

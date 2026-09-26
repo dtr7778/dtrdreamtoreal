@@ -6,12 +6,13 @@ import { OnWorkerEvent, Worker, WorkerNode } from "@workspace/lib/server";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
 
-import { type IAuditService } from "./Audit.service";
 import {
   type AuditOrchestrateJob,
-  type AuditRunCheckJob,
   auditQueue,
+  type AuditRunCheckJob,
 } from "./audit.queue";
+import { type IAuditService } from "./Audit.service";
+import { type IAuditLogService } from "./AuditLog.service";
 
 /**
  * Runs audit work: `orchestrate` crawls the site and fans out `runCheck` jobs,
@@ -26,6 +27,8 @@ export class AuditWorker {
   constructor(
     @inject(CONTAINER_TYPES.AuditService)
     private readonly auditService: IAuditService,
+    @inject(CONTAINER_TYPES.AuditLogService)
+    private readonly auditLog: IAuditLogService,
     @inject(CONTAINER_TYPES.Logger)
     private readonly log: LoggerType
   ) {}
@@ -69,14 +72,11 @@ export class AuditWorker {
   public onCompleted(job: Job): void {
     if (job.id) this.inFlight.delete(job.id);
 
-    this.log.info(
-      { jobId: job.id, jobName: job.name },
-      "audit job completed"
-    );
+    this.log.info({ jobId: job.id, jobName: job.name }, "audit job completed");
   }
 
   @OnWorkerEvent("failed")
-  public onFailed(job: Job | undefined, error: Error): void {
+  public async onFailed(job: Job | undefined, error: Error): Promise<void> {
     if (job?.id) this.inFlight.delete(job.id);
 
     this.log.error(
@@ -89,6 +89,37 @@ export class AuditWorker {
       },
       "audit job failed"
     );
+
+    const siteAuditId = job?.data?.siteAuditId as string | undefined;
+    if (!siteAuditId) return;
+
+    try {
+      const isOrchestrate = job?.name === auditQueue.jobs.orchestrate.name;
+
+      await this.auditLog.publish(siteAuditId, {
+        type: isOrchestrate ? "run_failed" : "error",
+        level: "error",
+        message: isOrchestrate
+          ? `Audit run failed while orchestrating: ${error.message}`
+          : `Check job failed (${job?.name ?? "unknown"}): ${error.message}`,
+        data: {
+          jobId: job?.id,
+          jobName: job?.name,
+          checklistKey: job?.data?.checklistKey,
+          url: job?.data?.url,
+          attemptsMade: job?.attemptsMade,
+        },
+      });
+
+      if (isOrchestrate) {
+        await this.auditLog.persistRun(siteAuditId);
+      }
+    } catch (publishError) {
+      this.log.error(
+        { err: publishError, siteAuditId },
+        "failed to publish audit log event"
+      );
+    }
   }
 
   @OnWorkerEvent("stalled")

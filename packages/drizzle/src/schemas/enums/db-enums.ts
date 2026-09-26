@@ -3,6 +3,8 @@ import { pgEnum } from "drizzle-orm/pg-core";
 import {
   ADDRESS_TYPE,
   AUDIT_ITEM_STATUS,
+  AUDIT_LOG_EVENT_TYPE,
+  AUDIT_LOG_LEVEL,
   AUDIT_STATUS,
   CONTACT_STATUS,
   CWV_SOURCE,
@@ -73,3 +75,10 @@ export const AuditItemStatusEnum = pgEnum(
 export const CwvStrategyEnum = pgEnum("CwvStrategyEnum", CWV_STRATEGY);
 
 export const CwvSourceEnum = pgEnum("CwvSourceEnum", CWV_SOURCE);
+
+export const AuditLogLevelEnum = pgEnum("AuditLogLevelEnum", AUDIT_LOG_LEVEL);
+
+export const AuditLogEventTypeEnum = pgEnum(
+  "AuditLogEventTypeEnum",
+  AUDIT_LOG_EVENT_TYPE
+);

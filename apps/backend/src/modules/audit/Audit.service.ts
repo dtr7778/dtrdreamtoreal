@@ -23,6 +23,7 @@ import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
 
 import { type RunCheckJobPayload } from "./audit.queue";
+import { type IAuditLogService } from "./AuditLog.service";
 import { type AuditQueueService } from "./AuditQueue.service";
 import {
   CHECKLIST,
@@ -94,6 +95,8 @@ export class AuditService implements IAuditService {
     @inject(CONTAINER_TYPES.Redis) private readonly redis: ExtendedRedis,
     @inject(CONTAINER_TYPES.AuditQueueService)
     private readonly auditQueue: AuditQueueService,
+    @inject(CONTAINER_TYPES.AuditLogService)
+    private readonly auditLog: IAuditLogService,
     @inject(CONTAINER_TYPES.PsiClient)
     private readonly psi: PsiClient,
     @inject(CONTAINER_TYPES.CruxClient)
@@ -163,9 +166,27 @@ export class AuditService implements IAuditService {
   public async orchestrate(siteAuditId: string): Promise<number> {
     const siteAudit = await this.getSiteAuditOrThrow(siteAuditId);
 
+    await this.auditLog.publish(siteAudit.id, {
+      type: "run_started",
+      message: `Audit run started for ${siteAudit.url}`,
+      data: { url: siteAudit.url },
+    });
+
+    await this.auditLog.publish(siteAudit.id, {
+      type: "crawl_started",
+      message: `Crawling ${siteAudit.url}`,
+      data: { url: siteAudit.url },
+    });
+
     const crawl = await crawlSite(siteAudit.url, {
       maxPages: AUDIT_DEFAULTS.crawlMaxPages,
       maxDepth: AUDIT_DEFAULTS.crawlMaxDepth,
+    });
+
+    await this.auditLog.publish(siteAudit.id, {
+      type: "crawl_finished",
+      message: `Crawl discovered ${crawl.pages.length} page(s)`,
+      data: { pages: crawl.pages.length },
     });
 
     await this.redis.set(
@@ -199,6 +220,17 @@ export class AuditService implements IAuditService {
     }
 
     const total = tasks.length + manualItems.length;
+
+    await this.auditLog.publish(siteAudit.id, {
+      type: "tasks_planned",
+      message: `Planned ${total} check(s): ${tasks.length} automated, ${manualItems.length} manual`,
+      data: {
+        total,
+        automated: tasks.length,
+        manual: manualItems.length,
+      },
+    });
+
     await this.redis.set(
       AUDIT_REDIS_KEYS.total(siteAudit.id),
       String(total),
@@ -304,6 +336,12 @@ export class AuditService implements IAuditService {
     const site = await this.getSiteAuditOrThrow(siteAuditId);
     const context = this.buildContext(site, url, checklistKey);
 
+    await this.auditLog.publish(siteAuditId, {
+      type: "check_started",
+      message: `Running "${item.title}"`,
+      data: { checklistKey, url, title: item.title, section: item.section },
+    });
+
     let result: CheckResult;
     const startedAt = Date.now();
     try {
@@ -315,6 +353,25 @@ export class AuditService implements IAuditService {
       };
     }
     const durationMs = Date.now() - startedAt;
+
+    await this.auditLog.publish(siteAuditId, {
+      type: "check_finished",
+      level:
+        result.status === "failed" || result.status === "error"
+          ? "error"
+          : result.status === "warning" || result.status === "needs_review"
+            ? "warn"
+            : "info",
+      message: `"${item.title}" ${result.status} (${durationMs}ms)`,
+      data: {
+        checklistKey,
+        url,
+        title: item.title,
+        status: result.status,
+        durationMs,
+        message: result.message,
+      },
+    });
 
     await this.persistItem({
       siteAuditId,
@@ -387,6 +444,12 @@ export class AuditService implements IAuditService {
 
     const total = Number(totalRaw ?? 0);
 
+    await this.auditLog.publish(siteAuditId, {
+      type: "progress",
+      message: `Progress ${progress}/${total}`,
+      data: { completed: progress, total },
+    });
+
     await this.db
       .update(SiteAuditTable)
       .set({ completedItems: progress, updatedAt: new Date() })
@@ -398,6 +461,16 @@ export class AuditService implements IAuditService {
   }
 
   private async finalizeRun(siteAuditId: string): Promise<void> {
+    const finalizedKey = AUDIT_REDIS_KEYS.finalized(siteAuditId);
+    const acquired = await this.redis.set(
+      finalizedKey,
+      "1",
+      "EX",
+      AUDIT_DEFAULTS.logStreamTtlSeconds,
+      "NX"
+    );
+    if (acquired !== "OK") return;
+
     const counts = await this.db
       .select({
         status: AuditItemTable.status,
@@ -417,6 +490,18 @@ export class AuditService implements IAuditService {
     const passed = byStatus.get("passed") ?? 0;
     const failed = byStatus.get("failed") ?? 0;
     const error = byStatus.get("error") ?? 0;
+
+    await this.auditLog.publish(siteAuditId, {
+      type: "run_completed",
+      message: `Audit completed: ${passed} passed, ${failed + error} failed of ${total}`,
+      data: {
+        total,
+        passed,
+        failed: failed + error,
+      },
+    });
+
+    await this.auditLog.persistRun(siteAuditId);
 
     await this.db
       .update(SiteAuditTable)

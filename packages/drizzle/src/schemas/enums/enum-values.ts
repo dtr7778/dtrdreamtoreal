@@ -136,3 +136,18 @@ export const AUDIT_ITEM_STATUS = [
 export const CWV_STRATEGY = ["phone", "desktop"] as const;
 
 export const CWV_SOURCE = ["psi", "crux", "crux_history", "bigquery"] as const;
+
+export const AUDIT_LOG_LEVEL = ["debug", "info", "warn", "error"] as const;
+
+export const AUDIT_LOG_EVENT_TYPE = [
+  "run_started",
+  "crawl_started",
+  "crawl_finished",
+  "tasks_planned",
+  "check_started",
+  "check_finished",
+  "progress",
+  "run_completed",
+  "run_failed",
+  "error",
+] as const;
