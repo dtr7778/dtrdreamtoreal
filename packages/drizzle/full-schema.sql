@@ -1,6 +1,8 @@
-◇ injected env (6) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (6) from ../../.env // tip: ⌘ enable debugging { debug: true }
 CREATE TYPE "public"."AddressTypeEnum" AS ENUM('billing', 'shipping', 'office', 'home', 'work', 'other');
 CREATE TYPE "public"."AuditItemStatusEnum" AS ENUM('pending', 'running', 'passed', 'failed', 'warning', 'needs_review', 'error', 'skipped');
+CREATE TYPE "public"."AuditLogEventTypeEnum" AS ENUM('run_started', 'crawl_started', 'crawl_finished', 'tasks_planned', 'check_started', 'check_finished', 'progress', 'run_completed', 'run_failed', 'error');
+CREATE TYPE "public"."AuditLogLevelEnum" AS ENUM('debug', 'info', 'warn', 'error');
 CREATE TYPE "public"."AuditStatusEnum" AS ENUM('pending', 'running', 'completed', 'failed', 'partial', 'cancelled');
 CREATE TYPE "public"."ContactStatusEnum" AS ENUM('pending', 'processing', 'replied', 'closed', 'spam');
 CREATE TYPE "public"."CwvSourceEnum" AS ENUM('psi', 'crux', 'crux_history', 'bigquery');
@@ -255,6 +257,17 @@ CREATE TABLE "audit_items" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "audit_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"site_audit_id" uuid NOT NULL,
+	"sequence" integer NOT NULL,
+	"type" "AuditLogEventTypeEnum" NOT NULL,
+	"level" "AuditLogLevelEnum" DEFAULT 'info' NOT NULL,
+	"message" text NOT NULL,
+	"data" jsonb,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "cwv_snapshots" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"site_audit_id" uuid NOT NULL,
@@ -483,6 +496,7 @@ ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permission_permission_fkey" 
 ALTER TABLE "user_roles" ADD CONSTRAINT "fk_user_roles_role_id" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "user_roles" ADD CONSTRAINT "fk_user_roles_user_id" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "audit_items" ADD CONSTRAINT "auditItem_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "audit_logs" ADD CONSTRAINT "auditLog_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "cwv_snapshots" ADD CONSTRAINT "cwvSnapshot_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_company_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_triggerdBy_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
@@ -559,6 +573,10 @@ CREATE INDEX "auditItem_siteAuditId_idx" ON "audit_items" USING btree ("site_aud
 CREATE INDEX "auditItem_checklistKey_idx" ON "audit_items" USING btree ("checklist_key");
 CREATE INDEX "auditItem_status_idx" ON "audit_items" USING btree ("status");
 CREATE INDEX "auditItem_url_idx" ON "audit_items" USING btree ("url");
+CREATE UNIQUE INDEX "auditLog_siteAuditId_sequence_uq" ON "audit_logs" USING btree ("site_audit_id","sequence");
+CREATE INDEX "auditLog_siteAuditId_idx" ON "audit_logs" USING btree ("site_audit_id");
+CREATE INDEX "auditLog_type_idx" ON "audit_logs" USING btree ("type");
+CREATE INDEX "auditLog_level_idx" ON "audit_logs" USING btree ("level");
 CREATE INDEX "cwvSnapshot_siteAuditId_idx" ON "cwv_snapshots" USING btree ("site_audit_id");
 CREATE INDEX "cwvSnapshot_url_idx" ON "cwv_snapshots" USING btree ("url");
 CREATE INDEX "cwvSnapshot_strategy_idx" ON "cwv_snapshots" USING btree ("strategy");

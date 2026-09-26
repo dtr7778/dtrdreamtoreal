@@ -18,6 +18,26 @@ enum AuditItemStatusEnum {
   skipped
 }
 
+enum AuditLogEventTypeEnum {
+  run_started
+  crawl_started
+  crawl_finished
+  tasks_planned
+  check_started
+  check_finished
+  progress
+  run_completed
+  run_failed
+  error
+}
+
+enum AuditLogLevelEnum {
+  debug
+  info
+  warn
+  error
+}
+
 enum AuditStatusEnum {
   pending
   running
@@ -536,6 +556,25 @@ table audit_items {
   }
 }
 
+table audit_logs {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  site_audit_id uuid [not null]
+  sequence integer [not null]
+  type AuditLogEventTypeEnum [not null]
+  level AuditLogLevelEnum [not null, default: 'info']
+  message text [not null]
+  data jsonb
+  created_at "timestamp (3) with time zone" [not null, default: `now()`]
+
+  indexes {
+    
+    (site_audit_id, sequence) [name: 'auditLog_siteAuditId_sequence_uq', unique]
+    site_audit_id [name: 'auditLog_siteAuditId_idx']
+    type [name: 'auditLog_type_idx']
+    level [name: 'auditLog_level_idx']
+  }
+}
+
 table cwv_snapshots {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   site_audit_id uuid [not null]
@@ -878,6 +917,8 @@ ref: user_roles.role_id > roles.id
 ref: user_roles.user_id - users.id
 
 ref: audit_items.site_audit_id > site_audits.id
+
+ref: audit_logs.site_audit_id > site_audits.id
 
 ref: cwv_snapshots.site_audit_id > site_audits.id
 
