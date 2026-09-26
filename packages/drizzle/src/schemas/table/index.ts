@@ -7,6 +7,7 @@ export * from "./siteAudit";
 export * from "./user";
 export * from "./account.table";
 export * from "./address.table";
+export * from "./aiUsage.table";
 export * from "./file.table";
 export * from "./session.table";
 export * from "./socialMedia.table";

@@ -16,6 +16,7 @@ import z from "zod";
 import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { RoleEnumSchema, RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
+import { AiUsageTable } from "../aiUsage.table";
 import { ContactSubmissionReplyTable } from "../contact";
 import { EmailThreadTable } from "../email";
 import { CompanyTable, EmployeeTable } from "../employee";
@@ -95,6 +96,7 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   createdCompanies: many(CompanyTable, { relationName: "CompanyToUser" }),
   createdEmployee: many(EmployeeTable, { relationName: "EmployeeToUser" }),
   siteAudits: many(SiteAuditTable, { relationName: "SiteAuditToTriggeredBy" }),
+  aiUsages: many(AiUsageTable, { relationName: "AiUsageToUser" }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

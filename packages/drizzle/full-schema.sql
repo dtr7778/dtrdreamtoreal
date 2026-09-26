@@ -1,4 +1,4 @@
-◇ injected env (6) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (6) from ../../.env // tip: ◈ encrypted .env [www.dotenvx.com]
 CREATE TYPE "public"."AddressTypeEnum" AS ENUM('billing', 'shipping', 'office', 'home', 'work', 'other');
 CREATE TYPE "public"."AuditItemStatusEnum" AS ENUM('pending', 'running', 'passed', 'failed', 'warning', 'needs_review', 'error', 'skipped');
 CREATE TYPE "public"."AuditStatusEnum" AS ENUM('pending', 'running', 'completed', 'failed', 'partial', 'cancelled');
@@ -8,7 +8,7 @@ CREATE TYPE "public"."CwvStrategyEnum" AS ENUM('phone', 'desktop');
 CREATE TYPE "public"."EmailDirectionEnum" AS ENUM('outbound', 'inbound', 'web_form');
 CREATE TYPE "public"."EmailEventTypeEnum" AS ENUM('email.sent', 'email.delivered', 'email.delivery_delayed', 'email.bounced', 'email.complained', 'email.opened', 'email.clicked', 'email.unsubscribed', 'email.rejected');
 CREATE TYPE "public"."EmailRecipientTypeEnum" AS ENUM('to', 'cc', 'bcc', 'reply_to', 'from', 'received_for');
-CREATE TYPE "public"."EmailStatusEnum" AS ENUM('draft', 'queued', 'sent', 'delivered', 'bounced', 'complained', 'failed');
+CREATE TYPE "public"."EmailStatusEnum" AS ENUM('draft', 'queued', 'sent', 'received', 'delivered', 'delivery_delayed', 'bounced', 'complained', 'suppressed', 'failed');
 CREATE TYPE "public"."NotificationCategoryEnum" AS ENUM('SYSTEM', 'AUTH', 'SUPPORT', 'LEAD');
 CREATE TYPE "public"."NotificationLevelEnum" AS ENUM('INFO', 'SUCCESS', 'WARNING', 'ERROR');
 CREATE TYPE "public"."RoleEnum" AS ENUM('USER', 'SUPPORT_AGENT', 'ADMIN', 'SUPER_ADMIN');
@@ -118,6 +118,7 @@ CREATE TABLE "companies" (
 	"email" varchar(255),
 	"phone" varchar(50),
 	"description" text,
+	"context" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_by" uuid NOT NULL,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
@@ -128,6 +129,13 @@ CREATE TABLE "company_addresses" (
 	"company_id" uuid NOT NULL,
 	"address_id" uuid NOT NULL,
 	"is_primary" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "company_ai_usages" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"company_id" uuid NOT NULL,
+	"ai_usage_id" uuid NOT NULL,
 	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
@@ -366,6 +374,20 @@ CREATE TABLE "addresses" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "ai_usages" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"provider" varchar(50) DEFAULT 'openrouter' NOT NULL,
+	"model" varchar(150) NOT NULL,
+	"activity" varchar(100) NOT NULL,
+	"prompt_tokens" integer DEFAULT 0 NOT NULL,
+	"completion_tokens" integer DEFAULT 0 NOT NULL,
+	"total_tokens" integer DEFAULT 0 NOT NULL,
+	"cost" double precision,
+	"latency_ms" integer DEFAULT 0 NOT NULL,
+	"created_by" uuid NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"key" varchar(512) NOT NULL,
@@ -440,6 +462,8 @@ ALTER TABLE "email_threads" ADD CONSTRAINT "emailThread_closedBy_fkey" FOREIGN K
 ALTER TABLE "companies" ADD CONSTRAINT "company_createdBy_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "company_addresses" ADD CONSTRAINT "companyAddress_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_addresses" ADD CONSTRAINT "companyAddress_addressId_fkey" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_ai_usages" ADD CONSTRAINT "companyAiUsage_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "company_ai_usages" ADD CONSTRAINT "companyAiUsage_aiUsageId_fkey" FOREIGN KEY ("ai_usage_id") REFERENCES "public"."ai_usages"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_email_threads" ADD CONSTRAINT "companyEmailThread_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_email_threads" ADD CONSTRAINT "companyEmailThread_emailThreadId_fkey" FOREIGN KEY ("email_thread_id") REFERENCES "public"."email_threads"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "company_socials" ADD CONSTRAINT "companySocial_companyId_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
@@ -467,6 +491,7 @@ ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_session_fkey" FOREIG
 ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "push_subscriptions" ADD CONSTRAINT "push_subscription_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "accounts" ADD CONSTRAINT "account_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "ai_usages" ADD CONSTRAINT "ai_usage_createdBy_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "files" ADD CONSTRAINT "file_user_fkey" FOREIGN KEY ("uploaded_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "files" ADD CONSTRAINT "file_deletedBy_fkey" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE cascade;
 ALTER TABLE "sessions" ADD CONSTRAINT "session_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
@@ -502,6 +527,8 @@ CREATE INDEX "companies_createdBy_idx" ON "companies" USING btree ("created_by")
 CREATE INDEX "companies_name_idx" ON "companies" USING btree ("name");
 CREATE INDEX "companyAddress_companyId_idx" ON "company_addresses" USING btree ("company_id");
 CREATE INDEX "companyAddress_addressId_idx" ON "company_addresses" USING btree ("address_id");
+CREATE INDEX "companyAiUsage_companyId_idx" ON "company_ai_usages" USING btree ("company_id");
+CREATE INDEX "companyAiUsage_aiUsageId_idx" ON "company_ai_usages" USING btree ("ai_usage_id");
 CREATE INDEX "companyEmailThread_companyId_idx" ON "company_email_threads" USING btree ("company_id");
 CREATE INDEX "companyEmailThread_emailThreadId_idx" ON "company_email_threads" USING btree ("email_thread_id");
 CREATE INDEX "companySocial_companyId_idx" ON "company_socials" USING btree ("company_id");
@@ -549,6 +576,7 @@ CREATE UNIQUE INDEX "push_subscription_endpoint_unique" ON "push_subscriptions" 
 CREATE INDEX "push_subscription_user_id" ON "push_subscriptions" USING btree ("user_id");
 CREATE UNIQUE INDEX "account_accountProvider_accountId_idx" ON "accounts" USING btree ("provider_id","account_id");
 CREATE INDEX "account_userId_idx" ON "accounts" USING btree ("user_id");
+CREATE INDEX "ai_usages_createdBy_idx" ON "ai_usages" USING btree ("created_by");
 CREATE INDEX "file_user_idx" ON "files" USING btree ("uploaded_by");
 CREATE INDEX "file_deletedBy_idx" ON "files" USING btree ("deleted_by");
 CREATE INDEX "file_entityType_idx" ON "files" USING btree ("entity_type","entity_id");

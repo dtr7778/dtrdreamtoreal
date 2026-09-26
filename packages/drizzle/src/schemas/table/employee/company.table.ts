@@ -19,6 +19,7 @@ import { db_created_at, db_id, db_updated_at } from "../../../db-utils";
 import { SiteAuditTable } from "../siteAudit/siteAudit.table";
 import { UserTable } from "../user";
 import { CompanyAddressTable } from "./companyAddress.table";
+import { CompanyAiUsageTable } from "./companyAiUsage.table";
 import { CompanyEmailThreadTable } from "./companyEmailThread.table";
 import { CompanySocialTable } from "./companySocial.table";
 import { EmployeeTable } from "./employee.table";
@@ -37,7 +38,8 @@ export const CompanyTable = pgTable(
     description: text("description"),
     context: jsonb("context")
       .$type<Record<string, string | string[]>>()
-      .notNull(),
+      .notNull()
+      .default({}),
 
     createdBy: uuid("created_by").notNull(),
     createdAt: db_created_at,
@@ -73,6 +75,9 @@ export const CompanyRelation = relations(CompanyTable, ({ many, one }) => ({
     relationName: "CompanyEmailThreadToCompany",
   }),
   siteAudits: many(SiteAuditTable, { relationName: "SiteAuditToCompany" }),
+  aiUsages: many(CompanyAiUsageTable, {
+    relationName: "CompanyAiUsageToCompany",
+  }),
 }));
 
 export const insertCompanySchema = createInsertSchema(CompanyTable, {

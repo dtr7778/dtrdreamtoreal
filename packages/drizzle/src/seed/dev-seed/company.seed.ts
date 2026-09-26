@@ -24,7 +24,7 @@ export async function seedCompanies(
 ): Promise<Array<CompanyDataModel>> {
   console.log("🌱 Seeding companies...");
 
-  const companiesData = zocker(insertCompanySchema)
+  const companiesData = zocker(insertCompanySchema.omit({ context: true }))
     .generateMany(seedConfigs.targets.companies)
     .map((company) => {
       const createdBy = faker.helpers.arrayElement(users);

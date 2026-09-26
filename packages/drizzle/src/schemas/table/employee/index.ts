@@ -1,5 +1,6 @@
 export * from "./company.table";
 export * from "./companyAddress.table";
+export * from "./companyAiUsage.table";
 export * from "./companyEmailThread.table";
 export * from "./companySocial.table";
 export * from "./employee.table";
