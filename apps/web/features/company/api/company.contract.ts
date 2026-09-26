@@ -1,3 +1,4 @@
+import { eventIterator } from "@orpc/contract";
 import z from "zod";
 
 import {
@@ -19,6 +20,8 @@ import { InferContractRouterType } from "@/types/orpc.types";
 
 import {
   companyCreateSchema,
+  companyDescriptionStreamChunkSchema,
+  companyGenerateDescriptionSchema,
   companyThreadCreateSchema,
   companyUpdateSchema,
 } from "../company.schema";
@@ -148,7 +151,11 @@ const companyCreateContract = companyBaseContract
     description: "Create a company",
     tags,
   })
-  .input(companyCreateSchema)
+  .input(
+    companyCreateSchema.extend({
+      aiUsageIds: z.array(z.uuid()).optional(),
+    })
+  )
   .output(apiOutputZodSchema(selectCompanySchema));
 export type CompanyCreateContractType = InferContractRouterType<
   typeof companyCreateContract
@@ -267,6 +274,19 @@ export type ListCompanyEmailContractType = InferContractRouterType<
   typeof listCompanyEmailContract
 >;
 
+const generateCompanyDescriptionContract = companyBaseContract
+  .route({
+    path: "/companies/generate-description",
+    description:
+      "Generate a company description from briefing context using AI",
+    tags,
+  })
+  .input(companyGenerateDescriptionSchema)
+  .output(eventIterator(companyDescriptionStreamChunkSchema));
+export type GenerateCompanyDescriptionContractType = InferContractRouterType<
+  typeof generateCompanyDescriptionContract
+>;
+
 export const companyContract = {
   list: listCompanyContract,
   listForSearch: listCompanyForSearchContract,
@@ -274,6 +294,7 @@ export const companyContract = {
   create: companyCreateContract,
   update: companyUpdateContract,
   delete: companyDeleteContract,
+  generateDescription: generateCompanyDescriptionContract,
   employee: employeeContract,
   emailThread: {
     list: listCompanyEmailThreadsContract,

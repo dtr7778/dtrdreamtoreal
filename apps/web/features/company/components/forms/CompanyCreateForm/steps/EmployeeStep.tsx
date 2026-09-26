@@ -4,7 +4,7 @@ import { Fragment } from "react";
 
 import { Plus, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
-import { Control, useFieldArray } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -16,37 +16,25 @@ import {
 import { InputField } from "@workspace/ui/components/form-fields/InputField";
 import { PhoneInputField } from "@workspace/ui/components/form-fields/PhoneInputField";
 
-import { CompanyCreateType } from "../../../company.schema";
-import { AddressField } from "../AddressField";
-import { formAnimationVariants } from "../CompanyCreateForm";
-import { SocialMediaField } from "../SocialMediaField";
+import { AddressField } from "../../AddressField";
+import { SocialMediaField } from "../../SocialMediaField";
+import { useCompanyFormContext } from "../contexts/CompanyFormContext";
+import {
+  createEmptyEmployee,
+  formAnimationVariants,
+} from "../data/company-form.constants";
 
-export function EmployeeStep({
-  control,
-  disabled,
-}: {
-  control: Control<CompanyCreateType>;
-  disabled?: boolean;
-}) {
+export function EmployeeStep() {
   "use no memo";
+  const { control, isPending } = useCompanyFormContext();
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "employees",
   });
 
   const handleAppend = () => {
-    append({
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      department: "",
-      jobTitle: "",
-      website: "",
-      addresses: [],
-      socialMedia: [],
-    });
+    append(createEmptyEmployee());
   };
 
   return (
@@ -73,7 +61,7 @@ export function EmployeeStep({
                     variant="destructive"
                     size="icon"
                     onClick={() => remove(idx)}
-                    disabled={disabled}
+                    disabled={isPending}
                   >
                     <Trash2 />
                   </Button>
@@ -86,7 +74,7 @@ export function EmployeeStep({
                       name={`employees.${idx}.firstName`}
                       label="First Name"
                       placeholder="First name"
-                      disabled={disabled}
+                      disabled={isPending}
                       requiredField
                     />
                     <InputField
@@ -94,14 +82,14 @@ export function EmployeeStep({
                       name={`employees.${idx}.middleName`}
                       label="Middle Name"
                       placeholder="Middle name"
-                      disabled={disabled}
+                      disabled={isPending}
                     />
                     <InputField
                       control={control}
                       name={`employees.${idx}.lastName`}
                       label="Last Name"
                       placeholder="Last name"
-                      disabled={disabled}
+                      disabled={isPending}
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -111,14 +99,14 @@ export function EmployeeStep({
                       name={`employees.${idx}.email`}
                       label="Email"
                       placeholder="employee@company.com"
-                      disabled={disabled}
+                      disabled={isPending}
                     />
                     <PhoneInputField
                       control={control}
                       name={`employees.${idx}.phone`}
                       label="Phone"
                       placeholder="+1 234 567 890"
-                      disabled={disabled}
+                      disabled={isPending}
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -127,14 +115,14 @@ export function EmployeeStep({
                       name={`employees.${idx}.jobTitle`}
                       label="Job Title"
                       placeholder="Software Engineer"
-                      disabled={disabled}
+                      disabled={isPending}
                     />
                     <InputField
                       control={control}
                       name={`employees.${idx}.department`}
                       label="Department"
                       placeholder="Engineering"
-                      disabled={disabled}
+                      disabled={isPending}
                     />
                   </div>
                   <InputField
@@ -143,14 +131,14 @@ export function EmployeeStep({
                     name={`employees.${idx}.website`}
                     label="Website"
                     placeholder="https://example.com"
-                    disabled={disabled}
+                    disabled={isPending}
                   />
 
                   <FieldGroup className="p-4 bg-muted/30 border rounded-md">
                     <SocialMediaField
                       control={control}
                       name={`employees.${idx}.socialMedia`}
-                      disabled={disabled}
+                      disabled={isPending}
                       legend={`Employee #${idx + 1} Social media`}
                       addLabel="Add Social media"
                       defaultType="person"
@@ -159,7 +147,7 @@ export function EmployeeStep({
                     <AddressField
                       control={control}
                       name={`employees.${idx}.addresses`}
-                      disabled={disabled}
+                      disabled={isPending}
                       legend={`Employee #${idx + 1} Address`}
                       addLabel="Add address"
                       defaultType="home"
@@ -177,7 +165,7 @@ export function EmployeeStep({
             variant="secondary"
             className="w-fit"
             onClick={handleAppend}
-            disabled={disabled}
+            disabled={isPending}
           >
             <Plus className="size-4" />
             <span>Add employee</span>

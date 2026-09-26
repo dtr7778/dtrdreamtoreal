@@ -6,8 +6,9 @@ import { InputField } from "@workspace/ui/components/form-fields/InputField";
 import { SelectField } from "@workspace/ui/components/form-fields/SelectField";
 import { TextareaField } from "@workspace/ui/components/form-fields/TextareaField";
 
-import { CompanyCreateType } from "../../../company.schema";
-import { ContextQuestion } from "./context-questions";
+import { CompanyCreateType } from "@/features/company/company.schema";
+
+import { ContextQuestion } from "../data/context-questions";
 import { ContextArrayField } from "./ContextArrayField";
 
 export function ContextQuestionField({

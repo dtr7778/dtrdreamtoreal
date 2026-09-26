@@ -1,13 +1,98 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { consumeEventIterator } from "@orpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { orpcTQClient } from "@/server/orpc.client";
+import { API_MESSAGES } from "@/constants/apiMessage";
+import { orpcClient, orpcTQClient } from "@/server/orpc.client";
 import { IApiHookInput } from "@/types";
 import { formatOrpcError } from "@/utils/formatOrpcError";
+
+import { AiUsageType } from "../company.schema";
+
+export type GenerateCompanyDescriptionResponse = {
+  description: string;
+  usage: AiUsageType;
+};
+
+export type StreamCompanyDescriptionInput = {
+  companyId?: string;
+  name: string;
+  industry?: string;
+  website?: string;
+  context?: Record<string, string | string[] | undefined>;
+};
+
+export function useStreamCompanyDescription() {
+  const toastId = "generate_company_description_toast_message";
+  const [isStreaming, setIsStreaming] = useState(false);
+  const unsubscribeRef = useRef<(() => Promise<void>) | null>(null);
+
+  useEffect(
+    () => () => {
+      void unsubscribeRef.current?.();
+    },
+    []
+  );
+
+  const stop = useCallback(() => {
+    void unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+    setIsStreaming(false);
+  }, []);
+
+  const start = useCallback(
+    (
+      input: StreamCompanyDescriptionInput,
+      handlers: {
+        onDelta?: (description: string) => void;
+        onDone?: (data: GenerateCompanyDescriptionResponse) => void;
+        onError?: (message: string) => void;
+      } = {}
+    ) => {
+      let description = "";
+
+      setIsStreaming(true);
+
+      unsubscribeRef.current = consumeEventIterator(
+        orpcClient.company.generateDescription(input),
+        {
+          onEvent: (chunk) => {
+            if (chunk.type === "delta") {
+              description += chunk.value;
+              handlers.onDelta?.(description);
+              return;
+            }
+
+            toast.success(API_MESSAGES.AI.GENERATE_COMPANY_DESCRIPTION, {
+              id: toastId,
+            });
+            handlers.onDone?.({
+              description,
+              usage: chunk.usage,
+            });
+          },
+          onError: (error) => {
+            const { message } = formatOrpcError(error);
+            toast.error(message, { id: toastId });
+            handlers.onError?.(message);
+          },
+          onFinish: () => {
+            setIsStreaming(false);
+            unsubscribeRef.current = null;
+          },
+        }
+      );
+    },
+    []
+  );
+
+  return { start, stop, isStreaming };
+}
 
 export function useCreateCompany<TFieldNames>({
   onRequestStart,

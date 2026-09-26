@@ -91,6 +91,47 @@ export const companyUpdateSchema = companyCreateSchema.partial().omit({
 });
 export type CompanyUpdateType = z.infer<typeof companyUpdateSchema>;
 
+export const aiUsageSchema = z.object({
+  id: z.uuid(),
+  model: z.string(),
+  promptTokens: z.number(),
+  completionTokens: z.number(),
+  totalTokens: z.number(),
+  cost: z.number().optional(),
+  latencyMs: z.number(),
+});
+export type AiUsageType = z.infer<typeof aiUsageSchema>;
+
+export const companyGenerateDescriptionSchema = z.object({
+  companyId: z.uuid().optional(),
+  name: z
+    .string()
+    .min(1, "Company name is required")
+    .max(255, "Company name is too long"),
+  industry: emptyStrSchema.optional(),
+  website: emptyStrSchema.optional(),
+  context: z
+    .record(z.string(), z.union([z.string(), z.array(z.string())]).optional())
+    .optional(),
+});
+export type CompanyGenerateDescriptionType = z.infer<
+  typeof companyGenerateDescriptionSchema
+>;
+
+export const companyDescriptionStreamChunkSchema = z.discriminatedUnion(
+  "type",
+  [
+    z.object({ type: z.literal("delta"), value: z.string() }),
+    z.object({
+      type: z.literal("done"),
+      usage: aiUsageSchema,
+    }),
+  ]
+);
+export type CompanyDescriptionStreamChunkType = z.infer<
+  typeof companyDescriptionStreamChunkSchema
+>;
+
 export const companyThreadCreateSchema = z.object({
   companyId: z.uuid(),
   subject: z.string().min(1, "Subject is required"),

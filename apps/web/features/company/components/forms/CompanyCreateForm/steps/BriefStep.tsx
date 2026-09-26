@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Control } from "react-hook-form";
 
 import {
   Accordion,
@@ -11,19 +10,15 @@ import {
 } from "@workspace/ui/components/accordion";
 import { FieldDescription, FieldGroup } from "@workspace/ui/components/field";
 
-import { CompanyCreateType } from "../../../company.schema";
-import { formAnimationVariants } from "../CompanyCreateForm";
-import { contextSections } from "../context/context-questions";
-import { ContextQuestionField } from "../context/ContextQuestionField";
+import { useCompanyFormContext } from "../contexts/CompanyFormContext";
+import { formAnimationVariants } from "../data/company-form.constants";
+import { contextSections } from "../data/context-questions";
+import { AiDescriptionDialog } from "../description/AiDescriptionDialog";
+import { ContextQuestionField } from "../fields/ContextQuestionField";
 
-export function BriefStep({
-  control,
-  disabled,
-}: {
-  control: Control<CompanyCreateType>;
-  disabled?: boolean;
-}) {
+export function BriefStep() {
   "use no memo";
+  const { control, isPending } = useCompanyFormContext();
 
   return (
     <motion.div
@@ -62,7 +57,7 @@ export function BriefStep({
                     key={question.name}
                     question={question}
                     control={control}
-                    disabled={disabled}
+                    disabled={isPending}
                   />
                 ))}
               </FieldGroup>
@@ -70,6 +65,8 @@ export function BriefStep({
           </AccordionItem>
         ))}
       </Accordion>
+
+      <AiDescriptionDialog />
     </motion.div>
   );
 }

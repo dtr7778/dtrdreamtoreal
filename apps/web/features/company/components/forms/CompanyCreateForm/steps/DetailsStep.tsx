@@ -1,25 +1,19 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Control } from "react-hook-form";
 
-import { FieldGroup, FieldSeparator } from "@workspace/ui/components/field";
+import { FieldGroup } from "@workspace/ui/components/field";
 import { InputField } from "@workspace/ui/components/form-fields/InputField";
 import { PhoneInputField } from "@workspace/ui/components/form-fields/PhoneInputField";
 
-import { CompanyCreateType } from "../../../company.schema";
-import { AddressField } from "../AddressField";
-import { formAnimationVariants } from "../CompanyCreateForm";
-import { SocialMediaField } from "../SocialMediaField";
+import { AddressField } from "../../AddressField";
+import { SocialMediaField } from "../../SocialMediaField";
+import { useCompanyFormContext } from "../contexts/CompanyFormContext";
+import { formAnimationVariants } from "../data/company-form.constants";
 
-export function DetailsStep({
-  control,
-  disabled,
-}: {
-  control: Control<CompanyCreateType>;
-  disabled?: boolean;
-}) {
+export function DetailsStep() {
   "use no memo";
+  const { control, isPending } = useCompanyFormContext();
 
   return (
     <motion.div
@@ -35,7 +29,7 @@ export function DetailsStep({
           name="name"
           label="Name"
           placeholder="Company name"
-          disabled={disabled}
+          disabled={isPending}
           requiredField
         />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -44,14 +38,14 @@ export function DetailsStep({
             name="legalName"
             label="Legal name"
             placeholder="Legal name"
-            disabled={disabled}
+            disabled={isPending}
           />
           <InputField
             control={control}
             name="employSize"
             label="Employee Size"
             placeholder="1-10, 11-50, 51-200, etc."
-            disabled={disabled}
+            disabled={isPending}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -61,14 +55,14 @@ export function DetailsStep({
             name="email"
             label="Email"
             placeholder="contact@company.com"
-            disabled={disabled}
+            disabled={isPending}
           />
           <PhoneInputField
             control={control}
             name="phone"
             label="Phone"
             placeholder="+1 234 567 890"
-            disabled={disabled}
+            disabled={isPending}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -78,13 +72,13 @@ export function DetailsStep({
             name="website"
             label="Website"
             placeholder="https://company.com"
-            disabled={disabled}
+            disabled={isPending}
           />
           <InputField
             control={control}
             name="industry"
             label="Industry"
-            disabled={disabled}
+            disabled={isPending}
           />
         </div>
 
@@ -92,18 +86,16 @@ export function DetailsStep({
           <SocialMediaField
             control={control}
             name="socialMedia"
-            disabled={disabled}
+            disabled={isPending}
             legend="Company social media"
             addLabel="Add Social media"
             defaultType="company"
           />
 
-          <FieldSeparator />
-
           <AddressField
             control={control}
             name="addresses"
-            disabled={disabled}
+            disabled={isPending}
             legend="Company Address"
             addLabel="Add address"
             defaultType="work"

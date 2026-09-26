@@ -79,6 +79,11 @@ export const API_MESSAGES = {
     NOT_FOUND: "Contact not found",
     REPLY_CREATED: "Reply sent successfully",
   },
+  AI: {
+    GENERATE_COMPANY_DESCRIPTION: "Company description generated successfully.",
+    NOT_GENERATE: "Failed to generate a description. Please try again.",
+    NOT_CONFIGURED: "AI is not configured. Please set the OpenRouter API key.",
+  },
   COMPANY: {
     GET_ALL: "Companies loaded successfully.",
     GET_ALL_FOR_SEARCH: "Companies loaded successfully.",

@@ -3,6 +3,7 @@ import {
   companyDeleteProcedure,
   companyDetailsProcedure,
   companyEmailThreadCreateProcedure,
+  companyGenerateDescriptionProcedure,
   companyImpl,
   companyUpdateProcedure,
   listCompanyEmailProcedure,
@@ -25,6 +26,7 @@ export const companyRouter = companyImpl.router({
   create: companyCreateProcedure,
   update: companyUpdateProcedure,
   delete: companyDeleteProcedure,
+  generateDescription: companyGenerateDescriptionProcedure,
   employee: {
     list: listEmployeeProcedure,
     create: employeeCreateProcedure,

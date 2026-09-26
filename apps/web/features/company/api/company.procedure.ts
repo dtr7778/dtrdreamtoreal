@@ -2,12 +2,18 @@ import { implement, ORPCError } from "@orpc/server";
 import { and, count, eq, inArray, isNotNull, SQL } from "drizzle-orm";
 
 import {
+  type CompanyDescriptionAnswer,
+  streamCompanyDescription,
+} from "@workspace/ai";
+import {
   buildPaginateOptions,
   buildPaginationMeta,
 } from "@workspace/drizzle/paginate-query";
 import {
   AddressTable,
+  AiUsageTable,
   CompanyAddressTable,
+  CompanyAiUsageTable,
   CompanyDataModel,
   CompanyEmailThreadTable,
   CompanySocialTable,
@@ -34,6 +40,8 @@ import {
 } from "@workspace/drizzle/schemas";
 import { apiResponse } from "@workspace/lib/utils";
 
+import { env } from "@/lib/env";
+
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { userProfileColumns } from "@/features/user/user.api-schema";
 import {
@@ -41,9 +49,13 @@ import {
   userPermissionMiddleware,
 } from "@/server/middleware/auth.middleware";
 import { errorMiddleware } from "@/server/middleware/error.middleware";
-import { privateRateLimitMiddleware } from "@/server/middleware/rateLimit.middleware";
+import {
+  aiRateLimitMiddleware,
+  privateRateLimitMiddleware,
+} from "@/server/middleware/rateLimit.middleware";
 import { ORPCContext } from "@/types/orpc.types";
 
+import { contextSections } from "../components/forms/CompanyCreateForm/data/context-questions";
 import { companyContract } from "./company.contract";
 
 export const companyImpl = implement(companyContract)
@@ -233,7 +245,8 @@ export const companyCreateProcedure = companyImpl.create
     userPermissionMiddleware(["system.company.manage", "system.company.create"])
   )
   .handler(async ({ context, input }) => {
-    const { employees, addresses, socialMedia, ...inputCompany } = input;
+    const { employees, addresses, socialMedia, aiUsageIds, ...inputCompany } =
+      input;
 
     const companyData = await context.db.transaction(async (tx) => {
       const [companyData] = await tx
@@ -246,6 +259,7 @@ export const companyCreateProcedure = companyImpl.create
           employSize: inputCompany.employSize,
           email: inputCompany.email,
           phone: inputCompany.phone,
+          description: inputCompany.description,
           context: sanitizeContext(inputCompany.context),
           createdBy: context.user.id,
         } satisfies InsertCompany)
@@ -255,6 +269,15 @@ export const companyCreateProcedure = companyImpl.create
         throw new ORPCError("INTERNAL_SERVER_ERROR", {
           message: API_MESSAGES.COMPANY.NOT_CREATE,
         });
+      }
+
+      if (aiUsageIds && aiUsageIds.length > 0) {
+        await tx.insert(CompanyAiUsageTable).values(
+          aiUsageIds.map((aiUsageId) => ({
+            companyId: companyData.id,
+            aiUsageId,
+          }))
+        );
       }
 
       if (socialMedia.length > 0) {
@@ -355,6 +378,87 @@ export const companyCreateProcedure = companyImpl.create
 
     return apiResponse(API_MESSAGES.COMPANY.CREATE, companyData);
   });
+
+export const companyGenerateDescriptionProcedure =
+  companyImpl.generateDescription
+    .use(aiRateLimitMiddleware)
+    .use(
+      userPermissionMiddleware([
+        "system.company.manage",
+        "system.company.create",
+      ])
+    )
+    .handler(async function* ({ context, input }) {
+      const answers: Array<CompanyDescriptionAnswer> = contextSections
+        .flatMap((section) =>
+          section.questions.map((question) => ({
+            label: `${section.title}: ${question.label}`,
+            value: input.context?.[question.name],
+          }))
+        )
+        .filter((answer): answer is CompanyDescriptionAnswer => {
+          if (answer.value === undefined) return false;
+          return Array.isArray(answer.value)
+            ? answer.value.length > 0
+            : answer.value.trim().length > 0;
+        });
+
+      try {
+        for await (const chunk of streamCompanyDescription({
+          companyName: input.name,
+          industry: input.industry,
+          website: input.website,
+          answers,
+          apiKey: env.OPENROUTER_API_KEY,
+          model: env.OPENROUTER_MODEL,
+          appTitle: env.NEXT_PUBLIC_SITE_NAME,
+          httpReferer: env.NEXT_PUBLIC_SITE_URL,
+        })) {
+          if (chunk.type === "delta") {
+            yield { type: "delta" as const, value: chunk.delta };
+            continue;
+          }
+          const [aiUsage] = await context.db
+            .insert(AiUsageTable)
+            .values({
+              provider: "openrouter",
+              model: chunk.usage.model,
+              activity: "company_description",
+              promptTokens: chunk.usage.promptTokens,
+              completionTokens: chunk.usage.completionTokens,
+              totalTokens: chunk.usage.totalTokens,
+              cost: chunk.usage.cost,
+              latencyMs: chunk.usage.latencyMs,
+              createdBy: context.user.id,
+            })
+            .returning({ id: AiUsageTable.id });
+
+          if (!aiUsage) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: API_MESSAGES.AI.NOT_GENERATE,
+            });
+          }
+
+          if (input.companyId) {
+            await context.db.insert(CompanyAiUsageTable).values({
+              companyId: input.companyId,
+              aiUsageId: aiUsage.id,
+            });
+          }
+
+          yield {
+            type: "done" as const,
+            usage: { ...chunk.usage, id: aiUsage.id },
+          };
+        }
+      } catch (error) {
+        console.log(error);
+        if (error instanceof ORPCError) throw error;
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: API_MESSAGES.AI.NOT_GENERATE,
+        });
+      }
+    });
 
 export const companyUpdateProcedure = companyImpl.update
   .use(
