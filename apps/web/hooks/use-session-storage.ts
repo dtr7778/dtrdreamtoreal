@@ -2,11 +2,11 @@
 
 import { useCallback, useState } from "react";
 
-import { getItem, removeItem, setItem } from "@/utils/localStorage";
+import { getItem, removeItem, setItem } from "@/utils/sessionStorage";
 
 export type DispatchAction<T> = T | ((prevState: T) => T);
 
-export default function useLocalStorage<T>(key: string, initialData: T) {
+export default function useSessionStorage<T>(key: string, initialData: T) {
   const [value, setValue] = useState(() => {
     const item = getItem<T>(key);
     return item || initialData;
