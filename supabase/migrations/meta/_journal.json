@@ -36,6 +36,20 @@
       "when": 1790461743302,
       "tag": "0004_add_audit_log",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790465605759,
+      "tag": "0005_fix_triggeredBy_user",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790474846250,
+      "tag": "0006_add_report_log_events",
+      "breakpoints": true
     }
   ]
 }
