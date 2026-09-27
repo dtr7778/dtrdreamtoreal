@@ -6,10 +6,13 @@ import { join } from "node:path";
 
 import { config } from "dotenv";
 
+import { loadResvg } from "@workspace/generate-image";
 import { BullMqService } from "@workspace/lib/server";
 
 import { container } from "./container/worker-container/worker-di-container";
 import { env } from "./env";
+import { auditReportQueue } from "./modules/audit/audit-report.queue";
+import { AuditReportWorker } from "./modules/audit/AuditReport.worker";
 import { AuditWorker } from "./modules/audit/Audit.worker";
 import { auditQueue } from "./modules/audit/audit.queue";
 import { mailQueue } from "./modules/mail/mail.queue";
@@ -23,6 +26,8 @@ async function main() {
   console.clear();
   console.log("Worker is starting....");
 
+  await loadResvg();
+
   const bullMq = new BullMqService({
     container,
     connection: {
@@ -34,8 +39,8 @@ async function main() {
     },
   });
 
-  bullMq.registerContracts([mailQueue, auditQueue]);
-  bullMq.createWorkers([MailWorker, AuditWorker]);
+  bullMq.registerContracts([mailQueue, auditQueue, auditReportQueue]);
+  bullMq.createWorkers([MailWorker, AuditWorker, AuditReportWorker]);
 
   const shutdown = async () => {
     console.log("Worker is shutting down....");

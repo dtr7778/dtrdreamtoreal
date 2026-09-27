@@ -41,6 +41,7 @@ import {
   IAuditLogService,
 } from "@/modules/audit/AuditLog.service";
 import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
+import { AuditReportQueueService } from "@/modules/audit/AuditReportQueue.service";
 import {
   AuditReportImageService,
   type IAuditReportImageService,
@@ -147,6 +148,10 @@ container
 container
   .bind<AuditQueueService>(CONTAINER_TYPES.AuditQueueService)
   .to(AuditQueueService)
+  .inSingletonScope();
+container
+  .bind<AuditReportQueueService>(CONTAINER_TYPES.AuditReportQueueService)
+  .to(AuditReportQueueService)
   .inSingletonScope();
 container
   .bind<IAuditLogService>(CONTAINER_TYPES.AuditLogService)

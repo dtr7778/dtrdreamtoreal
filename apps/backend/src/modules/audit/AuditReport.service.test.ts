@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createMockDrizzleClient,
@@ -13,12 +13,14 @@ import {
   UserTable,
 } from "@workspace/drizzle/schemas";
 import type { DatabaseType } from "@workspace/drizzle/types";
+import { loadResvg } from "@workspace/generate-image";
 import type { IStorageService } from "@workspace/lib/supabase/storage";
 
 import {
   AUDIT_REPORT_IMAGE_PATH,
   AuditReportImageService,
 } from "./AuditReport.service";
+import type { IAuditLogService } from "./AuditLog.service";
 
 function createStorageMock() {
   const store = vi.fn(async (file: Blob, filename: string, path?: string) => ({
@@ -52,12 +54,20 @@ describe("AuditReportImageService", () => {
   let service: AuditReportImageService;
   let siteAuditId: string;
 
+  beforeAll(async () => {
+    await loadResvg();
+  });
+
   beforeEach(async () => {
     db = await createMockDrizzleClient();
     storage = createStorageMock();
     service = new AuditReportImageService(
       db as unknown as DatabaseType,
-      storage
+      storage,
+      {
+        publish: vi.fn(async () => ({})),
+        persistRun: vi.fn(async () => 0),
+      } as unknown as IAuditLogService
     );
 
     const [user] = await db

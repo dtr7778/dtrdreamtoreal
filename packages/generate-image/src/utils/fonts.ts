@@ -32,8 +32,26 @@ export function getAuditReportFonts(): SatoriFont[] {
     },
     {
       name: "Inter",
+      data: loadFont("inter-latin-500-normal.woff"),
+      weight: 500,
+      style: "normal",
+    },
+    {
+      name: "Inter",
+      data: loadFont("inter-latin-600-normal.woff"),
+      weight: 600,
+      style: "normal",
+    },
+    {
+      name: "Inter",
       data: loadFont("inter-latin-700-normal.woff"),
       weight: 700,
+      style: "normal",
+    },
+    {
+      name: "Inter",
+      data: loadFont("inter-latin-800-normal.woff"),
+      weight: 800,
       style: "normal",
     },
   ];

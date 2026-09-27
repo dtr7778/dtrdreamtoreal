@@ -115,4 +115,8 @@ export const API_MESSAGES = {
       },
     },
   },
+  AUDIT: {
+    GET_DETAILS: "Audit details loaded successfully",
+    NOT_FOUND: "Audit not found",
+  },
 };

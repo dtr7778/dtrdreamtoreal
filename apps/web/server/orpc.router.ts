@@ -1,3 +1,4 @@
+import { auditRouter } from "@/features/audit/api/audit.public.router";
 import { authRouter } from "@/features/auth/api/auth.router";
 import { companyRouter } from "@/features/company/api/company.router";
 import { contactRouter } from "@/features/contact/api/contact.router";
@@ -9,6 +10,7 @@ import { userRouter } from "@/features/user/api/user.router";
 
 export const router = {
   auth: authRouter,
+  audit: auditRouter,
   notification: notificationRouter,
   upload: uploadRouter,
   user: userRouter,

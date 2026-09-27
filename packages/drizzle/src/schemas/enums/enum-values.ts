@@ -150,4 +150,7 @@ export const AUDIT_LOG_EVENT_TYPE = [
   "run_completed",
   "run_failed",
   "error",
+  "report_started",
+  "report_generated",
+  "report_failed",
 ] as const;

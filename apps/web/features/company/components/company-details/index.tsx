@@ -24,6 +24,7 @@ import {
   TabNavigationTrigger,
 } from "@/components/tab-navigation";
 
+import { AuditStep } from "@/features/company/components/company-details/AuditStep";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/server/orpc.client";
 
@@ -42,6 +43,11 @@ export function CompanyDetails({ companyId }: { companyId: string }) {
   const isAllowDelete = usePermissionCheck([
     "system.company.manage",
     "system.company.delete",
+  ]);
+  const isAllowAudit = usePermissionCheck([
+    "system.site_audit.manage",
+    "system.site_audit.list",
+    "system.site_audit.read",
   ]);
 
   const { data, isLoading, isError, error } = useQuery(
@@ -154,6 +160,11 @@ export function CompanyDetails({ companyId }: { companyId: string }) {
               <TabNavigationTrigger value="emails">
                 <span>Emails</span>
               </TabNavigationTrigger>
+              {isAllowAudit && (
+                <TabNavigationTrigger value="audit">
+                  <span>Audit</span>
+                </TabNavigationTrigger>
+              )}
             </TabNavigationList>
             <TabNavigationContent value="details">
               <CompanyDetailsStep companyId={companyId} />
@@ -164,6 +175,11 @@ export function CompanyDetails({ companyId }: { companyId: string }) {
             <TabNavigationContent value="emails">
               <CompanyEmailsStep companyId={companyId} />
             </TabNavigationContent>
+            {isAllowAudit && (
+              <TabNavigationContent value="audit">
+                <AuditStep companyId={companyId} websiteUrl={data?.website} />
+              </TabNavigationContent>
+            )}
           </TabNavigation>
         </div>
       )}

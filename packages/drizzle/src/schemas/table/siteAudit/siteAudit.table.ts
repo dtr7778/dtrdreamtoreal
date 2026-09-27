@@ -59,7 +59,7 @@ export const SiteAuditTable = pgTable(
     }).onDelete("cascade"),
     foreignKey({
       name: "siteAudit_triggerdBy_fkey",
-      columns: [table.companyId],
+      columns: [table.triggeredBy],
       foreignColumns: [UserTable.id],
     }).onDelete("set null"),
     index("siteAudit_companyId_idx").on(table.companyId),

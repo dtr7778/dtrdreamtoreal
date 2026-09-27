@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import type { AuditReportImageData } from "../components/audit-report-card";
+import { loadResvg } from "../utils/loadResvg";
 import { generateAuditReportImage } from "./render-audit-report";
 
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
@@ -29,6 +30,10 @@ const data: AuditReportImageData = {
 };
 
 describe("generateAuditReportImage", () => {
+  beforeAll(async () => {
+    await loadResvg();
+  });
+
   it("renders a valid PNG buffer", async () => {
     const buffer = await generateAuditReportImage(data);
 

@@ -21,6 +21,9 @@ import type { IStorageService } from "@workspace/lib/supabase/storage";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
 
+import { type IAuditLogService } from "./AuditLog.service";
+import type { AuditLogEventInput } from "./AuditLog.types";
+
 /** Storage path prefix for generated audit report images. */
 export const AUDIT_REPORT_IMAGE_PATH = "audit_report_image";
 
@@ -32,10 +35,56 @@ export interface IAuditReportImageService {
 export class AuditReportImageService implements IAuditReportImageService {
   constructor(
     @inject(CONTAINER_TYPES.Drizzle) private readonly db: DatabaseType,
-    @inject(CONTAINER_TYPES.Storage) private readonly storage: IStorageService
+    @inject(CONTAINER_TYPES.Storage) private readonly storage: IStorageService,
+    @inject(CONTAINER_TYPES.AuditLogService)
+    private readonly auditLog: IAuditLogService
   ) {}
 
   public async generateReportImage(siteAuditId: string): Promise<SelectFile> {
+    await this.logEvent(siteAuditId, {
+      type: "report_started",
+      level: "info",
+      message: "Generating audit report image",
+    });
+
+    try {
+      const saved = await this.renderReportImage(siteAuditId);
+
+      await this.logEvent(siteAuditId, {
+        type: "report_generated",
+        level: "info",
+        message: "Audit report image is ready",
+        data: { fileId: saved.id, url: saved.url },
+      });
+
+      return saved;
+    } catch (error) {
+      await this.logEvent(siteAuditId, {
+        type: "report_failed",
+        level: "error",
+        message: `Failed to generate audit report image: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      });
+
+      throw error;
+    }
+  }
+
+  /** Publishes and persists a run log event; never fails report generation. */
+  private async logEvent(
+    siteAuditId: string,
+    event: AuditLogEventInput
+  ): Promise<void> {
+    try {
+      await this.auditLog.publish(siteAuditId, event);
+      await this.auditLog.persistRun(siteAuditId);
+    } catch {
+      // Logging is best-effort; it must not break report generation.
+    }
+  }
+
+  private async renderReportImage(siteAuditId: string): Promise<SelectFile> {
     const [siteAudit] = await this.db
       .select()
       .from(SiteAuditTable)

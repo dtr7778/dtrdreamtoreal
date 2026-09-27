@@ -13,12 +13,12 @@ import {
   CwvSourceEnumSchema,
   CwvStrategyEnumSchema,
 } from "@workspace/drizzle/zod-db-enums";
+import { paginateOutputZodSchema } from "@workspace/lib/schemas";
 import {
   nodeApiOutputZodSchema,
   nodePaginateInputZodSchema,
 } from "@workspace/lib/schemas/node";
 import { InferContractType } from "@workspace/lib/types";
-import { paginateOutputZodSchema } from "@workspace/lib/schemas";
 
 import { createContract } from "../createContract";
 
@@ -52,6 +52,15 @@ const listSiteAuditContract = createContract({
             id: true,
             name: true,
           }),
+          reportImage: selectFileSchema
+            .pick({
+              id: true,
+              key: true,
+              filename: true,
+              originalName: true,
+              url: true,
+            })
+            .nullable(),
           triggeredByUser: userProfileSchema.nullable(),
           startedAt: z.coerce.date().nullable(),
           completedAt: z.coerce.date().nullable(),
@@ -136,7 +145,12 @@ const getSiteAuditResultsContract = createContract({
   },
   output: nodeApiOutputZodSchema(
     z.object({
-      siteAudit: selectSiteAuditSchema,
+      siteAudit: selectSiteAuditSchema.extend({
+        startedAt: z.coerce.date().nullable(),
+        completedAt: z.coerce.date().nullable(),
+        createdAt: z.coerce.date(),
+        updatedAt: z.coerce.date(),
+      }),
       summary: z.object({
         total: z.number(),
         completed: z.number(),

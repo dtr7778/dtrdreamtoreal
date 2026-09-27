@@ -7,7 +7,6 @@ import { consumeEventIterator } from "@orpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { API_MESSAGES } from "@/constants/apiMessage";
 import { orpcClient, orpcTQClient } from "@/server/orpc.client";
 import { IApiHookInput } from "@/types";
 import { formatOrpcError } from "@/utils/formatOrpcError";
@@ -68,9 +67,6 @@ export function useStreamCompanyDescription() {
               return;
             }
 
-            toast.success(API_MESSAGES.AI.GENERATE_COMPANY_DESCRIPTION, {
-              id: toastId,
-            });
             handlers.onDone?.({
               description,
               usage: chunk.usage,

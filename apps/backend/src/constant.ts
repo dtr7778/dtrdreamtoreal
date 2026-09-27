@@ -32,4 +32,7 @@ export const API_MESSAGE = {
     JOB_ENQUEU: "Mail job enqueued",
     WEBHOOK_QUEUED: "Mail webhook queued",
   },
+  COMPANY: {
+    NOT_FOUND: "Company not found",
+  },
 };

@@ -6,11 +6,11 @@ import { join } from "node:path";
 
 import { config } from "dotenv";
 
-import { loadResvg } from "@workspace/generate-image";
 import { BullMqService } from "@workspace/lib/server";
 
 import { container } from "./container/di-container";
 import { env } from "./env";
+import { auditReportQueue } from "./modules/audit/audit-report.queue";
 import { auditQueue } from "./modules/audit/audit.queue";
 import { AuditCronService } from "./modules/audit/AuditCron.service";
 import { SiteAuditController } from "./modules/audit/SiteAudit.controller";
@@ -27,7 +27,6 @@ async function main() {
   try {
     console.clear();
     console.log("Server is starting....");
-    await loadResvg();
 
     const bullMq = new BullMqService({
       container,
@@ -40,7 +39,7 @@ async function main() {
       },
     });
 
-    bullMq.registerContracts([mailQueue, auditQueue]);
+    bullMq.registerContracts([mailQueue, auditQueue, auditReportQueue]);
 
     new Server(
       container,

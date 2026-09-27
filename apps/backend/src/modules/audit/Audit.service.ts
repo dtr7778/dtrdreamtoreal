@@ -4,6 +4,7 @@ import { inject } from "inversify";
 
 import {
   AuditItemTable,
+  CompanyTable,
   CwvSnapshotTable,
   InsertAuditItem,
   InsertSiteAudit,
@@ -25,7 +26,7 @@ import { CONTAINER_TYPES } from "@/container/container-types";
 import { type RunCheckJobPayload } from "./audit.queue";
 import { type IAuditLogService } from "./AuditLog.service";
 import { type AuditQueueService } from "./AuditQueue.service";
-import { type IAuditReportImageService } from "./AuditReport.service";
+import { type AuditReportQueueService } from "./AuditReportQueue.service";
 import {
   CHECKLIST,
   getChecklistItem,
@@ -98,8 +99,8 @@ export class AuditService implements IAuditService {
     private readonly auditQueue: AuditQueueService,
     @inject(CONTAINER_TYPES.AuditLogService)
     private readonly auditLog: IAuditLogService,
-    @inject(CONTAINER_TYPES.AuditReportImageService)
-    private readonly auditReportImage: IAuditReportImageService,
+    @inject(CONTAINER_TYPES.AuditReportQueueService)
+    private readonly auditReportQueue: AuditReportQueueService,
     @inject(CONTAINER_TYPES.PsiClient)
     private readonly psi: PsiClient,
     @inject(CONTAINER_TYPES.CruxClient)
@@ -129,11 +130,24 @@ export class AuditService implements IAuditService {
     url: string,
     description?: string | undefined
   ): Promise<SelectSiteAudit> {
+    const [companyData] = await this.db
+      .select({ id: CompanyTable.id })
+      .from(CompanyTable)
+      .where(eq(CompanyTable.id, companyId))
+      .limit(1);
+
+    if (!companyData) {
+      throw new ApiError({
+        statusCode: StatusCodes.NOT_FOUND,
+        message: API_MESSAGE.COMPANY.NOT_FOUND,
+      });
+    }
+
     const [insertedSiteAudit] = await this.db
       .insert(SiteAuditTable)
       .values({
         status: "pending",
-        companyId,
+        companyId: companyData.id,
         name,
         url,
         description,
@@ -519,9 +533,12 @@ export class AuditService implements IAuditService {
       .where(eq(SiteAuditTable.id, siteAuditId));
 
     try {
-      await this.auditReportImage.generateReportImage(siteAuditId);
-    } catch {
-      // Swallowed intentionally; the audit is already marked completed.
+      await this.auditReportQueue.enqueueGenerateReportImage(
+        siteAuditId,
+        `report_image_${siteAuditId}`
+      );
+    } catch (err) {
+      console.error(err);
     }
   }
 

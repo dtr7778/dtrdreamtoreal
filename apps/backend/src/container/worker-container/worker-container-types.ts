@@ -16,6 +16,7 @@ export const WORKER_CONTAINER_TYPES = {
 
   AuditService: Symbol.for("AuditService"),
   AuditQueueService: Symbol.for("AuditQueueService"),
+  AuditReportQueueService: Symbol.for("AuditReportQueueService"),
   AuditLogService: Symbol.for("AuditLogService"),
   AuditReportImageService: Symbol.for("AuditReportImageService"),
 };

@@ -153,6 +153,13 @@ export class SiteAuditController
             id: CompanyTable.id,
             name: CompanyTable.name,
           },
+          reportImage: {
+            id: FileTable.id,
+            key: FileTable.key,
+            filename: FileTable.filename,
+            originalName: FileTable.originalName,
+            url: FileTable.url,
+          },
           triggeredByUser: userProfileColumns,
           startedAt: SiteAuditTable.startedAt,
           completedAt: SiteAuditTable.completedAt,
@@ -161,11 +168,12 @@ export class SiteAuditController
         })
         .from(SiteAuditTable)
         .innerJoin(CompanyTable, eq(CompanyTable.id, SiteAuditTable.companyId))
+        .leftJoin(FileTable, eq(FileTable.id, SiteAuditTable.reportImageFileId))
         .leftJoin(UserTable, eq(UserTable.id, SiteAuditTable.triggeredBy))
         .leftJoin(UserRoleTable, eq(UserRoleTable.userId, UserTable.id))
         .leftJoin(RoleTable, eq(RoleTable.id, UserRoleTable.roleId))
         .where(where)
-        .groupBy(SiteAuditTable.id, CompanyTable.id, UserTable.id)
+        .groupBy(SiteAuditTable.id, CompanyTable.id, UserTable.id, FileTable.id)
         .orderBy(orderBy)
         .limit(limit)
         .offset(offset),
