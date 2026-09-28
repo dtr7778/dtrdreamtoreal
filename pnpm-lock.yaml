@@ -1138,9 +1138,6 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 10.11.0(jiti@2.7.0)
-      reflect-metadata:
-        specifier: 'catalog:'
-        version: 0.2.2
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
