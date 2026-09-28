@@ -196,7 +196,7 @@ export class ResendMailController
   }
 
   @Post("/email-event")
-  @RequireResendWebhook("outbound")
+  @RequireResendWebhook("emailEvent")
   public async emailEvent(
     @Request() request: IRequest
   ): Promise<ApiResponse<null>> {

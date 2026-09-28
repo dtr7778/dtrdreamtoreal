@@ -19,6 +19,7 @@ import { env } from "@/env";
 const WEBHOOK_SECRETS: Record<ResendWebhookChannel, string> = {
   inbound: env.RESEND_INBOUND_WEBHOOK_SECRET,
   outbound: env.RESEND_OUTBOUND_WEBHOOK_SECRET,
+  emailEvent: env.RESEND_EVENT_WEBHOOK_SECRET,
 };
 
 function readHeader(

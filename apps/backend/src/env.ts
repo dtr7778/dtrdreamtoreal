@@ -40,6 +40,7 @@ export const env = createEnv({
       ),
     RESEND_INBOUND_WEBHOOK_SECRET: z.string().min(1),
     RESEND_OUTBOUND_WEBHOOK_SECRET: z.string().min(1),
+    RESEND_EVENT_WEBHOOK_SECRET: z.string().min(1),
     APP_NAME: z.string().min(1),
     SITE_URL: z.url(),
     SUPPORT_MAIL: z.email(),
@@ -70,6 +71,7 @@ export const env = createEnv({
           CORS_ORIGIN: "http://localhost:3000",
           RESEND_INBOUND_WEBHOOK_SECRET: "resend_inbound_webhook_secret",
           RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
+          RESEND_EVENT_WEBHOOK_SECRET: "resend_event_webhook_secret",
           APP_NAME: "Acme",
           SITE_URL: "http://localhost:3000",
           SUPPORT_MAIL: "support@example.com",
@@ -100,6 +102,7 @@ export const env = createEnv({
             process.env.RESEND_INBOUND_WEBHOOK_SECRET,
           RESEND_OUTBOUND_WEBHOOK_SECRET:
             process.env.RESEND_OUTBOUND_WEBHOOK_SECRET,
+          RESEND_EVENT_WEBHOOK_SECRET: process.env.RESEND_EVENT_WEBHOOK_SECRET,
           APP_NAME: process.env.APP_NAME,
           SITE_URL: process.env.SITE_URL,
           SUPPORT_MAIL: process.env.SUPPORT_MAIL,

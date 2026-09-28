@@ -3,7 +3,7 @@ import { createMetadataDecorator } from "@workspace/server-core/framework";
 export const RESEND_WEBHOOK_METADATA_KEY = "backend:resend:webhook";
 
 /** Resend webhook channels, each signed with its own secret. */
-export type ResendWebhookChannel = "inbound" | "outbound";
+export type ResendWebhookChannel = "inbound" | "outbound" | "emailEvent";
 
 /**
  * Declares which Resend webhook secret signs a route.
