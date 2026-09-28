@@ -58,5 +58,5 @@ afterEach(() => {
 
 afterAll(() => {
   vi.clearAllMocks();
-  db.$client.close();
+  db?.$client.close();
 });
