@@ -3,17 +3,12 @@ import { injectable } from "inversify";
 
 import { auditQueue, RunCheckItemJobPayload } from "@workspace/contract/worker";
 import type { EnqueueResult, QueueJobInput } from "@workspace/lib/bullmq";
-
-import { InjectQueue } from "../framework";
-import { BaseQueue } from "../helpers/BaseQueue";
+import { InjectQueue } from "@workspace/server-core/framework";
+import { BaseQueue } from "@workspace/server-core/helpers";
 
 type AuditQueueKey = keyof typeof auditQueue.jobs & string;
 
 export interface IAuditQueueService {
-  enqueueOrchestrate(
-    siteAuditId: string,
-    deduplicationId?: string | undefined
-  ): Promise<EnqueueResult>;
   enqueueRunCheckItem(
     payload: RunCheckItemJobPayload,
     deduplicationId?: string
@@ -27,14 +22,6 @@ export class AuditQueueService extends BaseQueue implements IAuditQueueService {
     private readonly queue: Queue
   ) {
     super();
-  }
-
-  /** Enqueue the orchestration job that crawls a site and fans out checks. */
-  public async enqueueOrchestrate(
-    siteAuditId: string,
-    deduplicationId?: string
-  ): Promise<EnqueueResult> {
-    return this.addJob("orchestrate", { siteAuditId }, deduplicationId);
   }
 
   /** Enqueue a single checklist item to be run by the backend worker. */

@@ -16,12 +16,12 @@ import { type ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import {
   AUDIT_LOG_DEFAULTS,
   type IAuditLogService,
-  type IAuditQueueService,
 } from "@workspace/server-core/services";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
 
 import { AUDIT_DEFAULTS, AUDIT_REDIS_KEYS } from "./audit.constant";
+import { type IAuditQueueService } from "./AuditQueue.service";
 import { type IAuditReportQueueService } from "./AuditReportQueue.service";
 import {
   CHECKLIST,

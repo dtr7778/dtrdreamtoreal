@@ -20,13 +20,12 @@ import type { IStorageService } from "@workspace/lib/supabase/storage";
 import { formatError } from "@workspace/lib/utils";
 import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import { ApiError } from "@workspace/server-core/framework";
-import {
-  AUDIT_REDIS_KEYS,
-  type IAuditQueueService,
-} from "@workspace/server-core/services";
+import { AUDIT_REDIS_KEYS } from "@workspace/server-core/services";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
+
+import { type IAuditQueueService } from "./AuditQueue.service";
 
 /** Storage path prefix used by the worker for generated report images. */
 const AUDIT_REPORT_IMAGE_PATH = "audit_report_image";

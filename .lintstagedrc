@@ -33,7 +33,7 @@
     "eslint --max-warnings 0 --config ./packages/redis/eslint.config.js"
   ],
   "packages/server-core/**/*.{js,jsx,ts,tsx}": [
-    "eslint --max-warnings 0 --config ./packages/server-core/eslint.config.js"
+    "eslint --max-warnings 0 --config ./packages/server-core/eslint.config.mjs"
   ],
   "packages/ui/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/ui/eslint.config.js"

@@ -47,7 +47,9 @@ export async function clearAll(db: DatabaseType) {
 
     await tx.delete(schema.AccountTable);
     await tx.delete(schema.SessionTable);
-    await tx.delete(schema.UserActivityTable);
+    await tx.delete(schema.UserEventTable);
+    await tx.delete(schema.UserSessionTable);
+    await tx.delete(schema.UserDeviceTable);
     await tx.delete(schema.UserTable);
   });
   console.log("🗑️  Cleared existing data \n");

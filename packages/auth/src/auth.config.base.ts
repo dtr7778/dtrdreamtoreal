@@ -7,16 +7,18 @@ import type {
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { betterAuth } from "better-auth/minimal";
 import { admin, haveIBeenPwned, oneTap } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
-import { UAParser } from "ua-parser-js";
+import { and, eq } from "drizzle-orm";
 
 import {
   AccountTable,
-  type InsertUserActivity,
+  type InsertUserDevice,
+  type InsertUserEvent,
   RoleTable,
   SessionTable,
-  UserActivityTable,
+  UserDeviceTable,
+  UserEventTable,
   UserRoleTable,
+  UserSessionTable,
   UserTable,
   VerificationTable,
 } from "@workspace/drizzle/schemas";
@@ -25,6 +27,7 @@ import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
 
 import { IMailTemplates } from "../../mail/src/services/withMailTemplates.mixin";
 import { systemAc, systemRoles } from "./access-control";
+import { parseUserAgent } from "./device-fingerprint";
 
 /** Result every mail hook resolves with. */
 export interface AuthMailResult {
@@ -79,11 +82,29 @@ function getIp(headers: Headers): string {
   );
 }
 
-async function createUserActivity(
+async function createUserEvent(database: DatabaseType, value: InsertUserEvent) {
+  return await database.insert(UserEventTable).values(value);
+}
+
+async function upsertUserDevice(
   database: DatabaseType,
-  value: InsertUserActivity
+  value: InsertUserDevice
 ) {
-  return await database.insert(UserActivityTable).values(value);
+  const [device] = await database
+    .insert(UserDeviceTable)
+    .values(value)
+    .onConflictDoUpdate({
+      target: [UserDeviceTable.userId, UserDeviceTable.fingerprint],
+      set: {
+        browser: value.browser,
+        os: value.os,
+        deviceType: value.deviceType,
+        lastSeenAt: new Date(),
+      },
+    })
+    .returning();
+
+  return device;
 }
 
 /** Throw when a mail hook reports a failure, mirroring better-auth errors. */
@@ -135,9 +156,10 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       database: {
         generateId: false,
       },
-      crossSubDomainCookies: config.domainName
-        ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
-        : undefined,
+      crossSubDomainCookies:
+        config.domainName && !config.isDev
+          ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
+          : undefined,
     },
     databaseHooks: {
       user: {
@@ -175,63 +197,147 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       session: {
         delete: {
           before: async (session) => {
-            await createUserActivity(config.database, {
-              userId: session.userId,
-              ipAddress: session.ipAddress,
-              userAgent: session.userAgent,
-              lastSeenAt: new Date(),
-              logoutAt: new Date(),
-            });
-          },
-        },
-        create: {
-          after: async (session) => {
-            await createUserActivity(config.database, {
-              userId: session.userId,
-              ipAddress: session.ipAddress,
-              userAgent: session.userAgent,
-              lastSeenAt: new Date(),
-              loginAt: new Date(),
-            });
+            try {
+              const [closed] = await config.database
+                .update(UserSessionTable)
+                .set({ logoutAt: new Date(), lastSeenAt: new Date() })
+                .where(eq(UserSessionTable.sessionId, session.id))
+                .returning({ deviceId: UserSessionTable.deviceId });
+
+              await createUserEvent(config.database, {
+                userId: session.userId,
+                event: "auth.logout",
+                sessionId: session.id,
+                deviceId: closed?.deviceId ?? null,
+                ipAddress: session.ipAddress,
+                userAgent: session.userAgent,
+              });
+            } catch (error) {
+              console.error("Failed to record logout activity", error);
+            }
           },
         },
       },
     },
     hooks: {
       after: createAuthMiddleware(async (ctx) => {
-        // after sign in
-        if (ctx.path.startsWith("/sign-in")) {
-          const newSession = ctx.context.newSession;
-          const headers = ctx.headers ?? ctx.request?.headers;
+        const headers = ctx.headers ?? ctx.request?.headers;
+        const newSession = ctx.context.newSession;
+        const userAgent = headers?.get("user-agent") ?? null;
+        const ip = headers ? getIp(headers) : null;
 
-          if (newSession && headers) {
-            const currentUserAgent = headers.get("user-agent");
-            const currentIp = getIp(headers);
+        // Record the login session, device and events after the endpoint has
+        // committed. Runs in the background so telemetry can never break auth.
+        if (newSession && userAgent) {
+          ctx.context.runInBackgroundOrAwait(
+            (async () => {
+              const parsed = parseUserAgent(userAgent);
 
-            if (!currentIp || !currentUserAgent) return;
+              const [existingDevice] = await config.database
+                .select({ id: UserDeviceTable.id })
+                .from(UserDeviceTable)
+                .where(
+                  and(
+                    eq(UserDeviceTable.userId, newSession.user.id),
+                    eq(UserDeviceTable.fingerprint, parsed.fingerprint)
+                  )
+                )
+                .limit(1);
 
-            if (
-              newSession.session.userAgent !== currentUserAgent ||
-              newSession.session.ipAddress !== currentIp
-            ) {
-              ctx.context.runInBackgroundOrAwait(
-                (async () => {
-                  const { browser, device } = UAParser(currentUserAgent);
-                  const result = await config.mailHooks.sendNewDeviceLoginMail({
-                    to: newSession.user.email,
-                    userName: newSession.user.name,
-                    loginTimestamp: Date.now().toString(),
-                    deviceInfo: `${device.type} ${device.model}`,
-                    browser: `${browser.name} ${browser.version}`,
-                    ipAddress: currentIp,
-                    approximateLocation: "not available",
-                    secureAccountUrl: `${config.siteUrl}/dashboard/settings/reset-password`,
-                  });
+              const device = await upsertUserDevice(config.database, {
+                userId: newSession.user.id,
+                fingerprint: parsed.fingerprint,
+                browser: parsed.browser,
+                os: parsed.os,
+                deviceType: parsed.deviceType,
+                firstSeenAt: new Date(),
+                lastSeenAt: new Date(),
+              });
 
-                  assertMailSent(result);
-                })()
-              );
-            }
+              const inserted = await config.database
+                .insert(UserSessionTable)
+                .values({
+                  userId: newSession.user.id,
+                  deviceId: device?.id ?? null,
+                  sessionId: newSession.session.id,
+                  ipAddress: ip,
+                  userAgent,
+                  loginAt: new Date(),
+                  lastSeenAt: new Date(),
+                  expiresAt: newSession.session.expiresAt,
+                })
+                .onConflictDoNothing({ target: UserSessionTable.sessionId })
+                .returning({ id: UserSessionTable.id });
+
+              if (inserted.length === 0) return;
+
+              await createUserEvent(config.database, {
+                userId: newSession.user.id,
+                event: "auth.login",
+                sessionId: newSession.session.id,
+                deviceId: device?.id ?? null,
+                ipAddress: ip,
+                userAgent,
+              });
+
+              if (newSession.session.impersonatedBy) {
+                await createUserEvent(config.database, {
+                  userId: newSession.user.id,
+                  event: "admin.impersonation",
+                  sessionId: newSession.session.id,
+                  deviceId: device?.id ?? null,
+                  ipAddress: ip,
+                  userAgent,
+                  metadata: {
+                    impersonatedBy: newSession.session.impersonatedBy,
+                  },
+                });
+                return;
+              }
+
+              if (existingDevice) return;
+
+              await createUserEvent(config.database, {
+                userId: newSession.user.id,
+                event: "device.new_detected",
+                sessionId: newSession.session.id,
+                deviceId: device?.id ?? null,
+                ipAddress: ip,
+                userAgent,
+              });
+
+              if (config.isDev || !ip) return;
+
+              const result = await config.mailHooks.sendNewDeviceLoginMail({
+                to: newSession.user.email,
+                userName: newSession.user.name,
+                loginTimestamp: Date.now().toString(),
+                deviceInfo: parsed.deviceType ?? "unknown",
+                browser: [parsed.browser, parsed.os].filter(Boolean).join(" "),
+                ipAddress: ip,
+                approximateLocation: "not available",
+                secureAccountUrl: `${config.siteUrl}/dashboard/settings/reset-password`,
+              });
+
+              assertMailSent(result);
+            })()
+          );
+        }
+
+        // failed sign in
+        if (ctx.path.startsWith("/sign-in") && !newSession) {
+          if (userAgent && ctx.context.returned instanceof APIError) {
+            const email =
+              typeof ctx.body?.email === "string" ? ctx.body.email : null;
+
+            ctx.context.runInBackgroundOrAwait(
+              createUserEvent(config.database, {
+                email,
+                event: "auth.login_failed",
+                ipAddress: ip,
+                userAgent,
+              })
+            );
           }
         }
 
@@ -248,13 +354,21 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
 
             ctx.context.runInBackgroundOrAwait(
               (async () => {
-                const { device } = UAParser(userAgent);
+                const { deviceType } = parseUserAgent(userAgent);
+
+                await createUserEvent(config.database, {
+                  userId: session.user.id,
+                  event: "auth.password_changed",
+                  ipAddress: ip,
+                  userAgent,
+                });
+
                 const result = await config.mailHooks.sendPasswordChangedMail({
                   to: session.user.email,
                   userName: session.user.name,
                   changeTimestamp: Date.now().toString(),
                   ipAddress: ip,
-                  deviceInfo: `${device.type} ${device.model}`,
+                  deviceInfo: deviceType ?? "unknown",
                 });
 
                 assertMailSent(result);
@@ -354,6 +468,16 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       resetPasswordTokenExpiresIn: 60 * 60,
       disableSignUp: true,
       sendResetPassword: async ({ user, url }) => {
+        try {
+          await createUserEvent(config.database, {
+            userId: user.id,
+            email: user.email,
+            event: "auth.password_reset",
+          });
+        } catch (error) {
+          console.error("Failed to record password reset event", error);
+        }
+
         const result = await config.mailHooks.sendPasswordResetMail({
           to: user.email,
           userName: user.name,

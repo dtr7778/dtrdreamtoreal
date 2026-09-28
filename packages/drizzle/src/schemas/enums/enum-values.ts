@@ -154,3 +154,13 @@ export const AUDIT_LOG_EVENT_TYPE = [
   "report_generated",
   "report_failed",
 ] as const;
+
+export const USER_EVENT_TYPE = [
+  "auth.login",
+  "auth.logout",
+  "auth.login_failed",
+  "auth.password_changed",
+  "auth.password_reset",
+  "device.new_detected",
+  "admin.impersonation",
+] as const;

@@ -82,10 +82,14 @@ const userStatsContract = userBaseContract
         totalUsers: z.number(),
         totalUsersGrowth: z.number().nullable(),
         activeNow: z.number(),
+        activeSessions: z.number(),
         wau: z.number(),
         wauGrowth: z.number().nullable(),
         mau: z.number(),
         mauGrowth: z.number().nullable(),
+        totalDevices: z.number(),
+        newDevices: z.number(),
+        failedLogins: z.number(),
       })
     )
   );

@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 
-import { MailError } from "@workspace/lib/utils";
+import { BullmqError } from "@workspace/lib/bullmq";
+import { MailError, ServiceError } from "@workspace/lib/utils";
 
 import { ApiError } from "../classes";
 import { API_MESSAGE } from "../constant";
@@ -27,34 +28,44 @@ export function errorMiddleware(
   return sendApiResponse(res)(errorData);
 }
 
-/** Whether internal error details may be exposed to the client. */
-function shouldExposeErrorDetails(): boolean {
-  return process.env.NODE_ENV !== "production";
-}
-
 function getServerError(err: unknown): ApiError {
   if (err instanceof ApiError) {
     return err;
   }
 
-  const exposeDetails = shouldExposeErrorDetails();
+  if (err instanceof BullmqError) {
+    return new ApiError({
+      statusCode: err.statusCode,
+      message: err.message,
+      cause: err.cause,
+      stack: err.stack,
+    });
+  }
 
   if (err instanceof MailError) {
     return new ApiError({
-      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      message: exposeDetails ? err.message : API_MESSAGE.INTERNAL_SERVER_ERROR,
-      cause: exposeDetails ? err.cause : undefined,
-      stack: exposeDetails ? err.stack : undefined,
+      statusCode: err.statusCode,
+      message: err.message,
+      cause: err.cause,
+      stack: err.stack,
     });
   }
+
+  if (err instanceof ServiceError) {
+    return new ApiError({
+      statusCode: err.statusCode,
+      message: err.message,
+      cause: err.cause,
+      stack: err.stack,
+    });
+  }
+
   if (err instanceof SyntaxError) {
     return new ApiError({
       statusCode: StatusCodes.BAD_REQUEST,
-      message: exposeDetails
-        ? err?.message || "Invalid syntax"
-        : "Invalid request body",
-      cause: exposeDetails ? err.cause : undefined,
-      stack: exposeDetails ? err.stack : undefined,
+      message: err.message,
+      cause: err.cause,
+      stack: err.stack,
     });
   }
   if (
@@ -64,19 +75,17 @@ function getServerError(err: unknown): ApiError {
   ) {
     return new ApiError({
       statusCode: StatusCodes.BAD_REQUEST,
-      message: exposeDetails ? err.message : "Invalid request",
-      cause: exposeDetails ? err.cause : undefined,
-      stack: exposeDetails ? err.stack : undefined,
+      message: err.message,
+      cause: err.cause,
+      stack: err.stack,
     });
   }
 
   return new ApiError({
     statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
     message:
-      exposeDetails && err instanceof Error
-        ? err.message
-        : API_MESSAGE.INTERNAL_SERVER_ERROR,
-    cause: exposeDetails ? err : undefined,
-    stack: exposeDetails && err instanceof Error ? err.stack : undefined,
+      err instanceof Error ? err.message : API_MESSAGE.INTERNAL_SERVER_ERROR,
+    cause: err,
+    stack: err instanceof Error ? err.stack : undefined,
   });
 }

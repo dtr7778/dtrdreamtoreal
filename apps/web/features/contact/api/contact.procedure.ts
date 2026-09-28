@@ -92,9 +92,7 @@ export const detailsContactProcedure = contactImpl.details
   .use(
     userPermissionMiddleware(["system.contact.manage", "system.contact.list"])
   )
-  .handler(async ({ context, input }) => {
-    const { contactId } = input;
-
+  .handler(async ({ context, input, errors }) => {
     const [submission] = await context.db
       .select({
         id: ContactSubmissionTable.id,
@@ -113,10 +111,10 @@ export const detailsContactProcedure = contactImpl.details
         ContactUserTable,
         eq(ContactUserTable.id, ContactSubmissionTable.contactUserId)
       )
-      .where(eq(ContactSubmissionTable.id, contactId));
+      .where(eq(ContactSubmissionTable.id, input.contactId));
 
     if (!submission) {
-      throw new Error("Contact not found");
+      throw errors.NOT_FOUND();
     }
 
     return apiResponse(API_MESSAGES.CONTACT.GET_DETAILS, {
@@ -131,16 +129,15 @@ export const createReplyContactProcedure = contactImpl.createReply
   .use(
     userPermissionMiddleware(["system.contact.manage", "system.contact.read"])
   )
-  .handler(async ({ context, input }) => {
-    const { contactId } = input;
-
+  .handler(async ({ context, input, errors }) => {
     const [submission] = await context.db
       .select({ id: ContactSubmissionTable.id })
       .from(ContactSubmissionTable)
-      .where(eq(ContactSubmissionTable.id, contactId));
+      .where(eq(ContactSubmissionTable.id, input.contactId))
+      .limit(1);
 
     if (!submission) {
-      throw new Error("Contact not found");
+      throw errors.NOT_FOUND();
     }
 
     return apiResponse(API_MESSAGES.CONTACT.REPLY_CREATED, null);
