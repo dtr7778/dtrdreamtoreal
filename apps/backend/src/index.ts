@@ -46,7 +46,7 @@ async function main() {
       SiteAuditController,
       MailController,
       ResendMailController,
-    ]).listen(env.BACKEND_PORT);
+    ]).listen(env.PORT);
   } catch (err) {
     console.error("Server is crashed:", err);
   }
