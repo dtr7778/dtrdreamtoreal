@@ -44,22 +44,6 @@ function getFieldErrors(
   );
 }
 
-export function useCompanyAudits(companyId: string) {
-  return useQuery(
-    apiClient.siteAudit.list.queryOptions({
-      input: {
-        query: {
-          page: DEFAULT_PAGE_INDEX,
-          limit: DEFAULT_PAGE_SIZE,
-          order: "desc",
-          orderField: "createdAt",
-          filter: { companyId },
-        },
-      },
-    })
-  );
-}
-
 export function useAuditDetails(
   auditId: string,
   options?: { enabled?: boolean; poll?: boolean }

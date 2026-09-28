@@ -36,9 +36,14 @@ function canonicalize(value: unknown): unknown {
  * everything else is canonical JSON (keys sorted recursively).
  */
 export function serializeBullmqPayload(payload: unknown): string {
-  return typeof payload === "string"
-    ? payload
-    : JSON.stringify(canonicalize(payload));
+  if (typeof payload === "string") {
+    return payload;
+  }
+
+  // `JSON.stringify(undefined)` returns `undefined`, which would make
+  // `createHmac().update()` throw. Fall back to a stable string so a missing
+  // payload verifies as `false` rather than crashing the request.
+  return JSON.stringify(canonicalize(payload)) ?? "undefined";
 }
 
 /** Compute the hex HMAC signature of `payload` using `secret`. */

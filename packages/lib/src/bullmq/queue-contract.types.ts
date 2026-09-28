@@ -61,3 +61,5 @@ export type QueueJob<C extends IQueueContract, K extends QueueJobKey<C>> = Job<
   QueueJobOutput<C, K>,
   QueueJobName<C, K>
 >;
+
+export type EnqueueResult = { jobId: string; queue: string };

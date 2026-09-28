@@ -14,7 +14,8 @@
     "access": "restricted"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./worker": "./src/worker/index.ts"
   },
   "scripts": {
     "lint": "eslint",

@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 
+import { EnqueueResult } from "@workspace/lib/bullmq";
 import { MailError } from "@workspace/lib/utils";
 import {
   type EmailService,
@@ -19,51 +20,41 @@ import { renderMailTemplate } from "@workspace/mail/template-registry";
 import { type ExtendedRedis } from "@workspace/redis/client/ioRedis";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
+import { env } from "@/env";
 
 import { type MailQueueService } from "./MailQueue.service";
 
-/** Default deduplication window (seconds) applied to sent mails. */
-const DEFAULT_DEDUP_WINDOW_SECONDS = 300;
-
-/** Result of enqueueing a mail job. */
-export interface MailEnqueueResult {
-  jobId: string;
-  queue: string;
+export interface IMailService {
+  send(payload: TemplateMailPayload): Promise<EnqueueResult>;
+  sendRaw(payload: RawMailPayload): Promise<EnqueueResult>;
+  sendBatch(payloads: TemplateMailPayload[]): Promise<MailBatchItemResult[]>;
+  sendRawBatch(payloads: RawMailPayload[]): Promise<MailBatchItemResult[]>;
 }
 
-export interface MailServiceOptions extends MailServiceConfig {
-  dedupWindowSeconds?: number;
-}
-
-/**
- * Backend mail orchestrator.
- *
- * Both the HTTP controller and the in-process publisher call this service. It
- * claims a Redis dedup key, renders the template, persists the outbound email
- * record and finally enqueues the `mail/send` job carrying only `emailId`.
- */
-export class MailService {
-  private readonly mailConfig: Omit<MailServiceConfig, "dedupWindowSeconds">;
+export class MailService implements IMailService {
+  private readonly mailConfig: MailServiceConfig;
   private readonly dedupWindowSeconds: number;
 
   constructor(
+    @inject(CONTAINER_TYPES.Redis)
+    private readonly redis: ExtendedRedis,
     @inject(CONTAINER_TYPES.EmailService)
     private readonly emailService: EmailService,
     @inject(CONTAINER_TYPES.EmailThreadService)
     private readonly emailThreadService: EmailThreadService,
     @inject(CONTAINER_TYPES.MailQueueService)
-    private readonly mailQueue: MailQueueService,
-    @inject(CONTAINER_TYPES.Redis)
-    private readonly redis: ExtendedRedis,
-    options: MailServiceOptions
+    private readonly mailQueue: MailQueueService
   ) {
-    this.mailConfig = options;
-    this.dedupWindowSeconds =
-      options.dedupWindowSeconds ?? DEFAULT_DEDUP_WINDOW_SECONDS;
+    this.mailConfig = {
+      appName: env.APP_NAME,
+      supportMail: env.SUPPORT_MAIL,
+      systemMail: env.SYSTEM_MAIL,
+    };
+    this.dedupWindowSeconds = 300;
   }
 
   /** Render a registered template, persist it and enqueue the send. */
-  public async send(payload: TemplateMailPayload): Promise<MailEnqueueResult> {
+  public async send(payload: TemplateMailPayload): Promise<EnqueueResult> {
     const definition = mailTemplateDefinitions[payload.template];
     const parsed = definition.data.safeParse(payload.data);
 
@@ -114,7 +105,7 @@ export class MailService {
   }
 
   /** Persist a pre-rendered mail and enqueue the send. */
-  public async sendRaw(payload: RawMailPayload): Promise<MailEnqueueResult> {
+  public async sendRaw(payload: RawMailPayload): Promise<EnqueueResult> {
     const parsed = rawMailPayloadSchema.parse(payload);
 
     const dedupKey = this.generateDedupKey("raw", parsed.to, parsed.subject);
@@ -156,7 +147,7 @@ export class MailService {
 
   /** Run a single batch item, capturing its failure instead of throwing. */
   private async runBatchItem(
-    action: () => Promise<MailEnqueueResult>
+    action: () => Promise<EnqueueResult>
   ): Promise<MailBatchItemResult> {
     try {
       const { jobId, queue } = await action();
@@ -174,7 +165,7 @@ export class MailService {
   private async dispatch(
     options: SendMailOption,
     meta: { dedupKey: string; isSystemMail: boolean }
-  ): Promise<MailEnqueueResult> {
+  ): Promise<EnqueueResult> {
     try {
       let threadId: string | undefined;
 

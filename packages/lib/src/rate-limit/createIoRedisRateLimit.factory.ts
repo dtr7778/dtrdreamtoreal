@@ -1,26 +1,17 @@
-import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
-
 import {
   type IIoRedisRatelimit,
   type IoRedisGetRemainingResponse,
   IoRedisRatelimit,
+  type IoRedisRatelimitConfig,
   type IoRedisRatelimitResponse,
 } from "./IoRedisRateLimit.service";
-import type { Duration } from "./types";
-
-interface RatelimitFactoryConfig {
-  redisClient: ExtendedRedis;
-  requests: number;
-  window: Duration;
-  prefix?: string;
-}
 
 function createRatelimit({
   redisClient,
   requests,
   window,
   prefix = "ratelimit",
-}: RatelimitFactoryConfig): IIoRedisRatelimit {
+}: IoRedisRatelimitConfig): IIoRedisRatelimit {
   return new IoRedisRatelimit({
     redisClient,
     requests,
@@ -34,5 +25,5 @@ export {
   type IIoRedisRatelimit,
   type IoRedisGetRemainingResponse,
   type IoRedisRatelimitResponse,
-  type RatelimitFactoryConfig,
+  type IoRedisRatelimitConfig,
 };

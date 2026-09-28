@@ -38,8 +38,7 @@
     "./supabase/storage": "./src/supabase/storage/index.ts",
     "./schemas": "./src/schemas/index.ts",
     "./schemas/node": "./src/schemas/node/index.ts",
-    "./utils": "./src/utils/index.ts",
-    "./server": "./src/server/index.ts"
+    "./utils": "./src/utils/index.ts"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
@@ -50,7 +49,6 @@
     "@workspace/typescript-config": "workspace:*",
     "@workspace/vitest-config": "workspace:*",
     "eslint": "catalog:",
-    "reflect-metadata": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

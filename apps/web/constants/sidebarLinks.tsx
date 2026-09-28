@@ -1,15 +1,14 @@
 import { ContactIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
+  Bell,
   Building2,
   ClipboardList,
   House,
-  ListTree,
-  MessagesSquare,
+  IdCard,
   Settings,
   ShieldUser,
   User,
-  UserSquare,
   UsersRound,
 } from "lucide-react";
 
@@ -17,7 +16,7 @@ import type { SidebarGroupMenuLinkType, SidebarMenuLinkType } from "@/types";
 
 export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
   {
-    groupName: "Dashboard",
+    groupName: "Overview",
     items: [
       {
         title: "Dashboard",
@@ -26,48 +25,32 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         pathRegex: /^\/dashboard$/,
       },
       {
+        title: "Notifications",
+        icon: <Bell />,
+        path: "/dashboard/notifications",
+        pathRegex: /^\/dashboard\/notifications$/,
+      },
+    ],
+  },
+  {
+    groupName: "Workspace",
+    items: [
+      {
         title: "Companies",
         icon: <Building2 />,
+        permissions: ["system.company.manage", "system.company.list"],
+        path: "/dashboard/companies",
+        pathRegex: /^\/dashboard\/companies(\/.*)?$/,
+      },
+      {
+        title: "Employees",
+        icon: <IdCard />,
         permissions: [
-          "system.company.manage",
-          "system.company.list",
           "system.company_employee.manage",
           "system.company_employee.list",
         ],
-        path: "/dashboard/companies",
-        pathRegex: /^\/dashboard\/companies(\/.*)?$/,
-        items: [
-          {
-            title: "All campanies",
-            icon: <ListTree />,
-            path: "/dashboard/companies/",
-            permissions: ["system.company.manage", "system.company.list"],
-            pathRegex: /^\/dashboard\/companies(\/.*)?$/,
-          },
-          {
-            title: "All employees",
-            icon: <UserSquare />,
-            path: "/dashboard/employees/",
-            permissions: [
-              "system.company_employee.manage",
-              "system.company_employee.list",
-            ],
-            pathRegex: /^\/dashboard\/employees(\/.*)?$/,
-          },
-        ],
-      },
-      {
-        title: "Tasks",
-        icon: <ClipboardList />,
-        permissions: ["system.task.manage", "system.task.list"],
-        path: "/dashboard/tasks",
-        pathRegex: /^\/dashboard\/tasks(\/.*)?$/,
-      },
-      {
-        title: "Message",
-        icon: <MessagesSquare />,
-        path: "/dashboard/message",
-        pathRegex: /^\/dashboard\/message(\/.*)?$/,
+        path: "/dashboard/employees",
+        pathRegex: /^\/dashboard\/employees(\/.*)?$/,
       },
       {
         title: "Contacts",
@@ -76,6 +59,18 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         path: "/dashboard/contacts",
         pathRegex: /^\/dashboard\/contacts(\/.*)?$/,
       },
+      {
+        title: "Tasks",
+        icon: <ClipboardList />,
+        permissions: ["system.task.manage", "system.task.list"],
+        path: "/dashboard/tasks",
+        pathRegex: /^\/dashboard\/tasks(\/.*)?$/,
+      },
+    ],
+  },
+  {
+    groupName: "Administration",
+    items: [
       {
         title: "All Users",
         icon: <UsersRound />,

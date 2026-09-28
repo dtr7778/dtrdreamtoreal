@@ -1,6 +1,9 @@
 import { Container } from "inversify";
 
-import { type ClassConstructor, TestBaseServer } from "@workspace/lib/server";
+import {
+  type ClassConstructor,
+  TestBaseServer,
+} from "@workspace/server-core/framework";
 
 export class TestServer extends TestBaseServer {
   constructor(

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const eventPayload = verifyResendWebhook(
       req.headers,
       payload,
-      env.RESEND_OUTBOUND_WEBHOOK_SECRET
+      env.RESEND_EVENT_WEBHOOK_SECRET
     );
 
     switch (eventPayload.type) {

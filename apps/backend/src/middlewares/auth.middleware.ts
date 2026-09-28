@@ -3,12 +3,11 @@ import { inject, injectable } from "inversify";
 
 import type { AuthType } from "@workspace/auth";
 import { type DatabaseType } from "@workspace/drizzle/types";
-import type {
+import {
   IMiddleware,
   IRequestExecutionContext,
-} from "@workspace/lib/server";
-
-import { getUserRolesAndPermission } from "@/lib/getUserPermission";
+} from "@workspace/server-core/framework";
+import { getUserRolesAndPermission } from "@workspace/server-core/lib";
 
 import { CONTAINER_TYPES } from "@/container/container-types";
 

@@ -3,23 +3,36 @@ import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 import { Resend, type WebhookEventPayload } from "resend";
 
-import { type DatabaseType } from "@workspace/drizzle/types";
 import { EmailTable } from "@workspace/drizzle/schemas";
+import { type DatabaseType } from "@workspace/drizzle/types";
+import { type EmailService, InboundEmailPayload } from "@workspace/mail";
 import {
+  ApiResponse,
   Controller,
   type IRequest,
   Post,
   Request,
   UseGuards,
-} from "@workspace/lib/server";
-import { type EmailService, InboundEmailPayload } from "@workspace/mail";
+} from "@workspace/server-core/framework";
+import { BaseController } from "@workspace/server-core/helpers";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
 import { RequireResendWebhook } from "@/decorators/resend-webhook.decorator";
 import { env } from "@/env";
-import { ResendWebhookGuard } from "@/guard/resend-webhook.guard";
-import { BaseController } from "@/helpers/BaseController";
+import { ResendWebhookGuard } from "@/guards/resend-webhook.guard";
+
+export interface IResendMailController {
+  inboundMail(request: IRequest): Promise<
+    ApiResponse<{
+      success: boolean;
+      emailId: string;
+      threadId: string | undefined;
+    }>
+  >;
+  outboundMail(request: IRequest): Promise<ApiResponse<null>>;
+  emailEvent(request: IRequest): Promise<ApiResponse<null>>;
+}
 
 @Controller({
   path: "/mails/resend",
@@ -27,7 +40,10 @@ import { BaseController } from "@/helpers/BaseController";
   tags: ["Resend mail"],
 })
 @UseGuards(ResendWebhookGuard)
-export class ResendMailController extends BaseController {
+export class ResendMailController
+  extends BaseController
+  implements IResendMailController
+{
   private readonly resend: Resend;
 
   constructor(
@@ -101,7 +117,13 @@ export class ResendMailController extends BaseController {
 
   @Post("/inbound")
   @RequireResendWebhook("inbound")
-  public async inboundMail(@Request() request: IRequest) {
+  public async inboundMail(@Request() request: IRequest): Promise<
+    ApiResponse<{
+      success: boolean;
+      emailId: string;
+      threadId: string | undefined;
+    }>
+  > {
     const eventPayload = this.getWebhookEvent(request);
 
     if (eventPayload.type !== "email.received") {
@@ -133,7 +155,7 @@ export class ResendMailController extends BaseController {
       this.database
     );
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.WEBHOOK_QUEUED,
       data: {
@@ -146,7 +168,9 @@ export class ResendMailController extends BaseController {
 
   @Post("/outbound")
   @RequireResendWebhook("outbound")
-  public async outboundMail(@Request() request: IRequest) {
+  public async outboundMail(
+    @Request() request: IRequest
+  ): Promise<ApiResponse<null>> {
     const eventPayload = this.getWebhookEvent(request);
 
     if (eventPayload.type !== "email.delivered") {
@@ -164,7 +188,7 @@ export class ResendMailController extends BaseController {
       this.database
     );
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.WEBHOOK_QUEUED,
       data: null,
@@ -172,8 +196,10 @@ export class ResendMailController extends BaseController {
   }
 
   @Post("/email-event")
-  @RequireResendWebhook("outbound")
-  public async emailEvent(@Request() request: IRequest) {
+  @RequireResendWebhook("emailEvent")
+  public async emailEvent(
+    @Request() request: IRequest
+  ): Promise<ApiResponse<null>> {
     const eventPayload = this.getWebhookEvent(request);
 
     switch (eventPayload.type) {
@@ -239,7 +265,7 @@ export class ResendMailController extends BaseController {
         });
     }
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.WEBHOOK_QUEUED,
       data: null,

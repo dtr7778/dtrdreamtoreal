@@ -38,17 +38,10 @@ export const env = createEnv({
           .map((o) => o.trim())
           .filter(Boolean)
       ),
-    GOOGLE_PSI_BASE_URL: z
-      .url()
-      .default("https://www.googleapis.com/pagespeedonline/v5"),
-    GOOGLE_PSI_API_KEY: z.string().default(""),
-    GOOGLE_CRUX_BASE_URL: z
-      .url()
-      .default("https://chromeuxreport.googleapis.com/v1"),
-    GOOGLE_CRUX_API_KEY: z.string().default(""),
     RESEND_INBOUND_WEBHOOK_SECRET: z.string().min(1),
     RESEND_OUTBOUND_WEBHOOK_SECRET: z.string().min(1),
-    APP_NAME: z.string().min(1).default("DTR"),
+    RESEND_EVENT_WEBHOOK_SECRET: z.string().min(1),
+    APP_NAME: z.string().min(1),
     SITE_URL: z.url(),
     SUPPORT_MAIL: z.email(),
     SYSTEM_MAIL: z.email(),
@@ -61,10 +54,9 @@ export const env = createEnv({
     SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
   },
   runtimeEnv:
-    process.env.NODE_ENV === "test" ||
-    process.env.SKIP_ENV_VALIDATION === "true"
+    process.env.NODE_ENV === "test"
       ? {
-          NODE_ENV: "production",
+          NODE_ENV: "test",
           DATABASE_URL:
             "postgresql://postgres:postgres@localhost:5432/postgres",
           BACKEND_PORT: "8000",
@@ -77,16 +69,13 @@ export const env = createEnv({
           REDIS_USERNAME: "default",
           REDIS_PASSWORD: "12345678",
           CORS_ORIGIN: "http://localhost:3000",
-          GOOGLE_PSI_API_KEY: "google_psi_api_key",
-          GOOGLE_PSI_BASE_URL: "https://www.googleapis.com/pagespeedonline/v5",
-          GOOGLE_CRUX_API_KEY: "google_crux_api_key",
-          GOOGLE_CRUX_BASE_URL: "https://chromeuxreport.googleapis.com/v1",
           RESEND_INBOUND_WEBHOOK_SECRET: "resend_inbound_webhook_secret",
           RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
-          APP_NAME: "My App",
+          RESEND_EVENT_WEBHOOK_SECRET: "resend_event_webhook_secret",
+          APP_NAME: "Acme",
           SITE_URL: "http://localhost:3000",
           SUPPORT_MAIL: "support@example.com",
-          SYSTEM_MAIL: "notifications@example.com",
+          SYSTEM_MAIL: "system@acme.com",
           BETTER_AUTH_URL: "http://localhost:8000",
           BETTER_AUTH_SECRET: "secret",
           GOOGLE_AUTH_CLIENT_ID: "client_id",
@@ -108,14 +97,12 @@ export const env = createEnv({
           REDIS_USERNAME: process.env.REDIS_USERNAME,
           REDIS_PASSWORD: process.env.REDIS_PASSWORD,
           CORS_ORIGIN: process.env.CORS_ORIGIN,
-          GOOGLE_PSI_API_KEY: process.env.GOOGLE_PSI_API_KEY,
-          GOOGLE_PSI_BASE_URL: process.env.GOOGLE_PSI_BASE_URL,
-          GOOGLE_CRUX_API_KEY: process.env.GOOGLE_CRUX_API_KEY,
-          GOOGLE_CRUX_BASE_URL: process.env.GOOGLE_CRUX_BASE_URL,
+
           RESEND_INBOUND_WEBHOOK_SECRET:
             process.env.RESEND_INBOUND_WEBHOOK_SECRET,
           RESEND_OUTBOUND_WEBHOOK_SECRET:
             process.env.RESEND_OUTBOUND_WEBHOOK_SECRET,
+          RESEND_EVENT_WEBHOOK_SECRET: process.env.RESEND_EVENT_WEBHOOK_SECRET,
           APP_NAME: process.env.APP_NAME,
           SITE_URL: process.env.SITE_URL,
           SUPPORT_MAIL: process.env.SUPPORT_MAIL,

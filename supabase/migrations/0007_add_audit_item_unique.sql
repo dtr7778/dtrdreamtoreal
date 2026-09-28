@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "auditItem_site_checklist_url_unq" ON "audit_items" USING btree ("site_audit_id","checklist_key","url");

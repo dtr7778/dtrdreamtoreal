@@ -51,16 +51,10 @@ function createService(overrides?: {
   const mailQueue = { sendMail } as unknown as MailQueueService;
 
   const service = new MailService(
+    redis,
     emailService,
     emailThreadService,
-    mailQueue,
-    redis,
-    {
-      appName: "Acme",
-      supportMail: "support@acme.com",
-      systemMail: "system@acme.com",
-      dedupWindowSeconds: 300,
-    }
+    mailQueue
   );
 
   return redis.flushall().then(() => ({

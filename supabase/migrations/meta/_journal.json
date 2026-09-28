@@ -50,6 +50,13 @@
       "when": 1790474846250,
       "tag": "0006_add_report_log_events",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790577025266,
+      "tag": "0007_add_audit_item_unique",
+      "breakpoints": true
     }
   ]
 }

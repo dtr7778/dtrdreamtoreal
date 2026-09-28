@@ -1,5 +1,6 @@
 import { TestServer } from "@test/core/TestServer";
 import { StatusCodes } from "http-status-codes";
+import { Container } from "inversify";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -8,17 +9,26 @@ import {
   createMockDrizzleClient,
   type MockDatabaseType,
 } from "@workspace/drizzle/client/mock";
-import { container, type IApplication } from "@workspace/lib/server";
+import type { IStorageService } from "@workspace/lib/supabase/storage";
 import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import { createMockRedisClient } from "@workspace/redis/client/ioRedis/mock";
+import {
+  IApplication,
+  type IRequestExecutionContext,
+} from "@workspace/server-core/framework";
+import { AuthGuard, PermissionGuard } from "@workspace/server-core/guard";
+import { ApiErrorFilter } from "@workspace/server-core/helpers";
+import { type IAuditLogService } from "@workspace/server-core/services";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
-import { AuthMiddleware } from "@/middlewares/auth.middleware";
+import {
+  AuthMiddleware,
+  RolePermissionMiddleware,
+} from "@/middlewares/auth.middleware";
 import { SiteAuditController } from "@/modules/audit/SiteAudit.controller";
 
 import { type IAuditService } from "./Audit.service";
-import { type IAuditLogService } from "./AuditLog.service";
 
 describe("SiteAuditController (Integration)", () => {
   let app: IApplication;
@@ -27,6 +37,13 @@ describe("SiteAuditController (Integration)", () => {
   beforeAll(async () => {
     db = await createMockDrizzleClient();
 
+    const container = new Container();
+
+    container
+      .bind<ApiErrorFilter>(ApiErrorFilter)
+      .to(ApiErrorFilter)
+      .inSingletonScope();
+
     container
       .bind<MockDatabaseType>(CONTAINER_TYPES.Drizzle)
       .toDynamicValue(() => db)
@@ -34,6 +51,15 @@ describe("SiteAuditController (Integration)", () => {
     container
       .bind<ExtendedRedis>(CONTAINER_TYPES.Redis)
       .toDynamicValue(() => createMockRedisClient())
+      .inSingletonScope();
+    container
+      .bind<IStorageService>(CONTAINER_TYPES.Storage)
+      .toDynamicValue(
+        () =>
+          ({
+            delete: vi.fn(async () => undefined),
+          }) as unknown as IStorageService
+      )
       .inSingletonScope();
     container
       .bind<AuthType>(CONTAINER_TYPES.Auth)
@@ -46,6 +72,37 @@ describe("SiteAuditController (Integration)", () => {
       .inSingletonScope();
     container.bind<AuthMiddleware>(AuthMiddleware).toSelf().inSingletonScope();
     container
+      .bind<RolePermissionMiddleware>(RolePermissionMiddleware)
+      .toDynamicValue(
+        () =>
+          ({
+            execute: vi.fn(async ({ request }: IRequestExecutionContext) => {
+              request.userPermissions = [
+                {
+                  name: "system.site_audit.manage",
+                  level: "system",
+                  resource: "site_audit",
+                  action: "manage",
+                },
+              ];
+            }),
+          }) as unknown as RolePermissionMiddleware
+      )
+      .inSingletonScope();
+    container
+      .bind<AuthGuard>(AuthGuard)
+      .toDynamicValue(
+        () =>
+          ({
+            canActivate: vi.fn(() => true),
+          }) as unknown as AuthGuard
+      )
+      .inSingletonScope();
+    container
+      .bind<PermissionGuard>(PermissionGuard)
+      .toSelf()
+      .inSingletonScope();
+    container
       .bind<IAuditService>(CONTAINER_TYPES.AuditService)
       .toDynamicValue(
         () =>
@@ -55,6 +112,7 @@ describe("SiteAuditController (Integration)", () => {
             runCheck: vi.fn(),
             storeCwv: vi.fn(),
             getResults: vi.fn(),
+            deleteSiteAudit: vi.fn(),
           }) as unknown as IAuditService
       )
       .inSingletonScope();

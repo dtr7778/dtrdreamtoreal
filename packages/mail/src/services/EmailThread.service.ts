@@ -6,7 +6,19 @@ import {
 } from "@workspace/drizzle/schemas";
 import { DatabaseType } from "@workspace/drizzle/types";
 
-export class EmailThreadService {
+export interface IEmailThreadService {
+  findOrCreateThread(
+    params: {
+      threadId?: string | undefined;
+      subject: string;
+      contactEmail: string;
+      contactName?: string | undefined;
+    },
+    database?: DatabaseType | undefined
+  ): Promise<string>;
+}
+
+export class EmailThreadService implements IEmailThreadService {
   constructor(private readonly database: DatabaseType) {}
 
   private resolveDB(database?: DatabaseType): DatabaseType {

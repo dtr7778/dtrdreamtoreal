@@ -23,6 +23,7 @@ export function createBuildConfig(options: BuildConfigOptions): OutputOptions {
     copyAssets: assetsToCopy = [],
     autoRestart = true,
     onBuildSuccess,
+    watch: watchOption,
     ...restOptions
   } = options;
 
@@ -51,7 +52,7 @@ export function createBuildConfig(options: BuildConfigOptions): OutputOptions {
     splitting: false,
     minify: !isDev,
     shims: false,
-    watch: isDev,
+    watch: isDev ? (watchOption ?? true) : false,
     // treeshake: !isDev,
     // skipNodeModulesBundle: true,
     external: externalPackages,

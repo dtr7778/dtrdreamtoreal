@@ -1,17 +1,24 @@
 import type { JobsOptions, Queue } from "bullmq";
 import { injectable } from "inversify";
 
+import { MailJobData, mailQueue } from "@workspace/contract/worker";
 import { type QueueJobInput } from "@workspace/lib/bullmq";
-import { InjectQueue } from "@workspace/lib/server";
-
-import { type MailJobData, mailQueue } from "./mail.queue";
+import { InjectQueue } from "@workspace/server-core/framework";
 
 type MailQueueKey = keyof typeof mailQueue.jobs & string;
 
 type EnqueueResult = { jobId: string; queue: string };
 
+export interface IMailQueueService {
+  sendMail(data: {
+    emailId: string;
+    threadId?: string | undefined;
+    delayMs?: number | undefined;
+  }): Promise<EnqueueResult>;
+}
+
 @injectable()
-export class MailQueueService {
+export class MailQueueService implements IMailQueueService {
   constructor(
     @InjectQueue(mailQueue)
     private readonly queue: Queue
