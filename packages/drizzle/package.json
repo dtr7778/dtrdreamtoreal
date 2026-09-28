@@ -94,7 +94,7 @@
     "drizzle-orm": "catalog:",
     "drizzle-zod": "^0.8.3",
     "ioredis": "catalog:",
-    "postgres": "^3.4.9",
+    "postgres": "catalog:",
     "zod": "catalog:"
   }
 }

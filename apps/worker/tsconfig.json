@@ -10,6 +10,6 @@
     "jsx": "react-jsx",
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["./tsup.config.ts", "./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

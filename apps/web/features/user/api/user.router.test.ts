@@ -49,7 +49,7 @@ describe("User Router (Integration)", () => {
     const [superAdminRole] = await db
       .insert(RoleTable)
       .values(
-        zocker(insertRoleSchema)
+        zocker(insertRoleSchema.omit({ metadata: true }))
           .supply(insertRoleSchema.shape.roleName, "SUPER_ADMIN")
           .generate()
       )
@@ -125,7 +125,7 @@ describe("User Router (Integration)", () => {
       const [userRole] = await db
         .insert(RoleTable)
         .values(
-          zocker(insertRoleSchema)
+          zocker(insertRoleSchema.omit({ metadata: true }))
             .supply(insertRoleSchema.shape.roleName, "USER")
             .generate()
         )
