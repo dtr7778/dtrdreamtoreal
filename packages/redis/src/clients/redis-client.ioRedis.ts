@@ -2,6 +2,7 @@ import {
   type ExtendedRedis,
   IoRedisService,
   type IoRedisServiceConfig,
+  resolveRedisTls,
 } from "../IoRedis.service";
 
 function createRedisClient(config: IoRedisServiceConfig): ExtendedRedis {
@@ -10,4 +11,4 @@ function createRedisClient(config: IoRedisServiceConfig): ExtendedRedis {
   return ioRedis.getClient();
 }
 
-export { createRedisClient, type ExtendedRedis };
+export { createRedisClient, resolveRedisTls, type ExtendedRedis };

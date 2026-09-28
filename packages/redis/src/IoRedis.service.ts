@@ -12,6 +12,11 @@ export interface IoRedisServiceConfig {
   db?: number;
 }
 
+export function resolveRedisTls(url: string, override?: boolean): boolean {
+  if (typeof override === "boolean") return override;
+  return url.startsWith("rediss://");
+}
+
 export class IoRedisService implements IIoRedisService {
   protected client: ExtendedRedis | undefined = undefined;
 
