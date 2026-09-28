@@ -21,6 +21,7 @@ jobs:
       shared: ${{ steps.filter.outputs.shared }}
       backend: ${{ steps.filter.outputs.backend }}
       worker: ${{ steps.filter.outputs.worker }}
+      combined: ${{ steps.filter.outputs.combined }}
     steps:
       - uses: actions/checkout@v7
 
@@ -41,6 +42,8 @@ jobs:
               - 'apps/backend/**'
             worker:
               - 'apps/worker/**'
+            combined:
+              - 'apps/combined/**'
 
   publish:
     name: Build, push & deploy ${{ matrix.app }}
@@ -60,6 +63,9 @@ jobs:
           - app: worker
             dockerfile: apps/worker/Dockerfile
             deployHookSecret: RENDER_DEPLOY_HOOK_WORKER
+          - app: combined
+            dockerfile: apps/combined/Dockerfile
+            deployHookSecret: RENDER_DEPLOY_HOOK_COMBINED
     env:
       APP_CHANGED: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.shared == 'true' || needs.changes.outputs[matrix.app] == 'true' }}
     steps:
