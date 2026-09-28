@@ -5,14 +5,11 @@
   "apps/web/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./apps/web/eslint.config.js"
   ],
-  "packages/ui/**/*.{js,jsx,ts,tsx}": [
-    "eslint --max-warnings 0 --config ./packages/ui/eslint.config.js"
+  "apps/worker/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./apps/worker/eslint.config.mjs"
   ],
-  "packages/drizzle/**/*.{js,jsx,ts,tsx}": [
-    "eslint --max-warnings 0 --config ./packages/drizzle/eslint.config.js"
-  ],
-  "packages/redis/**/*.{js,jsx,ts,tsx}": [
-    "eslint --max-warnings 0 --config ./packages/redis/eslint.config.js"
+  "packages/ai/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/ai/eslint.config.js"
   ],
   "packages/auth/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/auth/eslint.config.js"
@@ -20,14 +17,29 @@
   "packages/contract/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/contract/eslint.config.js"
   ],
+  "packages/drizzle/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/drizzle/eslint.config.js"
+  ],
+  "packages/generate-image/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/generate-image/eslint.config.js"
+  ],
   "packages/lib/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/lib/eslint.config.js"
   ],
-  "packages/vitest-config/**/*.{js,jsx,ts,tsx}": [
-    "eslint --max-warnings 0 --config ./packages/vitest-config/eslint.config.js"
-  ],
   "packages/mail/**/*.{js,jsx,ts,tsx}": [
     "eslint --max-warnings 0 --config ./packages/mail/eslint.config.js"
+  ],
+  "packages/redis/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/redis/eslint.config.js"
+  ],
+  "packages/server-core/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/server-core/eslint.config.js"
+  ],
+  "packages/ui/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/ui/eslint.config.js"
+  ],
+  "packages/vitest-config/**/*.{js,jsx,ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/vitest-config/eslint.config.js"
   ],
   "*.md": ["prettier --write"]
 }
