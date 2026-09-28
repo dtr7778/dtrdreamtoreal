@@ -12,13 +12,20 @@ import {
 import type { IStorageService } from "@workspace/lib/supabase/storage";
 import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import { createMockRedisClient } from "@workspace/redis/client/ioRedis/mock";
-import { IApplication } from "@workspace/server-core/framework";
+import {
+  IApplication,
+  type IRequestExecutionContext,
+} from "@workspace/server-core/framework";
+import { AuthGuard, PermissionGuard } from "@workspace/server-core/guard";
 import { ApiErrorFilter } from "@workspace/server-core/helpers";
 import { type IAuditLogService } from "@workspace/server-core/services";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
-import { AuthMiddleware } from "@/middlewares/auth.middleware";
+import {
+  AuthMiddleware,
+  RolePermissionMiddleware,
+} from "@/middlewares/auth.middleware";
 import { SiteAuditController } from "@/modules/audit/SiteAudit.controller";
 
 import { type IAuditService } from "./Audit.service";
@@ -64,6 +71,37 @@ describe("SiteAuditController (Integration)", () => {
       )
       .inSingletonScope();
     container.bind<AuthMiddleware>(AuthMiddleware).toSelf().inSingletonScope();
+    container
+      .bind<RolePermissionMiddleware>(RolePermissionMiddleware)
+      .toDynamicValue(
+        () =>
+          ({
+            execute: vi.fn(async ({ request }: IRequestExecutionContext) => {
+              request.userPermissions = [
+                {
+                  name: "system.site_audit.manage",
+                  level: "system",
+                  resource: "site_audit",
+                  action: "manage",
+                },
+              ];
+            }),
+          }) as unknown as RolePermissionMiddleware
+      )
+      .inSingletonScope();
+    container
+      .bind<AuthGuard>(AuthGuard)
+      .toDynamicValue(
+        () =>
+          ({
+            canActivate: vi.fn(() => true),
+          }) as unknown as AuthGuard
+      )
+      .inSingletonScope();
+    container
+      .bind<PermissionGuard>(PermissionGuard)
+      .toSelf()
+      .inSingletonScope();
     container
       .bind<IAuditService>(CONTAINER_TYPES.AuditService)
       .toDynamicValue(

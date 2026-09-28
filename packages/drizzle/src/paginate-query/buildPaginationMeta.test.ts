@@ -16,8 +16,8 @@ describe("buildPaginationMeta", () => {
       isLastPage: false,
       currentPage: page,
       previousPage: null,
-      nextPage: 2,
-      pageCount: 10,
+      nextPage: page + 1,
+      pageCount: queryCount / limit,
       queryCount,
       totalCount,
     });
