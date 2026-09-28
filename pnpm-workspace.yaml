@@ -3,10 +3,30 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  "@openrouter/sdk": true
+  "@swc/core": true
   esbuild: true
+  msgpackr-extract: true
   msw: false
   sharp: true
   unrs-resolver: true
+  "lightningcss": true
+
+overrides:
+  sharp: ">=0.35.4"
+  postcss: ">=8.5.23"
+  esbuild: ">=0.25.12"
+  browserslist: ">=4.28.7"
+  fast-uri: ">=3.1.6"
+  js-yaml: ">=4.3.2"
+  qs: ">=6.16.0"
+  baseline-browser-mapping: ">=2.11.0"
+  hono: ">=4.13.5"
+  next: ">=16.3.3"
+
+peerDependencyRules:
+  allowedVersions:
+    "eslint-plugin-react>eslint": "10"
 
 catalog:
   "@better-auth/drizzle-adapter": 1.6.30
