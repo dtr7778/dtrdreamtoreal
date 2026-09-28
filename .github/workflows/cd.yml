@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/backend/**'
+      - 'apps/worker/**'
+      - 'apps/combined/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+      - 'tsconfig.json'
+      - '.github/workflows/cd.yml'
   workflow_dispatch:
 
 concurrency:
@@ -14,40 +24,8 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  changes:
-    name: Detect changed apps
-    runs-on: ubuntu-latest
-    outputs:
-      shared: ${{ steps.filter.outputs.shared }}
-      backend: ${{ steps.filter.outputs.backend }}
-      worker: ${{ steps.filter.outputs.worker }}
-      combined: ${{ steps.filter.outputs.combined }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Filter changed paths
-        id: filter
-        if: github.event_name == 'push'
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            shared:
-              - 'packages/**'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'turbo.json'
-              - 'tsconfig.json'
-              - '.github/workflows/cd.yml'
-            backend:
-              - 'apps/backend/**'
-            worker:
-              - 'apps/worker/**'
-            combined:
-              - 'apps/combined/**'
-
-  publish:
-    name: Build, push & deploy ${{ matrix.app }}
-    needs: changes
+  build:
+    name: Build & push ${{ matrix.app }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -57,26 +35,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - app: backend
-            dockerfile: apps/backend/Dockerfile
-            deployHookSecret: RENDER_DEPLOY_HOOK_BACKEND
-          - app: worker
-            dockerfile: apps/worker/Dockerfile
-            deployHookSecret: RENDER_DEPLOY_HOOK_WORKER
           - app: combined
             dockerfile: apps/combined/Dockerfile
-            deployHookSecret: RENDER_DEPLOY_HOOK_COMBINED
-    env:
-      APP_CHANGED: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.shared == 'true' || needs.changes.outputs[matrix.app] == 'true' }}
+          - app: backend
+            dockerfile: apps/backend/Dockerfile
+          - app: worker
+            dockerfile: apps/worker/Dockerfile
     steps:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        if: env.APP_CHANGED == 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
-        if: env.APP_CHANGED == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -85,19 +56,14 @@ jobs:
 
       - name: Extract image metadata
         id: meta
-        if: env.APP_CHANGED == 'true'
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.app }}
           tags: |
-            type=ref,event=branch
             type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push
-        if: env.APP_CHANGED == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -109,14 +75,18 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
+  deploy:
+    name: Deploy combined to Render
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Trigger Render deploy
-        if: env.APP_CHANGED == 'true'
         env:
-          RENDER_DEPLOY_HOOK: ${{ secrets[matrix.deployHookSecret] }}
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_COMBINED }}
         run: |
           if [[ -z "${RENDER_DEPLOY_HOOK}" ]]; then
-            echo "::notice::No '${{ matrix.deployHookSecret }}' secret set; skipping Render deploy."
+            echo "::notice::No 'RENDER_DEPLOY_HOOK_COMBINED' secret set; skipping Render deploy."
             exit 0
           fi
           curl --fail --silent --show-error --request POST "${RENDER_DEPLOY_HOOK}"
-          echo "Triggered Render deploy for ${{ matrix.app }}."
+          echo "Triggered Render deploy for combined."
