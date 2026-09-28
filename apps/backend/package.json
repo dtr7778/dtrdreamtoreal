@@ -63,6 +63,7 @@
     "express": "catalog:",
     "http-status-codes": "^2.3.0",
     "inversify": "catalog:",
+    "ioredis": "catalog:",
     "postgres": "catalog:",
     "reflect-metadata": "catalog:",
     "resend": "catalog:",
