@@ -5,12 +5,11 @@ import { getSessionCookie } from "better-auth/cookies";
 import { auth } from "@/lib/better-auth/auth";
 
 import {
-  AUTH_ROUTES,
   DEFAULT_AUTH_PATH,
   DEFAULT_UNAUTH_PATH,
+  isAuthPath,
   isPublicPath,
 } from "@/constants";
-import type { RoutePathType } from "@/types";
 
 async function getDbSession(headers: Headers) {
   return auth.api.getSession({
@@ -29,7 +28,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublicRoute = isPublicPath(pathname);
-  const isAuthRoute = AUTH_ROUTES.includes(pathname as RoutePathType);
+  const isAuthRoute = isAuthPath(pathname);
 
   const sessionCookie = getSessionCookie(request);
 
@@ -43,7 +42,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Not authenticated
-    if (!session && !isPublicRoute) {
+    if (!session && !isPublicRoute && !isAuthRoute) {
       await signOut(request.headers);
       const loginUrl = new URL(DEFAULT_UNAUTH_PATH, request.url);
       return NextResponse.redirect(loginUrl);

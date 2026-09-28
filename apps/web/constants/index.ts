@@ -17,14 +17,25 @@ export const AUTH_ROUTES: Array<RoutePathType> = [
   RESET_PASSWORD_PATH,
 ];
 
-export const PUBLIC_ROUTES: Array<RoutePathType> = [...AUTH_ROUTES, "/"];
+export const PUBLIC_ROUTES: Array<RoutePathType> = [
+  "/",
+  "/about",
+  "/services",
+  "/contact",
+  "/privacy-policy",
+  "/terms-and-conditions",
+];
 
-export const PUBLIC_ROUTE_PREFIXES = ["/report/"] as const;
+export const PUBLIC_ROUTE_PREFIXES = ["/audit/"] as const;
 
 export function isPublicPath(pathname: string): boolean {
   if (PUBLIC_ROUTES.includes(pathname as RoutePathType)) return true;
 
   return PUBLIC_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+export function isAuthPath(pathname: string): boolean {
+  if (AUTH_ROUTES.includes(pathname as RoutePathType)) return true;
+  return false;
 }
 
 export const DEFAULT_PAGE_INDEX: number = 1;
