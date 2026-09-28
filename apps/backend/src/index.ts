@@ -32,10 +32,7 @@ async function main() {
     const bullMq = new BullMqService({
       container,
       connection: {
-        host: env.REDIS_HOST,
-        port: env.REDIS_PORT,
-        username: env.REDIS_USERNAME,
-        password: env.REDIS_PASSWORD,
+        url: env.REDIS_URL,
         maxRetriesPerRequest: null,
         tls: {},
       },

@@ -22,13 +22,7 @@ export const env = createEnv({
     API_LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace"])
       .default("info"),
-    REDIS_HOST: z.string().min(1),
-    REDIS_PORT: z
-      .string()
-      .default("6379")
-      .transform((arg) => parseInt(arg)),
-    REDIS_USERNAME: z.string().min(1),
-    REDIS_PASSWORD: z.string().min(1),
+    REDIS_URL: z.string().min(1),
     CORS_ORIGIN: z
       .string()
       .min(1)
@@ -65,10 +59,7 @@ export const env = createEnv({
           BULLMQ_SIGNING_SECRET: "bullmq_signing_secret",
           RESEND_API_KEY: "re_any_key_works",
           API_LOG_LEVEL: "info",
-          REDIS_HOST: "localhost",
-          REDIS_PORT: "6379",
-          REDIS_USERNAME: "default",
-          REDIS_PASSWORD: "12345678",
+          REDIS_URL: "edis://username:password@host:port",
           CORS_ORIGIN: "http://localhost:3000",
           RESEND_INBOUND_WEBHOOK_SECRET: "resend_inbound_webhook_secret",
           RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
@@ -94,10 +85,7 @@ export const env = createEnv({
           BULLMQ_SIGNING_SECRET: process.env.BULLMQ_SIGNING_SECRET,
           RESEND_API_KEY: process.env.RESEND_API_KEY,
           API_LOG_LEVEL: process.env.API_LOG_LEVEL,
-          REDIS_HOST: process.env.REDIS_HOST,
-          REDIS_PORT: process.env.REDIS_PORT,
-          REDIS_USERNAME: process.env.REDIS_USERNAME,
-          REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+          REDIS_URL: process.env.REDIS_URL,
           CORS_ORIGIN: process.env.CORS_ORIGIN,
 
           RESEND_INBOUND_WEBHOOK_SECRET:

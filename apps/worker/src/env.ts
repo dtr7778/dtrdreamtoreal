@@ -16,13 +16,7 @@ export const env = createEnv({
     API_LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace"])
       .default("info"),
-    REDIS_HOST: z.string().min(1),
-    REDIS_PORT: z
-      .string()
-      .default("6379")
-      .transform((arg) => parseInt(arg)),
-    REDIS_USERNAME: z.string().min(1),
-    REDIS_PASSWORD: z.string().min(1),
+    REDIS_URL: z.string().min(1),
     GOOGLE_PSI_BASE_URL: z
       .url()
       .default("https://www.googleapis.com/pagespeedonline/v5"),
@@ -43,10 +37,7 @@ export const env = createEnv({
             "postgresql://postgres:postgres@localhost:5432/postgres",
           RESEND_API_KEY: "re_any_key_works",
           API_LOG_LEVEL: "info",
-          REDIS_HOST: "localhost",
-          REDIS_PORT: "6379",
-          REDIS_USERNAME: "default",
-          REDIS_PASSWORD: "12345678",
+          REDIS_URL: "redis://default:12345678@localhost:6379",
           GOOGLE_PSI_API_KEY: "google_psi_api_key",
           GOOGLE_PSI_BASE_URL: "https://www.googleapis.com/pagespeedonline/v5",
           GOOGLE_CRUX_API_KEY: "google_crux_api_key",
@@ -60,10 +51,7 @@ export const env = createEnv({
           DATABASE_URL: process.env.DATABASE_URL,
           RESEND_API_KEY: process.env.RESEND_API_KEY,
           API_LOG_LEVEL: process.env.API_LOG_LEVEL,
-          REDIS_HOST: process.env.REDIS_HOST,
-          REDIS_PORT: process.env.REDIS_PORT,
-          REDIS_USERNAME: process.env.REDIS_USERNAME,
-          REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+          REDIS_URL: process.env.REDIS_URL,
           GOOGLE_PSI_API_KEY: process.env.GOOGLE_PSI_API_KEY,
           GOOGLE_PSI_BASE_URL: process.env.GOOGLE_PSI_BASE_URL,
           GOOGLE_CRUX_API_KEY: process.env.GOOGLE_CRUX_API_KEY,
