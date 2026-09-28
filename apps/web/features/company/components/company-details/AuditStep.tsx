@@ -1,23 +1,28 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { ClipboardCheck } from "lucide-react";
 
+import { DataTableGlobalSearch } from "@workspace/ui/components/data-table/data-table-global-search";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { useDebouncedCallback } from "@workspace/ui/hooks/use-debounced-callback";
 
+import { apiClient } from "@/lib/api";
 import { QueryStateBoundary } from "@/lib/tanstack/query/QueryStateBoundary";
 
-import { useCompanyAudits } from "@/features/audit/api/audit.api.hook";
+import { MetaPagination } from "@/components/MetaPagination";
+
 import { AuditCard } from "@/features/audit/components/AuditCard";
 import { AuditCreateDialog } from "@/features/audit/components/AuditCreateDialog";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
+import { useTableQueryState } from "@/hooks/use-table-query-state";
 
 export function AuditStep({
   companyId,
@@ -26,12 +31,33 @@ export function AuditStep({
   companyId: string;
   websiteUrl?: string | null | undefined;
 }) {
-  const { data, isLoading, isError, error } = useCompanyAudits(companyId);
+  const { filters, setSearchFilter, setFilters } = useTableQueryState({});
+
+  const { data, isLoading, isError, error, refetch } = useQuery(
+    apiClient.siteAudit.list.queryOptions({
+      input: {
+        query: {
+          page: filters.page,
+          limit: filters.limit,
+          search: filters.search,
+          searchFields: ["name", "url"],
+          order: "desc",
+          orderField: "createdAt",
+          filter: { companyId },
+        },
+      },
+    })
+  );
 
   const isAllowCreate = usePermissionCheck([
     "system.site_audit.manage",
     "system.site_audit.create",
   ]);
+
+  const globalSearch = useDebouncedCallback(
+    (searchValue: string | null) => setSearchFilter(searchValue),
+    500
+  );
 
   return (
     <div className="space-y-4">
@@ -47,6 +73,11 @@ export function AuditStep({
           <AuditCreateDialog companyId={companyId} websiteUrl={websiteUrl} />
         )}
       </div>
+      <DataTableGlobalSearch
+        searchValue={filters.search}
+        setSearchValue={globalSearch}
+        refresh={refetch}
+      />
 
       <QueryStateBoundary
         isLoading={isLoading}
@@ -73,22 +104,20 @@ export function AuditStep({
                 problems, and SEO opportunities.
               </EmptyDescription>
             </EmptyHeader>
-            {isAllowCreate && (
-              <EmptyContent>
-                <AuditCreateDialog
-                  companyId={companyId}
-                  websiteUrl={websiteUrl}
-                />
-              </EmptyContent>
-            )}
           </Empty>
         }
       >
-        {({ data }) => (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {data.map((audit) => (
-              <AuditCard key={audit.id} audit={audit} />
-            ))}
+        {({ data, meta }) => (
+          <div className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-2">
+              {data.map((audit) => (
+                <AuditCard key={audit.id} audit={audit} />
+              ))}
+            </div>
+            <MetaPagination
+              meta={meta}
+              onPageChange={(page) => setFilters({ page })}
+            />
           </div>
         )}
       </QueryStateBoundary>

@@ -4,6 +4,7 @@
   "globalEnv": [
     "NODE_ENV",
     "SKIP_ENV_VALIDATION",
+    "TRUST_PROXY",
     "DATABASE_URL",
     "REDIS_REST_URL",
     "REDIS_REST_TOKEN",
@@ -30,7 +31,6 @@
     "SYSTEM_MAIL",
     "APP_NAME",
     "SITE_URL",
-    "DOMAIN_NAME",
     "SUPABASE_SECRET_KEY",
     "SUPABASE_URL",
     "NEXT_RUNTIME",

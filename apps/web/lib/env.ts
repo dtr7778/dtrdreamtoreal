@@ -27,7 +27,6 @@ export const env = createEnv({
     RESEND_OUTBOUND_WEBHOOK_SECRET: z.string().min(1),
     SUPPORT_MAIL: z.email().min(1),
     SYSTEM_MAIL: z.email().min(1),
-    DOMAIN_NAME: z.string().min(1),
     BETTER_AUTH_URL: z.url(),
     BETTER_AUTH_SECRET: z.string(),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
@@ -71,7 +70,6 @@ export const env = createEnv({
           RESEND_OUTBOUND_WEBHOOK_SECRET: "resend_outbound_webhook_secret",
           SUPPORT_MAIL: "support@example.com",
           SYSTEM_MAIL: "notifications@example.com",
-          DOMAIN_NAME: "example.com",
           BETTER_AUTH_URL: "http://localhost:3000",
           BETTER_AUTH_SECRET: "secret",
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: "client_id",
@@ -106,7 +104,6 @@ export const env = createEnv({
             process.env.RESEND_OUTBOUND_WEBHOOK_SECRET,
           SUPPORT_MAIL: process.env.SUPPORT_MAIL,
           SYSTEM_MAIL: process.env.SYSTEM_MAIL,
-          DOMAIN_NAME: process.env.DOMAIN_NAME,
           BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
           BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID:

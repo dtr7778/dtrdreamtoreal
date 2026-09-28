@@ -2,19 +2,19 @@ import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
 
 import { contracts, type ContractsType } from "@workspace/contract";
+import type { TemplateMailPayload } from "@workspace/mail";
 import {
   Controller,
   Post,
   RequestValidator,
   UseGuards,
-} from "@workspace/lib/server";
-import type { TemplateMailPayload } from "@workspace/mail";
+} from "@workspace/server-core/framework";
+import { BaseController } from "@workspace/server-core/helpers";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
 import { RequireBullmqSignature } from "@/decorators/bullmq-signature.decorator";
-import { BullmqSignatureGuard } from "@/guard/bullmq-signature.guard";
-import { BaseController } from "@/helpers/BaseController";
+import { BullmqSignatureGuard } from "@/guards/bullmq-signature.guard";
 
 import { MailService } from "./Mail.service";
 
@@ -52,7 +52,7 @@ export class MailController extends BaseController implements IMailController {
       body as unknown as TemplateMailPayload
     );
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.JOB_ENQUEU,
       data: result,
@@ -66,7 +66,7 @@ export class MailController extends BaseController implements IMailController {
   ): Promise<ContractsType["mail"]["raw"]["output"]> {
     const result = await this.mailService.sendRaw(body);
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.JOB_ENQUEU,
       data: result,
@@ -83,7 +83,7 @@ export class MailController extends BaseController implements IMailController {
       body.items as unknown as TemplateMailPayload[]
     );
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.JOB_ENQUEU,
       data: { results },
@@ -98,7 +98,7 @@ export class MailController extends BaseController implements IMailController {
   ): Promise<ContractsType["mail"]["rawBatch"]["output"]> {
     const results = await this.mailService.sendRawBatch(body.items);
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.ACCEPTED,
       message: API_MESSAGE.MAIL.JOB_ENQUEU,
       data: { results },

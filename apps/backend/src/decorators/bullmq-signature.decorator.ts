@@ -1,4 +1,4 @@
-import { createMetadataDecorator } from "@workspace/lib/server";
+import { createMetadataDecorator } from "@workspace/server-core/framework";
 
 export const BULLMQ_SIGNATURE_METADATA_KEY = "backend:bullmq:signature";
 

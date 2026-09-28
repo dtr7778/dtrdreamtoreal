@@ -1,0 +1,65 @@
+{
+  "name": "worker",
+  "version": "0.0.1",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development tsup --config tsup.config.ts",
+    "build": "cross-env NODE_ENV=production tsup --config tsup.config.ts",
+    "start": "cross-env NODE_ENV=production node dist/index.js --trace-deprecation",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/tsup-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
+    "cross-env": "catalog:",
+    "dotenv": "catalog:",
+    "eslint": "catalog:",
+    "source-map-support": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@fontsource/inter": "catalog:",
+    "@resvg/resvg-wasm": "catalog:",
+    "@t3-oss/env-core": "catalog:",
+    "@workspace/contract": "workspace:*",
+    "@workspace/drizzle": "workspace:*",
+    "@workspace/generate-image": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "@workspace/mail": "workspace:*",
+    "@workspace/redis": "workspace:*",
+    "@workspace/server-core": "workspace:*",
+    "axios": "catalog:",
+    "bullmq": "catalog:",
+    "drizzle-orm": "catalog:",
+    "inversify": "catalog:",
+    "node-cron": "catalog:",
+    "reflect-metadata": "catalog:",
+    "resend": "catalog:",
+    "satori": "catalog:",
+    "zod": "catalog:"
+  }
+}

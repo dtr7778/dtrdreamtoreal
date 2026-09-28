@@ -22,7 +22,34 @@ export interface RecipientInfo {
   name?: string;
 }
 
-export class EmailService {
+export interface IEmailService {
+  normalizeRecipient(recipient: string): RecipientInfo;
+  normalizeRecipients(
+    recipients: string | string[] | null | undefined
+  ): RecipientInfo[];
+  extractPrimaryRecipient(to: string | string[]): RecipientInfo;
+  buildOutboundEmailOptions(emailId: string): Promise<CreateEmailOptions>;
+  createInboundEmailRecord(
+    params: InboundEmailPayload & {
+      threadId?: string | undefined;
+    },
+    database?: DatabaseType
+  ): Promise<{
+    emailId: string;
+  }>;
+  updateEmailByResendId(
+    resendId: string,
+    params: UpdateEmail,
+    database?: DatabaseType
+  ): Promise<void>;
+  updateEmailById(
+    id: string,
+    params: UpdateEmail,
+    database?: DatabaseType
+  ): Promise<void>;
+}
+
+export class EmailService implements IEmailService {
   constructor(private readonly database: DatabaseType) {}
 
   private resolveDB(database?: DatabaseType): DatabaseType {
@@ -353,12 +380,22 @@ export class EmailService {
     resendId: string,
     params: UpdateEmail,
     database?: DatabaseType
-  ) {
+  ): Promise<void> {
     const db = this.resolveDB(database);
 
     await db
       .update(EmailTable)
       .set(params)
       .where(eq(EmailTable.resendId, resendId));
+  }
+
+  public async updateEmailById(
+    id: string,
+    params: UpdateEmail,
+    database?: DatabaseType
+  ): Promise<void> {
+    const db = this.resolveDB(database);
+
+    await db.update(EmailTable).set(params).where(eq(EmailTable.id, id));
   }
 }

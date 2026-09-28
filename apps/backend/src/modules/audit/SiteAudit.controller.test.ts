@@ -1,5 +1,6 @@
 import { TestServer } from "@test/core/TestServer";
 import { StatusCodes } from "http-status-codes";
+import { Container } from "inversify";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -8,9 +9,12 @@ import {
   createMockDrizzleClient,
   type MockDatabaseType,
 } from "@workspace/drizzle/client/mock";
-import { container, type IApplication } from "@workspace/lib/server";
+import type { IStorageService } from "@workspace/lib/supabase/storage";
 import type { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import { createMockRedisClient } from "@workspace/redis/client/ioRedis/mock";
+import { IApplication } from "@workspace/server-core/framework";
+import { ApiErrorFilter } from "@workspace/server-core/helpers";
+import { type IAuditLogService } from "@workspace/server-core/services";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
@@ -18,7 +22,6 @@ import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import { SiteAuditController } from "@/modules/audit/SiteAudit.controller";
 
 import { type IAuditService } from "./Audit.service";
-import { type IAuditLogService } from "./AuditLog.service";
 
 describe("SiteAuditController (Integration)", () => {
   let app: IApplication;
@@ -27,6 +30,13 @@ describe("SiteAuditController (Integration)", () => {
   beforeAll(async () => {
     db = await createMockDrizzleClient();
 
+    const container = new Container();
+
+    container
+      .bind<ApiErrorFilter>(ApiErrorFilter)
+      .to(ApiErrorFilter)
+      .inSingletonScope();
+
     container
       .bind<MockDatabaseType>(CONTAINER_TYPES.Drizzle)
       .toDynamicValue(() => db)
@@ -34,6 +44,15 @@ describe("SiteAuditController (Integration)", () => {
     container
       .bind<ExtendedRedis>(CONTAINER_TYPES.Redis)
       .toDynamicValue(() => createMockRedisClient())
+      .inSingletonScope();
+    container
+      .bind<IStorageService>(CONTAINER_TYPES.Storage)
+      .toDynamicValue(
+        () =>
+          ({
+            delete: vi.fn(async () => undefined),
+          }) as unknown as IStorageService
+      )
       .inSingletonScope();
     container
       .bind<AuthType>(CONTAINER_TYPES.Auth)
@@ -55,6 +74,7 @@ describe("SiteAuditController (Integration)", () => {
             runCheck: vi.fn(),
             storeCwv: vi.fn(),
             getResults: vi.fn(),
+            deleteSiteAudit: vi.fn(),
           }) as unknown as IAuditService
       )
       .inSingletonScope();

@@ -1,0 +1,31 @@
+# Dependencies and build output
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+
+# Version control, CI and editor tooling
+.git
+.github
+.husky
+.vscode
+.opencode
+graphify-out
+
+# Local infra, database and seed data (not needed to build the backend)
+infra
+supabase
+scripts
+
+# Environment / secret files
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Documentation
+**/*.md
+LICENSE
+CODE_OF_CONDUCT.md

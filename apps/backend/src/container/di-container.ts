@@ -1,10 +1,10 @@
+import { Container } from "inversify";
+
 import { AuthType, createBullmqBetterAuth } from "@workspace/auth";
 import { createSecondaryStorage } from "@workspace/auth/ioRedis-secondary-storage";
 import { createDrizzleClient } from "@workspace/drizzle/client/ioRedis";
 import type { DatabaseType } from "@workspace/drizzle/types";
 import { type BullmqEnqueueResult } from "@workspace/lib/bullmq";
-import { logger, type LoggerType } from "@workspace/lib/logger";
-import { container, LoggerInterceptor } from "@workspace/lib/server";
 import {
   createServerClient,
   type ServerSupabaseClient,
@@ -25,38 +25,50 @@ import {
   createRedisClient,
   ExtendedRedis,
 } from "@workspace/redis/client/ioRedis";
+import { LoggerInterceptor } from "@workspace/server-core/framework";
+import { AuthGuard, PermissionGuard } from "@workspace/server-core/guard";
+import { ApiErrorFilter } from "@workspace/server-core/helpers";
+import {
+  AuditLogService,
+  AuditQueueService,
+  type IAuditLogService,
+  type IAuditQueueService,
+} from "@workspace/server-core/services";
 
-import { AuthGuard } from "@/guard/auth.guard";
-import { BullmqSignatureGuard } from "@/guard/bullmq-signature.guard";
-import { PermissionGuard } from "@/guard/permission.guard";
-import { ResendWebhookGuard } from "@/guard/resend-webhook.guard";
+import { env } from "@/env";
+import { BullmqSignatureGuard } from "@/guards/bullmq-signature.guard";
+import { ResendWebhookGuard } from "@/guards/resend-webhook.guard";
 import {
   AuthMiddleware,
   RolePermissionMiddleware,
 } from "@/middlewares/auth.middleware";
 import { AuditService, IAuditService } from "@/modules/audit/Audit.service";
-import { AuditCronService } from "@/modules/audit/AuditCron.service";
 import {
-  AuditLogService,
-  IAuditLogService,
-} from "@/modules/audit/AuditLog.service";
-import { AuditQueueService } from "@/modules/audit/AuditQueue.service";
-import { AuditReportQueueService } from "@/modules/audit/AuditReportQueue.service";
+  ISiteAuditController,
+  SiteAuditController,
+} from "@/modules/audit/SiteAudit.controller";
 import {
-  AuditReportImageService,
-  type IAuditReportImageService,
-} from "@/modules/audit/AuditReport.service";
-import { CruxClient } from "@/modules/audit/clients/crux.client";
-import { GoogleApiCache } from "@/modules/audit/clients/google-cache";
-import { PsiClient } from "@/modules/audit/clients/psi.client";
-import { MailController } from "@/modules/mail/Mail.controller";
-import { MailService } from "@/modules/mail/Mail.service";
-import { MailQueueService } from "@/modules/mail/MailQueue.service";
-import { ResendMailController } from "@/modules/mail/ResendMail.controller";
+  IMailController,
+  MailController,
+} from "@/modules/mail/Mail.controller";
+import { IMailService, MailService } from "@/modules/mail/Mail.service";
+import {
+  IMailQueueService,
+  MailQueueService,
+} from "@/modules/mail/MailQueue.service";
+import {
+  IResendMailController,
+  ResendMailController,
+} from "@/modules/mail/ResendMail.controller";
 
-import { env } from "../env";
-import { SiteAuditController } from "../modules/audit/SiteAudit.controller";
 import { CONTAINER_TYPES } from "./container-types";
+
+const container = new Container();
+
+container
+  .bind<ApiErrorFilter>(ApiErrorFilter)
+  .to(ApiErrorFilter)
+  .inSingletonScope();
 
 container.bind<LoggerInterceptor>(LoggerInterceptor).toConstantValue(
   new LoggerInterceptor({
@@ -86,16 +98,6 @@ container
     })
   )
   .inSingletonScope();
-
-container
-  .bind<LoggerType>(CONTAINER_TYPES.Logger)
-  .toDynamicValue(() =>
-    logger({
-      serviceName: "backend",
-      logLevel: env.API_LOG_LEVEL,
-    })
-  )
-  .inRequestScope();
 
 container
   .bind<ServerSupabaseClient>(CONTAINER_TYPES.Supabase)
@@ -131,61 +133,28 @@ container
   );
 
 container
-  .bind<GoogleApiCache>(CONTAINER_TYPES.GoogleApiCache)
-  .to(GoogleApiCache)
-  .inSingletonScope();
-
-container
-  .bind<PsiClient>(CONTAINER_TYPES.PsiClient)
-  .to(PsiClient)
-  .inSingletonScope();
-
-container
-  .bind<CruxClient>(CONTAINER_TYPES.CruxClient)
-  .to(CruxClient)
-  .inSingletonScope();
-
-container
-  .bind<AuditQueueService>(CONTAINER_TYPES.AuditQueueService)
+  .bind<IAuditQueueService>(CONTAINER_TYPES.AuditQueueService)
   .to(AuditQueueService)
   .inSingletonScope();
 container
-  .bind<AuditReportQueueService>(CONTAINER_TYPES.AuditReportQueueService)
-  .to(AuditReportQueueService)
-  .inSingletonScope();
-container
   .bind<IAuditLogService>(CONTAINER_TYPES.AuditLogService)
-  .to(AuditLogService)
-  .inSingletonScope();
-container
-  .bind<IAuditReportImageService>(CONTAINER_TYPES.AuditReportImageService)
-  .to(AuditReportImageService)
-  .inSingletonScope();
+  .toConstantValue(
+    new AuditLogService(
+      container.get<DatabaseType>(CONTAINER_TYPES.Drizzle),
+      container.get<ExtendedRedis>(CONTAINER_TYPES.Redis)
+    )
+  );
 container
   .bind<IAuditService>(CONTAINER_TYPES.AuditService)
   .to(AuditService)
   .inSingletonScope();
 container
-  .bind<MailQueueService>(CONTAINER_TYPES.MailQueueService)
+  .bind<IMailQueueService>(CONTAINER_TYPES.MailQueueService)
   .to(MailQueueService)
   .inSingletonScope();
 container
-  .bind<MailService>(CONTAINER_TYPES.MailService)
-  .toDynamicValue(
-    () =>
-      new MailService(
-        container.get<EmailService>(CONTAINER_TYPES.EmailService),
-        container.get<EmailThreadService>(CONTAINER_TYPES.EmailThreadService),
-        container.get<MailQueueService>(CONTAINER_TYPES.MailQueueService),
-        container.get<ExtendedRedis>(CONTAINER_TYPES.Redis),
-        {
-          appName: env.APP_NAME,
-          supportMail: env.SUPPORT_MAIL,
-          systemMail: env.SYSTEM_MAIL,
-          dedupWindowSeconds: 300,
-        }
-      )
-  )
+  .bind<IMailService>(CONTAINER_TYPES.MailService)
+  .to(MailService)
   .inSingletonScope();
 container
   .bind<IBullmqMailService>(CONTAINER_TYPES.Mailer)
@@ -194,7 +163,7 @@ container
       signingSecret: env.BULLMQ_SIGNING_SECRET,
       publisher: {
         async enqueue(request) {
-          const mailService = container.get<MailService>(
+          const mailService = container.get<IMailService>(
             CONTAINER_TYPES.MailService
           );
 
@@ -266,19 +235,15 @@ container.bind(PermissionGuard).toSelf().inSingletonScope();
 container.bind(BullmqSignatureGuard).toSelf().inSingletonScope();
 container.bind(ResendWebhookGuard).toSelf().inSingletonScope();
 
-// cron jobs
-container.bind<AuditCronService>(AuditCronService).toSelf().inSingletonScope();
-
 // controllers
 container
-  .bind<SiteAuditController>(SiteAuditController)
+  .bind<ISiteAuditController>(SiteAuditController)
   .toSelf()
   .inSingletonScope();
-container.bind<MailController>(MailController).toSelf().inSingletonScope();
+container.bind<IMailController>(MailController).toSelf().inSingletonScope();
 container
-  .bind<ResendMailController>(ResendMailController)
+  .bind<IResendMailController>(ResendMailController)
   .toSelf()
   .inSingletonScope();
 
 export { container };
-export { CONTAINER_TYPES } from "./container-types";

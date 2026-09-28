@@ -19,15 +19,12 @@
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsup --config tsup.config.ts",
-    "dev:worker": "cross-env NODE_ENV=development tsup --config tsup.worker.config.ts",
     "build": "cross-env NODE_ENV=production tsup --config tsup.config.ts",
-    "build:worker": "cross-env NODE_ENV=production tsup --config tsup.worker.config.ts",
     "start": "cross-env NODE_ENV=production node dist/index.js --trace-deprecation",
-    "start:worker": "cross-env NODE_ENV=production node dist/worker.js --trace-deprecation",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage"
   },
@@ -42,7 +39,6 @@
     "cross-env": "catalog:",
     "dotenv": "catalog:",
     "eslint": "catalog:",
-    "reflect-metadata": "catalog:",
     "source-map-support": "catalog:",
     "supertest": "catalog:",
     "tsup": "catalog:",
@@ -52,16 +48,15 @@
     "zocker": "catalog:"
   },
   "dependencies": {
-    "@fontsource/inter": "catalog:",
-    "@resvg/resvg-wasm": "catalog:",
+    "reflect-metadata": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@workspace/auth": "workspace:*",
     "@workspace/contract": "workspace:*",
     "@workspace/drizzle": "workspace:*",
-    "@workspace/generate-image": "workspace:*",
     "@workspace/lib": "workspace:*",
     "@workspace/mail": "workspace:*",
     "@workspace/redis": "workspace:*",
+    "@workspace/server-core": "workspace:*",
     "axios": "catalog:",
     "better-auth": "catalog:",
     "bullmq": "catalog:",
@@ -69,9 +64,7 @@
     "express": "catalog:",
     "http-status-codes": "^2.3.0",
     "inversify": "catalog:",
-    "node-cron": "catalog:",
     "resend": "catalog:",
-    "satori": "catalog:",
     "zod": "catalog:"
   }
 }

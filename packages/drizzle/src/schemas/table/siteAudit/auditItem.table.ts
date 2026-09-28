@@ -6,6 +6,7 @@ import {
   jsonb,
   pgTable,
   text,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -47,6 +48,11 @@ export const AuditItemTable = pgTable(
     index("auditItem_checklistKey_idx").on(table.checklistKey),
     index("auditItem_status_idx").on(table.status),
     index("auditItem_url_idx").on(table.url),
+    uniqueIndex("auditItem_site_checklist_url_unq").on(
+      table.siteAuditId,
+      table.checklistKey,
+      table.url
+    ),
   ]
 );
 

@@ -10,7 +10,6 @@ import {
   buildPaginationMeta,
 } from "@workspace/drizzle/paginate-query";
 import {
-  AuditItemTable,
   CompanyTable,
   CwvSnapshotTable,
   FileTable,
@@ -20,6 +19,7 @@ import {
   UserTable,
 } from "@workspace/drizzle/schemas";
 import type { DatabaseType } from "@workspace/drizzle/types";
+import { RequirePermissions } from "@workspace/server-core/decorators";
 import {
   Controller,
   Delete,
@@ -33,23 +33,22 @@ import {
   Response,
   UseGuards,
   UseMiddlewares,
-} from "@workspace/lib/server";
-import { type IStorageService } from "@workspace/lib/supabase/storage";
+} from "@workspace/server-core/framework";
+import { AuthGuard, PermissionGuard } from "@workspace/server-core/guard";
+import { BaseController } from "@workspace/server-core/helpers";
+import type {
+  AuditLogEvent,
+  IAuditLogService,
+} from "@workspace/server-core/services";
 
 import { API_MESSAGE } from "@/constant";
 import { CONTAINER_TYPES } from "@/container/container-types";
-import { RequirePermissions } from "@/decorators/permission.decorator";
-import { AuthGuard } from "@/guard/auth.guard";
-import { PermissionGuard } from "@/guard/permission.guard";
-import { BaseController } from "@/helpers/BaseController";
 import {
   AuthMiddleware,
   RolePermissionMiddleware,
 } from "@/middlewares/auth.middleware";
 
 import { type IAuditService } from "./Audit.service";
-import { type IAuditLogService } from "./AuditLog.service";
-import { type AuditLogEvent } from "./AuditLog.types";
 
 const streamLogsInputSchema = z.object({
   params: z.object({ id: z.uuid() }),
@@ -66,19 +65,24 @@ function writeAuditLogEvent(response: IResponse, event: AuditLogEvent): void {
   response.write(`data: ${JSON.stringify(event)}\n\n`);
 }
 
-export interface ISiteController {
+export interface ISiteAuditController {
   list(
     input: ContractsType["siteAudit"]["list"]["input"]
   ): Promise<ContractsType["siteAudit"]["list"]["output"]>;
-  listRunItems(
-    input: ContractsType["siteAudit"]["listAuditItems"]["input"]
-  ): Promise<ContractsType["siteAudit"]["listAuditItems"]["output"]>;
   create(
     input: ContractsType["siteAudit"]["create"]["input"]
   ): Promise<ContractsType["siteAudit"]["create"]["output"]>;
   get(
     input: ContractsType["siteAudit"]["get"]["input"]
   ): Promise<ContractsType["siteAudit"]["get"]["output"]>;
+  getRunResults(
+    input: ContractsType["siteAudit"]["getResult"]["input"]
+  ): Promise<ContractsType["siteAudit"]["getResult"]["output"]>;
+  streamLogs(
+    input: { params: { id: string }; query: { lastEventId?: number } },
+    request: IRequest,
+    response: IResponse
+  ): Promise<void>;
   update(
     input: ContractsType["siteAudit"]["update"]["input"]
   ): Promise<ContractsType["siteAudit"]["update"]["output"]>;
@@ -99,7 +103,7 @@ export interface ISiteController {
 @UseGuards(AuthGuard, PermissionGuard)
 export class SiteAuditController
   extends BaseController
-  implements ISiteController
+  implements ISiteAuditController
 {
   constructor(
     @inject(CONTAINER_TYPES.Drizzle)
@@ -107,9 +111,7 @@ export class SiteAuditController
     @inject(CONTAINER_TYPES.AuditService)
     private readonly auditService: IAuditService,
     @inject(CONTAINER_TYPES.AuditLogService)
-    private readonly auditLog: IAuditLogService,
-    @inject(CONTAINER_TYPES.Storage)
-    private readonly storage: IStorageService
+    private readonly auditLog: IAuditLogService
   ) {
     super();
   }
@@ -179,53 +181,12 @@ export class SiteAuditController
         .offset(offset),
     ]);
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.OK,
       message: API_MESSAGE.SITE_AUDIT.GET_ALL,
       data: {
         meta: buildPaginationMeta(totalCount, sites.length, page, limit),
         data: sites,
-      },
-    });
-  }
-
-  @Get("/:id/items", contracts.siteAudit.listAuditItems)
-  @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
-  public async listRunItems(
-    @RequestValidator(contracts.siteAudit.listAuditItems.input)
-    { params, query }: ContractsType["siteAudit"]["listAuditItems"]["input"]
-  ): Promise<ContractsType["siteAudit"]["listAuditItems"]["output"]> {
-    const { offset, limit, where, orderBy, page } = buildPaginateOptions(
-      {
-        title: AuditItemTable.title,
-        url: AuditItemTable.url,
-        checklistKey: AuditItemTable.checklistKey,
-        section: AuditItemTable.section,
-        status: AuditItemTable.status,
-        createdAt: AuditItemTable.createdAt,
-      },
-      query
-    );
-
-    const finalWhere = and(eq(AuditItemTable.siteAuditId, params.id), where);
-
-    const [totalCount, items] = await Promise.all([
-      this.db.$count(AuditItemTable, finalWhere),
-      this.db
-        .select()
-        .from(AuditItemTable)
-        .where(finalWhere)
-        .orderBy(orderBy)
-        .limit(limit)
-        .offset(offset),
-    ]);
-
-    return this.response({
-      statusCode: StatusCodes.OK,
-      message: API_MESSAGE.SITE_AUDIT.GET_ALL_AUDIT_ITEM,
-      data: {
-        meta: buildPaginationMeta(totalCount, items.length, page, limit),
-        data: items,
       },
     });
   }
@@ -243,7 +204,7 @@ export class SiteAuditController
       body.description ?? undefined
     );
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.CREATED,
       message: API_MESSAGE.SITE_AUDIT.CREATE,
       data: run,
@@ -301,7 +262,7 @@ export class SiteAuditController
       });
     }
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.OK,
       message: API_MESSAGE.SITE_AUDIT.GET,
       data: siteData,
@@ -316,18 +277,13 @@ export class SiteAuditController
   ): Promise<ContractsType["siteAudit"]["getResult"]["output"]> {
     const results = await this.auditService.getResults(params.id);
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.OK,
       message: API_MESSAGE.SITE_AUDIT.GET_RESULT,
       data: results,
     });
   }
 
-  /**
-   * Server-Sent Events stream of a run's execution log. Serves persisted events
-   * for finished runs and live-tails the Redis stream for in-progress runs.
-   * Reconnects resume from `Last-Event-ID` (or `?lastEventId=`) without duplicates.
-   */
   @Get("/:id/logs")
   @RequirePermissions("system.site_audit.manage", "system.site_audit.read")
   public async streamLogs(
@@ -421,7 +377,7 @@ export class SiteAuditController
       });
     }
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.OK,
       message: API_MESSAGE.SITE_AUDIT.UPDATE,
       data: updatedData,
@@ -434,24 +390,9 @@ export class SiteAuditController
     @RequestValidator(contracts.siteAudit.delete.input)
     { params }: ContractsType["siteAudit"]["delete"]["input"]
   ): Promise<ContractsType["siteAudit"]["delete"]["output"]> {
-    const [existing] = await this.db
-      .select({ id: SiteAuditTable.id })
-      .from(SiteAuditTable)
-      .where(eq(SiteAuditTable.id, params.id))
-      .limit(1);
+    await this.auditService.deleteSiteAudit(params.id);
 
-    if (!existing) {
-      throw this.apiError({
-        statusCode: StatusCodes.NOT_FOUND,
-        message: API_MESSAGE.SITE_AUDIT.NOT_FOUND,
-      });
-    }
-
-    await this.db
-      .delete(SiteAuditTable)
-      .where(eq(SiteAuditTable.id, existing.id));
-
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.OK,
       message: API_MESSAGE.SITE_AUDIT.DELETE,
       data: null,
@@ -486,7 +427,7 @@ export class SiteAuditController
         .offset(offset),
     ]);
 
-    return this.response({
+    return this.apiResponse({
       statusCode: StatusCodes.OK,
       message: API_MESSAGE.SITE_AUDIT.CWV.GET_ALL,
       data: {

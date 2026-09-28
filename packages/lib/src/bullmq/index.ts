@@ -1,6 +1,6 @@
 export * from "./queue-contract.types";
-export * from "./createQueueContract";
 export * from "./createQueueProducer";
+export * from "./QueueProducer";
 
 export * from "./BullmqClient.service";
 export * from "./createBullmqClient.factory";

@@ -5,12 +5,12 @@ import express from "express";
 import type { Container } from "inversify";
 
 import { AuthType } from "@workspace/auth";
+import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import {
   BaseServer,
   ClassConstructor,
   LoggerInterceptor,
-} from "@workspace/lib/server";
-import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
+} from "@workspace/server-core/framework";
 
 import pkg from "../package.json";
 import { CONTAINER_TYPES } from "./container/container-types";
@@ -19,8 +19,7 @@ import { env } from "./env";
 export class Server extends BaseServer {
   constructor(
     container: Container,
-    controllerClasses: readonly ClassConstructor[],
-    cronJobClasses?: readonly ClassConstructor[]
+    controllerClasses: readonly ClassConstructor[]
   ) {
     super({
       container,
@@ -47,7 +46,6 @@ export class Server extends BaseServer {
         );
       },
       controllerClasses,
-      cronJobClasses,
     });
 
     this.init();

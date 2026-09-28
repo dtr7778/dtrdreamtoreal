@@ -1,0 +1,15 @@
+{
+  "extends": "@workspace/typescript-config/expressjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "rootDirs": ["./src"],
+    "outDir": "./dist",
+    "jsx": "react-jsx",
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["./tsup.config.ts", "./src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
