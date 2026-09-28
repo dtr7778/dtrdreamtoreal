@@ -31,9 +31,7 @@ import { AuthGuard, PermissionGuard } from "@workspace/server-core/guard";
 import { ApiErrorFilter } from "@workspace/server-core/helpers";
 import {
   AuditLogService,
-  AuditQueueService,
   type IAuditLogService,
-  type IAuditQueueService,
 } from "@workspace/server-core/services";
 
 import { env } from "@/env";
@@ -44,6 +42,10 @@ import {
   RolePermissionMiddleware,
 } from "@/middlewares/auth.middleware";
 import { AuditService, IAuditService } from "@/modules/audit/Audit.service";
+import {
+  AuditQueueService,
+  type IAuditQueueService,
+} from "@/modules/audit/AuditQueue.service";
 import {
   ISiteAuditController,
   SiteAuditController,

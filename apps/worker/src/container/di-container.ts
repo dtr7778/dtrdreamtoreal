@@ -28,9 +28,7 @@ import {
 } from "@workspace/redis/client/ioRedis";
 import {
   AuditLogService,
-  AuditQueueService,
   IAuditLogService,
-  type IAuditQueueService,
 } from "@workspace/server-core/services";
 
 import { env } from "@/env";
@@ -42,6 +40,10 @@ import {
   AuditCronService,
   IAuditCronService,
 } from "@/modules/audit/AuditCron.service";
+import {
+  AuditQueueService,
+  type IAuditQueueService,
+} from "@/modules/audit/AuditQueue.service";
 import {
   AuditReportService,
   IAuditReportService,
