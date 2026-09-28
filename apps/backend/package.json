@@ -48,7 +48,6 @@
     "zocker": "catalog:"
   },
   "dependencies": {
-    "reflect-metadata": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@workspace/auth": "workspace:*",
     "@workspace/contract": "workspace:*",
@@ -64,6 +63,8 @@
     "express": "catalog:",
     "http-status-codes": "^2.3.0",
     "inversify": "catalog:",
+    "postgres": "catalog:",
+    "reflect-metadata": "catalog:",
     "resend": "catalog:",
     "zod": "catalog:"
   }

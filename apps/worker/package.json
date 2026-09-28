@@ -57,6 +57,7 @@
     "drizzle-orm": "catalog:",
     "inversify": "catalog:",
     "node-cron": "catalog:",
+    "postgres": "catalog:",
     "reflect-metadata": "catalog:",
     "resend": "catalog:",
     "satori": "catalog:",

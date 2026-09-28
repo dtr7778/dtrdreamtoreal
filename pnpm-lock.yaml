@@ -153,6 +153,9 @@ catalogs:
     pino:
       specifier: ^10.3.1
       version: 10.3.1
+    postgres:
+      specifier: ^3.4.9
+      version: 3.4.9
     rate-limit-redis:
       specifier: ^6.0.1
       version: 6.0.1
@@ -342,6 +345,9 @@ importers:
       inversify:
         specifier: 'catalog:'
         version: 8.2.3(reflect-metadata@0.2.2)
+      postgres:
+        specifier: 'catalog:'
+        version: 3.4.9
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
@@ -720,6 +726,9 @@ importers:
       node-cron:
         specifier: 'catalog:'
         version: 4.6.0
+      postgres:
+        specifier: 'catalog:'
+        version: 3.4.9
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
@@ -908,7 +917,7 @@ importers:
         specifier: 'catalog:'
         version: 5.11.1
       postgres:
-        specifier: ^3.4.9
+        specifier: 'catalog:'
         version: 3.4.9
       zod:
         specifier: 'catalog:'
