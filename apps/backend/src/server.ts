@@ -5,6 +5,7 @@ import express from "express";
 import type { Container } from "inversify";
 
 import { AuthType } from "@workspace/auth";
+import { expandTrustedOrigins } from "@workspace/lib/utils";
 import { ExtendedRedis } from "@workspace/redis/client/ioRedis";
 import {
   BaseServer,
@@ -31,7 +32,7 @@ export class Server extends BaseServer {
         ignoredPaths: ["/mails"],
       },
       corsConfig: {
-        allowedOrigins: env.CORS_ORIGIN,
+        allowedOrigins: expandTrustedOrigins(env.CORS_ORIGIN),
       },
       rateLimitConfig: {
         window: "10 s",
