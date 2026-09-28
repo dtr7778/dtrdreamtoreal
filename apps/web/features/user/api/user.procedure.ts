@@ -1,5 +1,16 @@
 import { implement, ORPCError } from "@orpc/server";
-import { and, countDistinct, eq, gte, inArray, lte, max } from "drizzle-orm";
+import {
+  and,
+  countDistinct,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  max,
+  or,
+} from "drizzle-orm";
 
 import {
   buildPaginateOptions,
@@ -8,8 +19,10 @@ import {
 import {
   FileTable,
   RoleTable,
-  UserActivityTable,
+  UserDeviceTable,
+  UserEventTable,
   UserRoleTable,
+  UserSessionTable,
   UserTable,
 } from "@workspace/drizzle/schemas";
 import { apiResponse, prepareExport } from "@workspace/lib/utils";
@@ -51,11 +64,11 @@ export const listUserProcedure = userImpl.list
 
     const lastLoginSq = context.db
       .select({
-        userId: UserActivityTable.userId,
-        lastLogin: max(UserActivityTable.loginAt).as("last_login"),
+        userId: UserSessionTable.userId,
+        lastLogin: max(UserSessionTable.loginAt).as("last_login"),
       })
-      .from(UserActivityTable)
-      .groupBy(UserActivityTable.userId)
+      .from(UserSessionTable)
+      .groupBy(UserSessionTable.userId)
       .as("last_login_sq");
 
     const joinedQuery = context.db
@@ -109,11 +122,11 @@ export const userDataExportProcedure = userImpl.export
 
     const lastLoginSq = context.db
       .select({
-        userId: UserActivityTable.userId,
-        lastLogin: max(UserActivityTable.loginAt).as("last_login"),
+        userId: UserSessionTable.userId,
+        lastLogin: max(UserSessionTable.loginAt).as("last_login"),
       })
-      .from(UserActivityTable)
-      .groupBy(UserActivityTable.userId)
+      .from(UserSessionTable)
+      .groupBy(UserSessionTable.userId)
       .as("last_login_sq");
 
     const results = await context.db
@@ -178,61 +191,111 @@ export const userStatsProcedure = userImpl.stats
 
       // Active now
       context.db
-        .select({ count: countDistinct(UserActivityTable.userId) })
-        .from(UserActivityTable)
-        .where(gte(UserActivityTable.lastSeenAt, fiveMinutesAgo)),
+        .select({ count: countDistinct(UserSessionTable.userId) })
+        .from(UserSessionTable)
+        .where(
+          and(
+            gte(UserSessionTable.lastSeenAt, fiveMinutesAgo),
+            isNull(UserSessionTable.logoutAt)
+          )
+        ),
 
       // WAU: unique logins in last 7 days
       context.db
-        .select({ count: countDistinct(UserActivityTable.userId) })
-        .from(UserActivityTable)
-        .where(gte(UserActivityTable.loginAt, thisWeekStart)),
+        .select({ count: countDistinct(UserSessionTable.userId) })
+        .from(UserSessionTable)
+        .where(gte(UserSessionTable.loginAt, thisWeekStart)),
 
       // Last WAU: unique logins in the 7 days before that
       context.db
-        .select({ count: countDistinct(UserActivityTable.userId) })
-        .from(UserActivityTable)
+        .select({ count: countDistinct(UserSessionTable.userId) })
+        .from(UserSessionTable)
         .where(
           and(
-            gte(UserActivityTable.loginAt, lastWeekStart),
-            lte(UserActivityTable.loginAt, thisWeekStart)
+            gte(UserSessionTable.loginAt, lastWeekStart),
+            lte(UserSessionTable.loginAt, thisWeekStart)
           )
         ),
 
       // MAU: unique logins in last 30 days
       context.db
-        .select({ count: countDistinct(UserActivityTable.userId) })
-        .from(UserActivityTable)
-        .where(gte(UserActivityTable.loginAt, thisMonthStart)),
+        .select({ count: countDistinct(UserSessionTable.userId) })
+        .from(UserSessionTable)
+        .where(gte(UserSessionTable.loginAt, thisMonthStart)),
 
       // Last MAU: unique logins in the 30 days before that
       context.db
-        .select({ count: countDistinct(UserActivityTable.userId) })
-        .from(UserActivityTable)
+        .select({ count: countDistinct(UserSessionTable.userId) })
+        .from(UserSessionTable)
         .where(
           and(
-            gte(UserActivityTable.loginAt, lastMonthStart),
-            lte(UserActivityTable.loginAt, thisMonthStart)
+            gte(UserSessionTable.loginAt, lastMonthStart),
+            lte(UserSessionTable.loginAt, thisMonthStart)
           )
         ),
+
+      // Active sessions: not logged out and not expired
+      context.db
+        .select({ count: countDistinct(UserSessionTable.id) })
+        .from(UserSessionTable)
+        .where(
+          and(
+            isNull(UserSessionTable.logoutAt),
+            or(
+              isNull(UserSessionTable.expiresAt),
+              gt(UserSessionTable.expiresAt, new Date())
+            )
+          )
+        ),
+
+      // Known devices across all users
+      context.db.$count(UserDeviceTable),
+
+      // New devices first seen in the last 7 days
+      context.db.$count(
+        UserDeviceTable,
+        gte(UserDeviceTable.firstSeenAt, thisWeekStart)
+      ),
+
+      // Failed sign-in attempts in the last 24 hours
+      context.db.$count(
+        UserEventTable,
+        and(
+          eq(UserEventTable.event, "auth.login_failed"),
+          gte(UserEventTable.createdAt, daysAgo(1))
+        )
+      ),
     ]);
 
     const totalUsers = allData[0];
     const lastMonthTotal = allData[1];
-    const activeNow = allData[2][0]!;
-    const wau = allData[3][0]!;
-    const lastWau = allData[4][0]!;
-    const mau = allData[5][0]!;
-    const lastMau = allData[6][0]!;
+    const activeNow = allData[2][0];
+    const wau = allData[3][0];
+    const lastWau = allData[4][0];
+    const mau = allData[5][0];
+    const lastMau = allData[6][0];
+    const activeSessions = allData[7][0];
+    const totalDevices = allData[8];
+    const newDevices = allData[9];
+    const failedLogins = allData[10];
+
+    const wauCount = wau ? wau.count : 0;
+    const lastWauCount = lastWau ? lastWau.count : 0;
+    const mauCount = mau ? mau.count : 0;
+    const lastMauCount = lastMau ? lastMau.count : 0;
 
     return apiResponse(API_MESSAGES.USER.GET_STATS, {
       totalUsers,
       totalUsersGrowth: calcGrowth(lastMonthTotal, totalUsers),
-      activeNow: activeNow.count,
-      wau: wau.count,
-      wauGrowth: calcGrowth(lastWau.count, wau.count),
-      mau: mau.count,
-      mauGrowth: calcGrowth(lastMau.count, mau.count),
+      activeNow: activeNow ? activeNow.count : 0,
+      activeSessions: activeSessions ? activeSessions.count : 0,
+      wau: wauCount,
+      wauGrowth: calcGrowth(lastWauCount, wauCount),
+      mau: mauCount,
+      mauGrowth: calcGrowth(lastMauCount, mauCount),
+      totalDevices,
+      newDevices,
+      failedLogins,
     });
   });
 
@@ -348,11 +411,11 @@ export const userDetailsProcedure = userImpl.details
   .handler(async ({ input, errors, context }) => {
     const lastLoginSq = context.db
       .select({
-        userId: UserActivityTable.userId,
-        lastLogin: max(UserActivityTable.loginAt).as("last_login"),
+        userId: UserSessionTable.userId,
+        lastLogin: max(UserSessionTable.loginAt).as("last_login"),
       })
-      .from(UserActivityTable)
-      .groupBy(UserActivityTable.userId)
+      .from(UserSessionTable)
+      .groupBy(UserSessionTable.userId)
       .as("last_login_sq");
 
     const [user] = await context.db
