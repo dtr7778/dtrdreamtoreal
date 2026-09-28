@@ -213,6 +213,7 @@ container
       siteUrl: env.SITE_URL,
       isDev: env.NODE_ENV !== "production",
       trustedOrigins: env.CORS_ORIGIN,
+      domainName: env.DOMAIN_NAME,
       errorPagePath: "/error",
       database: container.get<DatabaseType>(CONTAINER_TYPES.Drizzle),
       secondaryStorage: createSecondaryStorage(
