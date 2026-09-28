@@ -345,6 +345,9 @@ importers:
       inversify:
         specifier: 'catalog:'
         version: 8.2.3(reflect-metadata@0.2.2)
+      ioredis:
+        specifier: 'catalog:'
+        version: 5.11.1
       postgres:
         specifier: 'catalog:'
         version: 3.4.9
@@ -723,6 +726,9 @@ importers:
       inversify:
         specifier: 'catalog:'
         version: 8.2.3(reflect-metadata@0.2.2)
+      ioredis:
+        specifier: 'catalog:'
+        version: 5.11.1
       node-cron:
         specifier: 'catalog:'
         version: 4.6.0
