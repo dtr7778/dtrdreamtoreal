@@ -12,7 +12,7 @@ export const env = createEnv({
       .enum(["development", "production", "test"])
       .default("development"),
     DATABASE_URL: z.string().min(1),
-    BACKEND_PORT: z
+    PORT: z
       .string()
       .default("8000")
       .transform((arg) => parseInt(arg)),
@@ -60,7 +60,7 @@ export const env = createEnv({
           NODE_ENV: "test",
           DATABASE_URL:
             "postgresql://postgres:postgres@localhost:5432/postgres",
-          BACKEND_PORT: "8000",
+          PORT: "8000",
           CSRF_TOKEN: "csrf_token",
           BULLMQ_SIGNING_SECRET: "bullmq_signing_secret",
           RESEND_API_KEY: "re_any_key_works",
@@ -89,7 +89,7 @@ export const env = createEnv({
       : {
           NODE_ENV: process.env.NODE_ENV,
           DATABASE_URL: process.env.DATABASE_URL,
-          BACKEND_PORT: process.env.BACKEND_PORT,
+          PORT: process.env.PORT,
           CSRF_TOKEN: process.env.CSRF_TOKEN,
           BULLMQ_SIGNING_SECRET: process.env.BULLMQ_SIGNING_SECRET,
           RESEND_API_KEY: process.env.RESEND_API_KEY,
