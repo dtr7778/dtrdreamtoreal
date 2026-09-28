@@ -7,21 +7,29 @@ export interface IIoRedisService {
 }
 
 export interface IoRedisServiceConfig {
-  username: string;
-  password: string;
-  port: number;
-  host: string;
+  url: string;
+  tls?: boolean | object;
+  db?: number;
 }
 
 export class IoRedisService implements IIoRedisService {
   protected client: ExtendedRedis | undefined = undefined;
 
   constructor(config: IoRedisServiceConfig) {
-    this.client = new Redis({
-      port: config.port,
-      host: config.host,
-      username: config.username,
-      password: config.password,
+    this.client = new Redis(config.url, {
+      db: config.db,
+      ...(config.tls ? { tls: config.tls === true ? {} : config.tls } : {}),
+      retryStrategy: (times) => Math.min(times * 200, 5000),
+      enableReadyCheck: true,
+      lazyConnect: false,
+    });
+
+    this.client.on("error", (err) => {
+      console.error("[ioredis] connection error:", err.message);
+    });
+
+    this.client.on("connect", () => {
+      console.log("[ioredis] connected");
     });
   }
 
