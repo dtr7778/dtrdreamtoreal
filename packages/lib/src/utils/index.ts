@@ -5,5 +5,6 @@ export * from "./formatCurrency";
 export * from "./formatEnum";
 export * from "./formatError";
 export * from "./permission";
+export * from "./trustedOrigins";
 export * from "./ServiceError";
 export * from "./MailError";

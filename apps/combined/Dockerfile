@@ -18,7 +18,7 @@ ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
     CI=true \
     HUSKY=0
-RUN npm install -g pnpm@10.33.4
+RUN npm install -g pnpm@12.6.0
 WORKDIR /app
 
 # ---------------------------------------------------------------------------

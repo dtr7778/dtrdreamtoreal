@@ -13,6 +13,7 @@ import {
   createStorage,
   type IStorageService,
 } from "@workspace/lib/supabase/storage";
+import { expandTrustedOrigins } from "@workspace/lib/utils";
 import {
   createBullmqMail,
   EmailService,
@@ -213,7 +214,7 @@ container
       appName: env.APP_NAME,
       siteUrl: env.SITE_URL,
       isDev: env.NODE_ENV !== "production",
-      trustedOrigins: env.CORS_ORIGIN,
+      trustedOrigins: expandTrustedOrigins(env.CORS_ORIGIN),
       domainName: env.DOMAIN_NAME,
       errorPagePath: "/error",
       database: container.get<DatabaseType>(CONTAINER_TYPES.Drizzle),

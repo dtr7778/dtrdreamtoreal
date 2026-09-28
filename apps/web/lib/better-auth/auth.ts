@@ -2,6 +2,7 @@ import { nextCookies } from "better-auth/next-js";
 
 import { createBullmqBetterAuth } from "@workspace/auth";
 import { createSecondaryStorage } from "@workspace/auth/upstash-secondary-storage";
+import { expandTrustedOrigins } from "@workspace/lib/utils";
 
 import { ERROR_PAGE_PATH } from "@/constants";
 
@@ -16,7 +17,7 @@ export const auth = createBullmqBetterAuth({
   appName: env.NEXT_PUBLIC_SITE_NAME,
   siteUrl: env.NEXT_PUBLIC_SITE_URL,
   isDev: env.NODE_ENV !== "production",
-  trustedOrigins: [env.NEXT_PUBLIC_SITE_URL],
+  trustedOrigins: expandTrustedOrigins(env.NEXT_PUBLIC_SITE_URL),
   domainName: env.DOMAIN_NAME,
   errorPagePath: ERROR_PAGE_PATH,
   database: db,
