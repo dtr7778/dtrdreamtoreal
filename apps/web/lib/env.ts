@@ -30,6 +30,7 @@ export const env = createEnv({
     SYSTEM_MAIL: z.email().min(1),
     BETTER_AUTH_URL: z.url(),
     BETTER_AUTH_SECRET: z.string(),
+    DOMAIN_NAME: z.string().optional(),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
     SUPABASE_SECRET_KEY: z.string().min(1),
     WEB_PUSH_PRIVATE_KEY: z.string().min(1),
@@ -74,6 +75,7 @@ export const env = createEnv({
           SYSTEM_MAIL: "notifications@example.com",
           BETTER_AUTH_URL: "http://localhost:3000",
           BETTER_AUTH_SECRET: "secret",
+          DOMAIN_NAME: "example.com",
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: "client_id",
           GOOGLE_AUTH_CLIENT_SECRET: "client_secret",
           NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
@@ -109,6 +111,7 @@ export const env = createEnv({
           SYSTEM_MAIL: process.env.SYSTEM_MAIL,
           BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
           BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+          DOMAIN_NAME: process.env.DOMAIN_NAME,
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID:
             process.env.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID,
           GOOGLE_AUTH_CLIENT_SECRET: process.env.GOOGLE_AUTH_CLIENT_SECRET,

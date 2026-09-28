@@ -10,7 +10,6 @@ import { admin, haveIBeenPwned, oneTap } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
 
-import { type DatabaseType } from "@workspace/drizzle/types";
 import {
   AccountTable,
   type InsertUserActivity,
@@ -21,6 +20,7 @@ import {
   UserTable,
   VerificationTable,
 } from "@workspace/drizzle/schemas";
+import { type DatabaseType } from "@workspace/drizzle/types";
 import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
 
 import { IMailTemplates } from "../../mail/src/services/withMailTemplates.mixin";
@@ -54,6 +54,7 @@ export interface CreateBetterAuthBaseConfig {
   siteUrl: string;
   isDev: boolean;
   trustedOrigins: string[];
+  domainName?: string;
   errorPagePath: string;
   database: DatabaseType;
   secondaryStorage: SecondaryStorage;
@@ -64,6 +65,10 @@ export interface CreateBetterAuthBaseConfig {
     redirectURI: string;
   };
   plugins?: BetterAuthPlugin[];
+}
+
+function resolveCookieDomain(domainName: string): string {
+  return `.${domainName.trim().replace(/^\.+/, "")}`;
 }
 
 function getIp(headers: Headers): string {
@@ -130,6 +135,9 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       database: {
         generateId: false,
       },
+      crossSubDomainCookies: config.domainName
+        ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
+        : undefined,
     },
     databaseHooks: {
       user: {
