@@ -24,6 +24,7 @@ import {
   SOCIAL_MEDIA_TYPE,
   TASK_PRIORITY,
   TASK_STATUS,
+  USER_EVENT_TYPE,
 } from "./enum-values";
 
 export const FileEntityTypeEnumSchema = z.enum(FILE_ENTITY_TYPES);
@@ -106,3 +107,6 @@ export const AuditLogEventTypeEnumSchema = z.enum(AUDIT_LOG_EVENT_TYPE);
 export type AuditLogEventTypeEnumType = z.infer<
   typeof AuditLogEventTypeEnumSchema
 >;
+
+export const UserEventTypeEnumSchema = z.enum(USER_EVENT_TYPE);
+export type UserEventTypeEnumType = z.infer<typeof UserEventTypeEnumSchema>;

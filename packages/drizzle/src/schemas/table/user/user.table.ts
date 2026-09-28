@@ -28,6 +28,9 @@ import { SiteAuditTable } from "../siteAudit";
 import { TaskTable } from "../task";
 import { NotificationSettingsTable } from "./notificationSetting.table";
 import { PushSubscriptionTable } from "./pushSubscription.table";
+import { UserDeviceTable } from "./userDevice.table";
+import { UserEventTable } from "./userEvent.table";
+import { UserSessionTable } from "./userSession.table";
 
 export const UserTable = pgTable(
   "users",
@@ -97,6 +100,12 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   createdEmployee: many(EmployeeTable, { relationName: "EmployeeToUser" }),
   siteAudits: many(SiteAuditTable, { relationName: "SiteAuditToTriggeredBy" }),
   aiUsages: many(AiUsageTable, { relationName: "AiUsageToUser" }),
+  // auth sessions / devices / events
+  loginSessions: many(UserSessionTable, {
+    relationName: "UserSessionToUser",
+  }),
+  devices: many(UserDeviceTable, { relationName: "UserDeviceToUser" }),
+  events: many(UserEventTable, { relationName: "UserEventToUser" }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

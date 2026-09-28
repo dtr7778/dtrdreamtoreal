@@ -17,7 +17,6 @@ import {
 import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
-import { UserActivityTable } from "./user";
 import { UserTable } from "./user/user.table";
 
 export const SessionTable = pgTable(
@@ -50,14 +49,11 @@ export const SessionTable = pgTable(
   ]
 );
 
-export const SessionRelations = relations(SessionTable, ({ one, many }) => ({
+export const SessionRelations = relations(SessionTable, ({ one }) => ({
   user: one(UserTable, {
     relationName: "SessionToUser",
     fields: [SessionTable.userId],
     references: [UserTable.id],
-  }),
-  activities: many(UserActivityTable, {
-    relationName: "UserActivityToSession",
   }),
 }));
 

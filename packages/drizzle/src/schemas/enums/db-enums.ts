@@ -20,6 +20,7 @@ import {
   SOCIAL_MEDIA_TYPE,
   TASK_PRIORITY,
   TASK_STATUS,
+  USER_EVENT_TYPE,
 } from "./enum-values";
 
 export const RoleEnum = pgEnum("RoleEnum", ROLES);
@@ -82,3 +83,5 @@ export const AuditLogEventTypeEnum = pgEnum(
   "AuditLogEventTypeEnum",
   AUDIT_LOG_EVENT_TYPE
 );
+
+export const UserEventTypeEnum = pgEnum("UserEventTypeEnum", USER_EVENT_TYPE);

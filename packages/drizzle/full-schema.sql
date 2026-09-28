@@ -1,7 +1,7 @@
-◇ injected env (6) from ../../.env // tip: ⌘ enable debugging { debug: true }
+◇ injected env (6) from ../../.env // tip: ⌁ auth for agents [www.vestauth.com]
 CREATE TYPE "public"."AddressTypeEnum" AS ENUM('billing', 'shipping', 'office', 'home', 'work', 'other');
 CREATE TYPE "public"."AuditItemStatusEnum" AS ENUM('pending', 'running', 'passed', 'failed', 'warning', 'needs_review', 'error', 'skipped');
-CREATE TYPE "public"."AuditLogEventTypeEnum" AS ENUM('run_started', 'crawl_started', 'crawl_finished', 'tasks_planned', 'check_started', 'check_finished', 'progress', 'run_completed', 'run_failed', 'error');
+CREATE TYPE "public"."AuditLogEventTypeEnum" AS ENUM('run_started', 'crawl_started', 'crawl_finished', 'tasks_planned', 'check_started', 'check_finished', 'progress', 'run_completed', 'run_failed', 'error', 'report_started', 'report_generated', 'report_failed');
 CREATE TYPE "public"."AuditLogLevelEnum" AS ENUM('debug', 'info', 'warn', 'error');
 CREATE TYPE "public"."AuditStatusEnum" AS ENUM('pending', 'running', 'completed', 'failed', 'partial', 'cancelled');
 CREATE TYPE "public"."ContactStatusEnum" AS ENUM('pending', 'processing', 'replied', 'closed', 'spam');
@@ -18,6 +18,7 @@ CREATE TYPE "public"."SocialMediaPlatfromTypeEnum" AS ENUM('X', 'linkedin', 'fac
 CREATE TYPE "public"."SocialMediaTypeEnum" AS ENUM('person', 'company');
 CREATE TYPE "public"."TaskPriorityEnum" AS ENUM('low', 'medium', 'high');
 CREATE TYPE "public"."TaskStatusEnum" AS ENUM('todo', 'in_progress', 'done', 'cancelled');
+CREATE TYPE "public"."UserEventTypeEnum" AS ENUM('auth.login', 'auth.logout', 'auth.login_failed', 'auth.password_changed', 'auth.password_reset', 'device.new_detected', 'admin.impersonation');
 CREATE TABLE "contact_submissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"email_thread_id" uuid NOT NULL,
@@ -322,15 +323,45 @@ CREATE TABLE "users" (
 	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
-CREATE TABLE "user_activities" (
+CREATE TABLE "user_devices" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
-	"session_id" uuid,
+	"fingerprint" text NOT NULL,
+	"browser" text,
+	"os" text,
+	"device_type" text,
+	"first_seen_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"last_seen_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "user_sessions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"device_id" uuid,
+	"session_id" text NOT NULL,
 	"ip_address" varchar(45),
 	"user_agent" text,
 	"login_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"last_seen_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
 	"logout_at" timestamp (3) with time zone,
-	"last_seen_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+	"expires_at" timestamp (3) with time zone,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "user_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid,
+	"email" varchar(255),
+	"event" "UserEventTypeEnum" NOT NULL,
+	"session_id" text,
+	"device_id" uuid,
+	"ip_address" varchar(45),
+	"user_agent" text,
+	"metadata" jsonb,
+	"created_at" timestamp (3) with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE "notification_settings" (
@@ -499,9 +530,12 @@ ALTER TABLE "audit_items" ADD CONSTRAINT "auditItem_siteAudit_fkey" FOREIGN KEY 
 ALTER TABLE "audit_logs" ADD CONSTRAINT "auditLog_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "cwv_snapshots" ADD CONSTRAINT "cwvSnapshot_siteAudit_fkey" FOREIGN KEY ("site_audit_id") REFERENCES "public"."site_audits"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_company_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;
-ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_triggerdBy_fkey" FOREIGN KEY ("company_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
-ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
-ALTER TABLE "user_activities" ADD CONSTRAINT "user_activity_session_fkey" FOREIGN KEY ("session_id") REFERENCES "public"."sessions"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "site_audits" ADD CONSTRAINT "siteAudit_triggerdBy_fkey" FOREIGN KEY ("triggered_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "user_devices" ADD CONSTRAINT "user_device_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "user_sessions" ADD CONSTRAINT "user_session_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "user_sessions" ADD CONSTRAINT "user_session_device_fkey" FOREIGN KEY ("device_id") REFERENCES "public"."user_devices"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "user_events" ADD CONSTRAINT "user_event_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
+ALTER TABLE "user_events" ADD CONSTRAINT "user_event_device_fkey" FOREIGN KEY ("device_id") REFERENCES "public"."user_devices"("id") ON DELETE set null ON UPDATE no action;
 ALTER TABLE "notification_settings" ADD CONSTRAINT "notification_settings_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "push_subscriptions" ADD CONSTRAINT "push_subscription_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 ALTER TABLE "accounts" ADD CONSTRAINT "account_user_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
@@ -573,6 +607,7 @@ CREATE INDEX "auditItem_siteAuditId_idx" ON "audit_items" USING btree ("site_aud
 CREATE INDEX "auditItem_checklistKey_idx" ON "audit_items" USING btree ("checklist_key");
 CREATE INDEX "auditItem_status_idx" ON "audit_items" USING btree ("status");
 CREATE INDEX "auditItem_url_idx" ON "audit_items" USING btree ("url");
+CREATE UNIQUE INDEX "auditItem_site_checklist_url_unq" ON "audit_items" USING btree ("site_audit_id","checklist_key","url");
 CREATE UNIQUE INDEX "auditLog_siteAuditId_sequence_uq" ON "audit_logs" USING btree ("site_audit_id","sequence");
 CREATE INDEX "auditLog_siteAuditId_idx" ON "audit_logs" USING btree ("site_audit_id");
 CREATE INDEX "auditLog_type_idx" ON "audit_logs" USING btree ("type");
@@ -586,9 +621,16 @@ CREATE INDEX "siteAudit_companyId_idx" ON "site_audits" USING btree ("company_id
 CREATE INDEX "siteAudit_triggeredBy_idx" ON "site_audits" USING btree ("triggered_by");
 CREATE INDEX "siteAudit_createdAt_idx" ON "site_audits" USING btree ("created_at");
 CREATE UNIQUE INDEX "user_email_key" ON "users" USING btree ("email");
-CREATE INDEX "user_activity_user_id_idx" ON "user_activities" USING btree ("user_id");
-CREATE INDEX "user_activity_login_at_idx" ON "user_activities" USING btree ("login_at");
-CREATE INDEX "session_activity_last_seen_at_idx" ON "user_activities" USING btree ("last_seen_at");
+CREATE UNIQUE INDEX "user_device_user_fingerprint_idx" ON "user_devices" USING btree ("user_id","fingerprint");
+CREATE INDEX "user_device_user_id_idx" ON "user_devices" USING btree ("user_id");
+CREATE UNIQUE INDEX "user_session_session_id_idx" ON "user_sessions" USING btree ("session_id");
+CREATE INDEX "user_session_user_id_idx" ON "user_sessions" USING btree ("user_id");
+CREATE INDEX "user_session_login_at_idx" ON "user_sessions" USING btree ("login_at");
+CREATE INDEX "user_session_last_seen_at_idx" ON "user_sessions" USING btree ("last_seen_at");
+CREATE INDEX "user_event_user_id_idx" ON "user_events" USING btree ("user_id");
+CREATE INDEX "user_event_event_idx" ON "user_events" USING btree ("event");
+CREATE INDEX "user_event_created_at_idx" ON "user_events" USING btree ("created_at");
+CREATE INDEX "user_event_session_id_idx" ON "user_events" USING btree ("session_id");
 CREATE UNIQUE INDEX "notification_settings_user_category_key" ON "notification_settings" USING btree ("user_id","category");
 CREATE UNIQUE INDEX "push_subscription_endpoint_unique" ON "push_subscriptions" USING btree ("endpoint");
 CREATE INDEX "push_subscription_user_id" ON "push_subscriptions" USING btree ("user_id");
