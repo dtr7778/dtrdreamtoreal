@@ -19,7 +19,7 @@ let csrfTokenPromise: Promise<string> | null = null;
 
 async function fetchCsrfToken(): Promise<string> {
   const response = await axios.get<{ data: string }>(
-    `${backendOrigin}/csrf-token`,
+    `${backendOrigin}/api/v1/csrf-token`,
     { withCredentials: true }
   );
 

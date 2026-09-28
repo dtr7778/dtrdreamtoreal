@@ -112,7 +112,7 @@ export abstract class BaseServer implements IBaseServer {
     this.app.use(rateLimitMiddleware(rateLimit));
 
     // Registered after the rate limiter so token minting cannot be hammered.
-    this.app.get("/csrf-token", (req, res) => {
+    this.app.get(`${config.basePath}/csrf-token`, (req, res) => {
       const token = generateToken(req);
       setCsrfCookie(res, token);
       sendApiResponse(res)(
