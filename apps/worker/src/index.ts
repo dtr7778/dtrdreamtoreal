@@ -12,6 +12,7 @@ import {
   mailQueue,
 } from "@workspace/contract/worker";
 import { loadResvg } from "@workspace/generate-image";
+import { resolveRedisTls } from "@workspace/redis/client/ioRedis";
 import { CronJobService } from "@workspace/server-core/corn-job";
 import { BullMqService } from "@workspace/server-core/framework";
 
@@ -37,7 +38,7 @@ async function main() {
     connection: {
       url: env.REDIS_URL,
       maxRetriesPerRequest: null,
-      tls: {},
+      ...(resolveRedisTls(env.REDIS_URL, env.REDIS_TLS) ? { tls: {} } : {}),
     },
   });
 

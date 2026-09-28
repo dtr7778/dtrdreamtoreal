@@ -17,6 +17,10 @@ export const env = createEnv({
       .enum(["fatal", "error", "warn", "info", "debug", "trace"])
       .default("info"),
     REDIS_URL: z.string().min(1),
+    REDIS_TLS: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
+      .optional(),
     GOOGLE_PSI_BASE_URL: z
       .url()
       .default("https://www.googleapis.com/pagespeedonline/v5"),
@@ -52,6 +56,7 @@ export const env = createEnv({
           RESEND_API_KEY: process.env.RESEND_API_KEY,
           API_LOG_LEVEL: process.env.API_LOG_LEVEL,
           REDIS_URL: process.env.REDIS_URL,
+          REDIS_TLS: process.env.REDIS_TLS,
           GOOGLE_PSI_API_KEY: process.env.GOOGLE_PSI_API_KEY,
           GOOGLE_PSI_BASE_URL: process.env.GOOGLE_PSI_BASE_URL,
           GOOGLE_CRUX_API_KEY: process.env.GOOGLE_CRUX_API_KEY,

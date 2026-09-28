@@ -11,6 +11,7 @@ import {
   auditReportImageQueue,
   mailQueue,
 } from "@workspace/contract/worker";
+import { resolveRedisTls } from "@workspace/redis/client/ioRedis";
 import { BullMqService } from "@workspace/server-core/framework";
 
 import { container } from "./container/di-container";
@@ -34,7 +35,7 @@ async function main() {
       connection: {
         url: env.REDIS_URL,
         maxRetriesPerRequest: null,
-        tls: {},
+        ...(resolveRedisTls(env.REDIS_URL, env.REDIS_TLS) ? { tls: {} } : {}),
       },
     });
 

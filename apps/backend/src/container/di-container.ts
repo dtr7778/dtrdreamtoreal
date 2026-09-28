@@ -24,6 +24,7 @@ import {
 import {
   createRedisClient,
   ExtendedRedis,
+  resolveRedisTls,
 } from "@workspace/redis/client/ioRedis";
 import { LoggerInterceptor } from "@workspace/server-core/framework";
 import { AuthGuard, PermissionGuard } from "@workspace/server-core/guard";
@@ -81,7 +82,7 @@ container
   .toDynamicValue(() =>
     createRedisClient({
       url: env.REDIS_URL,
-      tls: {},
+      tls: resolveRedisTls(env.REDIS_URL, env.REDIS_TLS),
     })
   )
   .inSingletonScope();

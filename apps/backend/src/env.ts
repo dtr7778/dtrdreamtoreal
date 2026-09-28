@@ -23,6 +23,10 @@ export const env = createEnv({
       .enum(["fatal", "error", "warn", "info", "debug", "trace"])
       .default("info"),
     REDIS_URL: z.string().min(1),
+    REDIS_TLS: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
+      .optional(),
     CORS_ORIGIN: z
       .string()
       .min(1)
@@ -86,6 +90,7 @@ export const env = createEnv({
           RESEND_API_KEY: process.env.RESEND_API_KEY,
           API_LOG_LEVEL: process.env.API_LOG_LEVEL,
           REDIS_URL: process.env.REDIS_URL,
+          REDIS_TLS: process.env.REDIS_TLS,
           CORS_ORIGIN: process.env.CORS_ORIGIN,
 
           RESEND_INBOUND_WEBHOOK_SECRET:

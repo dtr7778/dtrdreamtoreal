@@ -24,6 +24,7 @@ import {
 import {
   createRedisClient,
   ExtendedRedis,
+  resolveRedisTls,
 } from "@workspace/redis/client/ioRedis";
 import {
   AuditLogService,
@@ -65,7 +66,7 @@ container
   .toDynamicValue(() =>
     createRedisClient({
       url: env.REDIS_URL,
-      tls: {},
+      tls: resolveRedisTls(env.REDIS_URL, env.REDIS_TLS),
     })
   )
   .inSingletonScope();
