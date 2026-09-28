@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
     "@workspace/auth",
     "@workspace/ai",
   ],
-  allowedDevOrigins: [process.env.NGROK_URL!],
+  allowedDevOrigins:
+    process.env.NODE_ENV === "development" ? [process.env.NGROK_URL!] : [],
   typedRoutes: true,
   reactCompiler: true,
   images: {
