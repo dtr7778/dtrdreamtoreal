@@ -40,6 +40,7 @@ async function main() {
       username: env.REDIS_USERNAME,
       password: env.REDIS_PASSWORD,
       maxRetriesPerRequest: null,
+      tls: {},
     },
   });
 
