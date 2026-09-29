@@ -1,13 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 import z from "zod";
 
+import type { InputValidationError } from "@workspace/lib/types";
+
 import { ApiError } from "../classes";
 import { ParameterType } from "../constant";
 import { MetadataExtractorService } from "../services/MetadataExtractor.service";
 import type {
   ClassConstructor,
   INextFunction,
-  InputValidationError,
   IParameterMetadata,
   IRequest,
   IResponse,

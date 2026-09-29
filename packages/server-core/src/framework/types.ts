@@ -15,22 +15,6 @@ export type INextFunction = express.NextFunction;
 export type IRequestHandler = express.RequestHandler;
 export type IRouter = express.Router;
 
-export interface InputValidationError {
-  field: string;
-  message: string;
-  code: string;
-}
-
-export interface ApiResponseType<T = unknown> {
-  success: boolean;
-  message: string;
-  statusCode: number;
-  data: T;
-  error?: unknown;
-  stack?: string;
-  inputErrors?: InputValidationError[];
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ClassConstructor<T = object> = new (...args: any[]) => T;
 

@@ -1,5 +1,7 @@
+import type { ApiResponseType } from "@workspace/lib/types";
+
 import type { ApiResponse } from "../classes";
-import type { ApiResponseType, IResponse } from "../types";
+import type { IResponse } from "../types";
 
 /**
  * Standard API response formatter

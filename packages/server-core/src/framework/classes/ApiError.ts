@@ -1,6 +1,9 @@
 import type { StatusCodes } from "http-status-codes";
 
-import { ApiResponseType, InputValidationError } from "../types";
+import type {
+  ApiResponseType,
+  InputValidationError,
+} from "@workspace/lib/types";
 
 export class ApiError extends Error {
   public statusCode: StatusCodes;
