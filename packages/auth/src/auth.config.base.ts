@@ -163,7 +163,7 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
     );
   }
 
-  const { siteUrl, trustedOrigins, crossSubDomainCookies } = getDomainConfig(
+  const { siteUrl } = getDomainConfig(
     config.domainName,
     config.isDev,
     config?.port
@@ -186,12 +186,10 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       storage: "secondary-storage",
     },
     telemetry: { enabled: true },
-    trustedOrigins,
     advanced: {
       database: {
         generateId: false,
       },
-      crossSubDomainCookies: crossSubDomainCookies,
     },
     databaseHooks: {
       user: {
