@@ -24,6 +24,7 @@ if (isSentryEnabled(dsn) || isSpotlightEnabled(spotlightValue)) {
     tracesSampleRate: resolveTracesSampleRate(),
     dataCollection: resolveDataCollection(),
     integrations: [
+      Sentry.spotlightBrowserIntegration(),
       Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] }),
     ],
     initialScope: { tags: appTag("web") },
