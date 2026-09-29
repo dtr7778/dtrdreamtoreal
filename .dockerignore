@@ -17,7 +17,8 @@ graphify-out
 # Local infra, database and seed data (not needed to build the backend)
 infra
 supabase
-scripts
+scripts/*
+!scripts/upload-sourcemaps.mjs
 
 # Environment / secret files
 .env
