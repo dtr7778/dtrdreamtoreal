@@ -15,7 +15,7 @@ export type ContractInput = {
   params?: z.ZodObject<z.ZodRawShape>;
   query?: z.ZodObject<z.ZodRawShape>;
 };
-export type ContractOutput = z.ZodTypeAny;
+export type ContractOutput = z.ZodType;
 
 export interface ContractInputs<
   TInput extends ContractInput = ContractInput,
