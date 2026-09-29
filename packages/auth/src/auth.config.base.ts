@@ -163,11 +163,13 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
     );
   }
 
-  const { siteUrl, baseURL, trustedOrigins, crossSubDomainCookies } =
-    getDomainConfig(config.domainName, config.isDev, config?.port);
+  const { siteUrl, trustedOrigins, crossSubDomainCookies } = getDomainConfig(
+    config.domainName,
+    config.isDev,
+    config?.port
+  );
 
   return betterAuth({
-    baseURL,
     secret: config.secret,
     appName: config.appName,
     database: drizzleAdapter(config.database, {
