@@ -152,7 +152,17 @@ function getDomainConfig(
  * them in here.
  */
 export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
-  const defaultPlugins: Array<BetterAuthPlugin> = [];
+  const defaultPlugins: Array<BetterAuthPlugin> = [
+    admin({
+      ac: systemAc,
+      roles: systemRoles,
+      defaultRole: RoleEnumSchema.enum.USER,
+      adminRoles: [RoleEnumSchema.enum.ADMIN, RoleEnumSchema.enum.SUPER_ADMIN],
+      defaultBanExpiresIn: 60 * 60 * 24 * 10, // 10 day
+      bannedUserMessage: "Your account is currently banned",
+    }),
+    oneTap(),
+  ];
 
   if (!config.isDev) {
     defaultPlugins.push(
@@ -163,13 +173,13 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
     );
   }
 
-  const { siteUrl } = getDomainConfig(
-    config.domainName,
-    config.isDev,
-    config?.port
-  );
+  const { siteUrl, baseURL, trustedOrigins, crossSubDomainCookies } =
+    getDomainConfig(config.domainName, config.isDev, config?.port);
+
+  console.log({ siteUrl, baseURL, trustedOrigins, crossSubDomainCookies });
 
   return betterAuth({
+    baseURL,
     secret: config.secret,
     appName: config.appName,
     database: drizzleAdapter(config.database, {
@@ -186,10 +196,12 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       storage: "secondary-storage",
     },
     telemetry: { enabled: true },
+    trustedOrigins,
     advanced: {
       database: {
         generateId: false,
       },
+      crossSubDomainCookies: crossSubDomainCookies,
     },
     databaseHooks: {
       user: {
@@ -510,22 +522,7 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
         assertMailSent(result);
       },
     },
-    plugins: [
-      admin({
-        ac: systemAc,
-        roles: systemRoles,
-        defaultRole: RoleEnumSchema.enum.USER,
-        adminRoles: [
-          RoleEnumSchema.enum.ADMIN,
-          RoleEnumSchema.enum.SUPER_ADMIN,
-        ],
-        defaultBanExpiresIn: 60 * 60 * 24 * 10, // 10 day
-        bannedUserMessage: "Your account is currently banned",
-      }),
-      ...defaultPlugins,
-      oneTap(),
-      ...(config.plugins ?? []),
-    ],
+    plugins: [...defaultPlugins, ...(config.plugins ?? [])],
   });
 }
 
