@@ -29,12 +29,22 @@ RUN pnpm dlx turbo prune worker --docker --out-dir /out
 # builder: install the pruned workspace, then bundle the worker
 # ---------------------------------------------------------------------------
 FROM base AS builder
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+ARG SENTRY_RELEASE
+ENV SENTRY_ORG=$SENTRY_ORG \
+    SENTRY_PROJECT=$SENTRY_PROJECT \
+    SENTRY_RELEASE=$SENTRY_RELEASE
 COPY --from=pruner /out/json/ ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --store-dir=/pnpm/store
 COPY --from=pruner /out/full/ ./
+COPY scripts/upload-sourcemaps.mjs ./scripts/upload-sourcemaps.mjs
 RUN pnpm --filter @workspace/tsup-config build \
     && pnpm --filter worker build
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" \
+    node scripts/upload-sourcemaps.mjs apps/worker/dist
 
 # ---------------------------------------------------------------------------
 # prod-deps: minimal production node_modules
@@ -51,7 +61,9 @@ RUN node -e "const fs=require('fs');const p='apps/worker/package.json';const j=J
 # runner: slim runtime image
 # ---------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-alpine AS runner
-ENV NODE_ENV=production
+ARG SENTRY_RELEASE
+ENV NODE_ENV=production \
+    SENTRY_RELEASE=${SENTRY_RELEASE}
 WORKDIR /app
 RUN addgroup -S -g 1001 nodejs \
     && adduser -S -u 1001 -G nodejs nodejs

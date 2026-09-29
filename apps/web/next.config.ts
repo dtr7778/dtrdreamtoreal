@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+import { withSentryConfig } from "@sentry/nextjs/config";
 import { withSerwist } from "@serwist/turbopack";
 
 const nextConfig: NextConfig = {
@@ -12,6 +13,7 @@ const nextConfig: NextConfig = {
     "@workspace/contract",
     "@workspace/auth",
     "@workspace/ai",
+    "@workspace/sentry",
   ],
   allowedDevOrigins:
     process.env.NODE_ENV === "development" ? [process.env.NGROK_URL!] : [],
@@ -54,4 +56,15 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSerwist(nextConfig);
+const authToken = process.env.SENTRY_AUTH_TOKEN;
+
+export default withSentryConfig(withSerwist(nextConfig), {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+  release: { name: process.env.SENTRY_RELEASE },
+  sourcemaps: { disable: !authToken },
+});

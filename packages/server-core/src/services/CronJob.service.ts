@@ -1,6 +1,8 @@
 import type { Container } from "inversify";
 import cron, { type ScheduledTask } from "node-cron";
 
+import { captureWithContext } from "@workspace/sentry/helpers";
+
 import { MetadataExtractorService } from "../framework/services/MetadataExtractor.service";
 import type { ClassConstructor, ICronJobDefinition } from "../framework/types";
 
@@ -50,6 +52,10 @@ export class CronJobService {
             `❌ [${new Date().toISOString()}] Error in job ${jobName}:`,
             error
           );
+          captureWithContext(error, {
+            app: "worker",
+            tags: { app: "worker", cron: jobName ?? "unnamed" },
+          });
         }
       },
       {
@@ -64,6 +70,10 @@ export class CronJobService {
       console.log(`🚀 Running job on initialization: ${jobName}`);
       Promise.resolve(method.call(jobInstance)).catch((error) => {
         console.error(`❌ Error running job ${jobName} on init:`, error);
+        captureWithContext(error, {
+          app: "worker",
+          tags: { app: "worker", cron: jobName ?? "unnamed" },
+        });
       });
     }
   }

@@ -3,6 +3,7 @@ import NextError from "next/error";
 import Link from "next/link";
 import { useEffect } from "react";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 
 import { Button } from "@workspace/ui/components/button";
@@ -19,7 +20,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (

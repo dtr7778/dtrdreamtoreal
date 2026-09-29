@@ -37,6 +37,14 @@ export const env = createEnv({
     SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
     OPENROUTER_API_KEY: z.string().min(1),
     OPENROUTER_MODEL: z.string().min(1),
+    SENTRY_DSN: z.url().optional(),
+    SENTRY_ENVIRONMENT: z.string().optional(),
+    SENTRY_RELEASE: z.string().optional(),
+    SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
+    SENTRY_DISABLED: z.enum(["true", "false"]).optional(),
+    SENTRY_AUTH_TOKEN: z.string().optional(),
+    SENTRY_ORG: z.string().optional(),
+    SENTRY_PROJECT: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_NODE_ENV: z
@@ -49,6 +57,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: z.string().min(1),
     NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY: z.string().min(1),
     NEXT_PUBLIC_BACKEND_URL: z.url().min(1),
+    NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test" ||
@@ -87,6 +96,15 @@ export const env = createEnv({
           OPENROUTER_API_KEY: "sk-or-test-key",
           OPENROUTER_MODEL: "google/gemini-2.5-flash-lite",
           NEXT_PUBLIC_BACKEND_URL: "http://localhost:8000/api/v1",
+          SENTRY_DSN: undefined,
+          SENTRY_ENVIRONMENT: undefined,
+          SENTRY_RELEASE: undefined,
+          SENTRY_TRACES_SAMPLE_RATE: undefined,
+          SENTRY_DISABLED: "true",
+          SENTRY_AUTH_TOKEN: undefined,
+          SENTRY_ORG: undefined,
+          SENTRY_PROJECT: undefined,
+          NEXT_PUBLIC_SENTRY_DSN: undefined,
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -127,5 +145,14 @@ export const env = createEnv({
           OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
           OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
           NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
+          SENTRY_DSN: process.env.SENTRY_DSN,
+          SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT,
+          SENTRY_RELEASE: process.env.SENTRY_RELEASE,
+          SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE,
+          SENTRY_DISABLED: process.env.SENTRY_DISABLED,
+          SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+          SENTRY_ORG: process.env.SENTRY_ORG,
+          SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+          NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
         },
 });

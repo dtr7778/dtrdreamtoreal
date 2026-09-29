@@ -51,6 +51,11 @@ export const env = createEnv({
     SUPABASE_URL: z.url(),
     SUPABASE_SECRET_KEY: z.string().min(1),
     SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
+    SENTRY_DSN: z.url().optional(),
+    SENTRY_ENVIRONMENT: z.string().optional(),
+    SENTRY_RELEASE: z.string().optional(),
+    SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
+    SENTRY_DISABLED: z.enum(["true", "false"]).optional(),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test"
@@ -111,5 +116,10 @@ export const env = createEnv({
           SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
           SUPABASE_STORAGE_BUCKET_NAME:
             process.env.SUPABASE_STORAGE_BUCKET_NAME,
+          SENTRY_DSN: process.env.SENTRY_DSN,
+          SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT,
+          SENTRY_RELEASE: process.env.SENTRY_RELEASE,
+          SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE,
+          SENTRY_DISABLED: process.env.SENTRY_DISABLED,
         },
 });

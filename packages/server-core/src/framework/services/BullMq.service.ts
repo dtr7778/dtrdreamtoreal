@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import {
   type ConnectionOptions,
   type Job,
@@ -11,6 +12,7 @@ import type { Container } from "inversify";
 import { BULLMQ_DEFAULT_PREFIX } from "@workspace/lib/bullmq";
 import type { IQueueContract } from "@workspace/lib/bullmq";
 import { QueueProducer } from "@workspace/lib/bullmq";
+import { captureWithContext } from "@workspace/sentry/helpers";
 
 import type { ClassConstructor, IWorkerMetadata } from "../types";
 import { MetadataExtractorService } from "./MetadataExtractor.service";
@@ -198,24 +200,48 @@ export class BullMqService {
     const worker = new Worker(
       queueName,
       async (job: Job, token?: string, signal?: AbortSignal) => {
-        const methodName =
-          namedWorkerNodes.get(job.name) ?? defaultWorkerNodes?.methodName;
+        return Sentry.withIsolationScope(async () => {
+          Sentry.setTags({
+            app: "worker",
+            queue: queueName,
+            job: job.name,
+          });
 
-        if (!methodName) {
-          throw new Error(
-            `[BullMQ] No @Worker() handler found for job "${job.name}" on queue "${queueName}" (worker ${metadata.workerClass.name}).`
-          );
-        }
+          const methodName =
+            namedWorkerNodes.get(job.name) ?? defaultWorkerNodes?.methodName;
 
-        const handler = (workerInstance as Record<string, unknown>)[methodName];
+          if (!methodName) {
+            throw new Error(
+              `[BullMQ] No @Worker() handler found for job "${job.name}" on queue "${queueName}" (worker ${metadata.workerClass.name}).`
+            );
+          }
 
-        if (typeof handler !== "function") {
-          throw new Error(
-            `[BullMQ] Handler "${methodName}" is not a function on ${metadata.workerClass.name}.`
-          );
-        }
+          const handler = (workerInstance as Record<string, unknown>)[
+            methodName
+          ];
 
-        return handler.call(workerInstance, job, token, signal);
+          if (typeof handler !== "function") {
+            throw new Error(
+              `[BullMQ] Handler "${methodName}" is not a function on ${metadata.workerClass.name}.`
+            );
+          }
+
+          try {
+            return await handler.call(workerInstance, job, token, signal);
+          } catch (error) {
+            captureWithContext(error, {
+              app: "worker",
+              tags: {
+                app: "worker",
+                queue: queueName,
+                job: job.name,
+                attempt: String(job.attemptsMade + 1),
+              },
+              contexts: { job: { id: job.id, name: job.name } },
+            });
+            throw error;
+          }
+        });
       },
       {
         ...workerOptions,
@@ -223,6 +249,23 @@ export class BullMqService {
         prefix: this.prefix,
       }
     );
+
+    worker.on("error", (error) => {
+      captureWithContext(error, {
+        app: "worker",
+        tags: { app: "worker", queue: queueName, event: "error" },
+      });
+    });
+
+    worker.on("stalled", (jobId) => {
+      captureWithContext(
+        new Error(`[BullMQ] Job stalled: ${jobId} on queue "${queueName}"`),
+        {
+          app: "worker",
+          tags: { app: "worker", queue: queueName, event: "stalled" },
+        }
+      );
+    });
 
     this.bindWorkerEvents(
       worker,
