@@ -51,6 +51,7 @@ export const env = createEnv({
     SUPABASE_URL: z.url(),
     SUPABASE_SECRET_KEY: z.string().min(1),
     SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
+    SENTRY_DSN: z.url().optional(),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test"
@@ -80,6 +81,7 @@ export const env = createEnv({
           SUPABASE_URL: "https://example.supabase.co",
           SUPABASE_SECRET_KEY: "supabase_secret_key",
           SUPABASE_STORAGE_BUCKET_NAME: "bucket",
+          SENTRY_DSN: "sentry_dns",
         }
       : {
           NODE_ENV: process.env.NODE_ENV,
@@ -111,5 +113,6 @@ export const env = createEnv({
           SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
           SUPABASE_STORAGE_BUCKET_NAME:
             process.env.SUPABASE_STORAGE_BUCKET_NAME,
+          SENTRY_DSN: process.env.SENTRY_DSN,
         },
 });

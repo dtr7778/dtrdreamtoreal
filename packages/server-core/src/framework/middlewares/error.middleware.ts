@@ -5,12 +5,13 @@ import { MailError, ServiceError } from "@workspace/lib/utils";
 
 import { ApiError } from "../classes";
 import { API_MESSAGE } from "../constant";
+import { captureServerError } from "../sentry";
 import type { INextFunction, IRequest, IResponse } from "../types";
 import { sendApiResponse } from "../utils";
 
 export function errorMiddleware(
   err: unknown,
-  _req: IRequest,
+  req: IRequest,
   res: IResponse,
   next: INextFunction
 ) {
@@ -22,6 +23,22 @@ export function errorMiddleware(
   }
 
   const error: ApiError = getServerError(err);
+
+  if (error.statusCode >= 500) {
+    const request = req as IRequest & {
+      id?: string;
+      method?: string;
+      originalUrl?: string;
+      user?: { id?: string };
+    };
+
+    captureServerError(err, {
+      requestId: request.id,
+      userId: request.user?.id,
+      method: request.method,
+      route: request.originalUrl,
+    });
+  }
 
   const errorData = error.toApiResponse();
 

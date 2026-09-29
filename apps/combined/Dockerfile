@@ -32,13 +32,26 @@ RUN pnpm dlx turbo prune backend worker --docker --out-dir /out
 # builder: install the pruned workspace, then bundle both apps
 # ---------------------------------------------------------------------------
 FROM base AS builder
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+ARG SENTRY_RELEASE
+ENV SENTRY_ORG=$SENTRY_ORG \
+    SENTRY_PROJECT=$SENTRY_PROJECT \
+    SENTRY_RELEASE=$SENTRY_RELEASE
 COPY --from=pruner /out/json/ ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --store-dir=/pnpm/store
 COPY --from=pruner /out/full/ ./
+COPY scripts/upload-sourcemaps.mjs ./scripts/upload-sourcemaps.mjs
 RUN pnpm --filter @workspace/tsup-config build \
     && pnpm --filter backend build \
     && pnpm --filter worker build
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" \
+    node scripts/upload-sourcemaps.mjs apps/backend/dist
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" \
+    node scripts/upload-sourcemaps.mjs apps/worker/dist
 
 # ---------------------------------------------------------------------------
 # prod-deps: minimal production node_modules for each app.
@@ -57,8 +70,10 @@ RUN node -e "const fs=require('fs');for(const p of ['apps/backend/package.json',
 # runner: slim runtime image running both processes via the supervisor
 # ---------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-alpine AS runner
+ARG SENTRY_RELEASE
 ENV NODE_ENV=production \
-    PORT=8000
+    PORT=8000 \
+    SENTRY_RELEASE=${SENTRY_RELEASE}
 WORKDIR /app
 RUN addgroup -S -g 1001 nodejs \
     && adduser -S -u 1001 -G nodejs nodejs

@@ -4,6 +4,7 @@
   "globalEnv": [
     "NODE_ENV",
     "SKIP_ENV_VALIDATION",
+    "CI",
     "TRUST_PROXY",
     "DATABASE_URL",
     "REDIS_REST_URL",
@@ -44,7 +45,17 @@
     "API_LOG_LEVEL",
     "CORS_ORIGIN",
     "OPENROUTER_API_KEY",
-    "OPENROUTER_MODEL"
+    "OPENROUTER_MODEL",
+    "SENTRY_DSN",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "SENTRY_ENVIRONMENT",
+    "SENTRY_RELEASE",
+    "SENTRY_TRACES_SAMPLE_RATE",
+    "SENTRY_ENABLE_LOGS",
+    "SENTRY_DISABLED",
+    "SENTRY_AUTH_TOKEN",
+    "SENTRY_ORG",
+    "SENTRY_PROJECT"
   ],
   "tasks": {
     "build": {

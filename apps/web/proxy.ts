@@ -73,10 +73,11 @@ export const config = {
      * Match all request paths except for the ones starting with:
      * - api (API routes)
      * - orpc (orpc routes)
+     * - monitoring (Sentry tunnel route)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    "/((?!api|orpc|_next/static|_next/image|serwist|manifest.webmanifest|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|orpc|monitoring|~offline|_next/static|_next/image|serwist|manifest.webmanifest|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -52,6 +52,8 @@
   },
   "dependencies": {
     "reflect-metadata": "catalog:",
+    "@sentry/node": "catalog:",
+    "@workspace/sentry": "workspace:*",
     "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@date-fns/tz": "catalog:",
     "@fontsource/inter": "catalog:",

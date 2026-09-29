@@ -44,6 +44,7 @@
   "dependencies": {
     "@fontsource/inter": "catalog:",
     "@resvg/resvg-wasm": "catalog:",
+    "@sentry/node": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@workspace/contract": "workspace:*",
     "@workspace/drizzle": "workspace:*",
@@ -51,6 +52,7 @@
     "@workspace/lib": "workspace:*",
     "@workspace/mail": "workspace:*",
     "@workspace/redis": "workspace:*",
+    "@workspace/sentry": "workspace:*",
     "@workspace/server-core": "workspace:*",
     "axios": "catalog:",
     "bullmq": "catalog:",

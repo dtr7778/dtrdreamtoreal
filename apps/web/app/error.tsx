@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertCircle, Home, RefreshCw } from "lucide-react";
 
 import { Button } from "@workspace/ui/components/button";
@@ -13,6 +15,10 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
       <div className="relative z-10 mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 lg:px-8">

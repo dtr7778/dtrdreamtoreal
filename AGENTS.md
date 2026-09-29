@@ -127,9 +127,20 @@ Requires a local `.env` per app (copied from the corresponding `.env.example`) a
 - `apps/backend` + `apps/worker` share `server-core` but keep separate DI containers and container-type symbol maps; names must stay in sync.
 - Read `node_modules/next/dist/docs/` before touching `apps/web` — this Next.js differs from training data.
 
+## Observability
+
+- **Sentry** is the unified error/tracing/logs layer. One Sentry project is shared by all apps; events are separated by an `app` tag (`web` | `backend` | `worker`) and by `environment`.
+- Shared policy lives in `@workspace/sentry` (`config`: env/release/sampling/data-collection/`scrubEvent`; `helpers`: `captureWithContext`). Web uses `@sentry/nextjs`; backend + worker use `@sentry/node`.
+- Backend captures 5xx/unexpected errors centrally in server-core's `errorMiddleware`; BullMQ failures are captured once in the job processor (`failed` events are deliberately not double-captured), plus worker `error`/`stalled` and cron failures.
+- pino logs are bridged into Sentry Logs via `@sentry/node`'s `pinoIntegration` (warn+ in production). No change to `@workspace/lib`'s logger.
+- **Sentry is a no-op when `SENTRY_DSN` is unset** or `SENTRY_DISABLED=true`; unit tests never hit the network. Do not make Sentry env vars required.
+- Env vars: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENABLE_LOGS`, `SENTRY_DISABLED`; build-time `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`. Dev app sets `SENTRY_DISABLED=true`.
+- Source maps: web uploads via `withSentryConfig`; backend/worker/combined run `scripts/upload-sourcemaps.mjs` in the Docker builder (before `.map` deletion) when `SENTRY_AUTH_TOKEN` is present. CD passes `SENTRY_RELEASE=${GITHUB_SHA}` as a build arg and the token as a BuildKit secret; token-less local/CI builds still succeed.
+
 ## Docs
 
 - Specs and design docs live in `docs/superpowers/specs/` (e.g. the worker/backend split).
+- The Sentry integration design + plan live in `docs/superpowers/specs/2026-09-29-sentry-error-tracking-design.md` and `docs/superpowers/plans/2026-09-29-sentry-error-tracking.md`.
 
 ## graphify
 

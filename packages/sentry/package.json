@@ -1,0 +1,40 @@
+{
+  "name": "@workspace/sentry",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    "./config": "./src/config.ts",
+    "./helpers": "./src/helpers.ts"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@sentry/core": "catalog:"
+  }
+}
