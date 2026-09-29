@@ -70,9 +70,9 @@ export interface CreateBetterAuthBaseConfig {
   plugins?: BetterAuthPlugin[];
 }
 
-function resolveCookieDomain(domainName: string): string {
-  return `.${domainName.trim().replace(/^\.+/, "")}`;
-}
+// function resolveCookieDomain(domainName: string): string {
+//   return `.${domainName.trim().replace(/^\.+/, "")}`;
+// }
 
 function getIp(headers: Headers): string {
   return (
@@ -156,10 +156,10 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       database: {
         generateId: false,
       },
-      crossSubDomainCookies:
-        config.domainName && !config.isDev
-          ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
-          : undefined,
+      // crossSubDomainCookies:
+      //   config.domainName && !config.isDev
+      //     ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
+      //     : undefined,
     },
     databaseHooks: {
       user: {
