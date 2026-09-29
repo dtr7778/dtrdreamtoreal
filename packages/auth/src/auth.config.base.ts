@@ -70,9 +70,9 @@ export interface CreateBetterAuthBaseConfig {
   plugins?: BetterAuthPlugin[];
 }
 
-// function resolveCookieDomain(domainName: string): string {
-//   return `.${domainName.trim().replace(/^\.+/, "")}`;
-// }
+function resolveCookieDomain(domainName: string): string {
+  return `.${domainName.trim().replace(/^\.+/, "")}`;
+}
 
 function getIp(headers: Headers): string {
   return (
@@ -156,19 +156,14 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       database: {
         generateId: false,
       },
-      // crossSubDomainCookies:
-      //   config.domainName && !config.isDev
-      //     ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
-      //     : undefined,
+      crossSubDomainCookies:
+        config.domainName && !config.isDev
+          ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
+          : undefined,
     },
     databaseHooks: {
       user: {
         create: {
-          before: async () => {
-            throw new APIError("BAD_REQUEST", {
-              message: "Register is currently disabled",
-            });
-          },
           after: async (user) => {
             // 1. Find the default USER role
             const [defaultRole] = await config.database
@@ -414,7 +409,6 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
         redirectURI: config.google.redirectURI,
         accessType: "offline",
         prompt: "select_account",
-        disableSignUp: true,
       },
     },
     user: {
@@ -466,7 +460,6 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       autoSignIn: false,
       requireEmailVerification: true,
       resetPasswordTokenExpiresIn: 60 * 60,
-      disableSignUp: true,
       sendResetPassword: async ({ user, url }) => {
         try {
           await createUserEvent(config.database, {
