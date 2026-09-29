@@ -16,10 +16,12 @@ import { resolveRedisTls } from "@workspace/redis/client/ioRedis";
 import {
   appTag,
   isSentryEnabled,
+  isSpotlightEnabled,
   resolveDataCollection,
   resolveEnvironment,
   resolveLogLevels,
   resolveRelease,
+  resolveSpotlight,
   resolveTracesSampleRate,
   scrubEvent,
 } from "@workspace/sentry/config";
@@ -36,9 +38,10 @@ config({
   path: [join(process.cwd(), ".env")],
 });
 
-if (isSentryEnabled(env.SENTRY_DSN)) {
+if (isSentryEnabled(env.SENTRY_DSN) || isSpotlightEnabled()) {
   Sentry.init({
     dsn: env.SENTRY_DSN,
+    spotlight: resolveSpotlight(),
     environment: resolveEnvironment(),
     release: resolveRelease(),
     tracesSampleRate: resolveTracesSampleRate(),

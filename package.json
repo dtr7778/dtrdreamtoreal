@@ -26,7 +26,8 @@
     "docker:dev:down": "bash scripts/docker-compose-wrapper.sh -f ./infra/docker/docker-compose-dev.yml down",
     "test": "turbo test",
     "test:projects": "vitest run",
-    "test:projects:watch": "vitest --watch"
+    "test:projects:watch": "vitest --watch",
+    "start:server": "turbo -F web -F backend -F worker dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "catalog:"

@@ -48,6 +48,15 @@ services:
     networks:
       - dtr_dream_to_real_network
 
+  spotlight:
+    image: ghcr.io/getsentry/spotlight:latest
+    container_name: spotlight
+    restart: unless-stopped
+    ports:
+      - "8969:8969"
+    networks:
+      - dtr_dream_to_real_network
+
 networks:
   dtr_dream_to_real_network:
     driver: bridge

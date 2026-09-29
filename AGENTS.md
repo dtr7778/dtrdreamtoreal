@@ -134,7 +134,8 @@ Requires a local `.env` per app (copied from the corresponding `.env.example`) a
 - Backend captures 5xx/unexpected errors centrally in server-core's `errorMiddleware`; BullMQ failures are captured once in the job processor (`failed` events are deliberately not double-captured), plus worker `error`/`stalled` and cron failures.
 - pino logs are bridged into Sentry Logs via `@sentry/node`'s `pinoIntegration` (warn+ in production). No change to `@workspace/lib`'s logger.
 - **Sentry is a no-op when `SENTRY_DSN` is unset** or `SENTRY_DISABLED=true`; unit tests never hit the network. Do not make Sentry env vars required.
-- Env vars: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENABLE_LOGS`, `SENTRY_DISABLED`; build-time `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`. Dev app sets `SENTRY_DISABLED=true`.
+- **Spotlight (local dev)**: set `SENTRY_SPOTLIGHT=true` (and `NEXT_PUBLIC_SENTRY_SPOTLIGHT=true` for the browser) to stream errors/traces/logs to the local Spotlight sidecar even without a DSN. Start it with `pnpm docker:dev:up` (service `spotlight`, UI at `http://localhost:8969`). Set `SENTRY_SPOTLIGHT` to a URL to point at a custom sidecar. `SENTRY_DSN=` (empty) is treated as "unset".
+- Env vars: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENABLE_LOGS`, `SENTRY_DISABLED`, `SENTRY_SPOTLIGHT`, `NEXT_PUBLIC_SENTRY_SPOTLIGHT`; build-time `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`. Dev app sets `SENTRY_DISABLED=true`.
 - Source maps: web uploads via `withSentryConfig`; backend/worker/combined run `scripts/upload-sourcemaps.mjs` in the Docker builder (before `.map` deletion) when `SENTRY_AUTH_TOKEN` is present. CD passes `SENTRY_RELEASE=${GITHUB_SHA}` as a build arg and the token as a BuildKit secret; token-less local/CI builds still succeed.
 
 ## Docs
