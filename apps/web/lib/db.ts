@@ -15,8 +15,6 @@ export const db: DatabaseType =
     databaseUrl: env.DATABASE_URL,
     isProd: env.NODE_ENV === "production",
     operationMode: "normal",
-    redisUrl: env.REDIS_REST_URL,
-    redisToken: env.REDIS_REST_TOKEN,
   });
 
 if (env.NODE_ENV !== "production") {
