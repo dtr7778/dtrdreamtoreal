@@ -1,6 +1,9 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import z from "zod";
 
+const domainRegex =
+  /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+
 export const env = createEnv({
   // Only validate in server and test environments
   isServer: typeof window === "undefined" || process.env.NODE_ENV === "test",
@@ -28,9 +31,11 @@ export const env = createEnv({
     RESEND_EVENT_WEBHOOK_SECRET: z.string().min(1),
     SUPPORT_MAIL: z.email().min(1),
     SYSTEM_MAIL: z.email().min(1),
-    BETTER_AUTH_URL: z.url(),
     BETTER_AUTH_SECRET: z.string(),
-    DOMAIN_NAME: z.string().optional(),
+    DOMAIN_NAME: z
+      .string()
+      .transform((val) => val.replace("www.", ""))
+      .pipe(z.string().regex(domainRegex, "Invalid DOMAIN_NAME format")),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
     SUPABASE_SECRET_KEY: z.string().min(1),
     WEB_PUSH_PRIVATE_KEY: z.string().min(1),
@@ -73,7 +78,6 @@ export const env = createEnv({
           RESEND_EVENT_WEBHOOK_SECRET: "resend_event_webhook_secret",
           SUPPORT_MAIL: "support@example.com",
           SYSTEM_MAIL: "notifications@example.com",
-          BETTER_AUTH_URL: "http://localhost:3000",
           BETTER_AUTH_SECRET: "secret",
           DOMAIN_NAME: "example.com",
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID: "client_id",
@@ -109,7 +113,6 @@ export const env = createEnv({
           RESEND_EVENT_WEBHOOK_SECRET: process.env.RESEND_EVENT_WEBHOOK_SECRET,
           SUPPORT_MAIL: process.env.SUPPORT_MAIL,
           SYSTEM_MAIL: process.env.SYSTEM_MAIL,
-          BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
           BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
           DOMAIN_NAME: process.env.DOMAIN_NAME,
           NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID:
