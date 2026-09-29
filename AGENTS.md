@@ -96,6 +96,16 @@ Requires a local `.env` per app (copied from the corresponding `.env.example`) a
 
 - **better-auth** with the Drizzle adapter; configs in `packages/auth` (`auth.config.base.ts` plus bullmq/qstash variants). Web route `app/api/auth/[...all]` + `proxy.ts` session guard; backend mounts the node handler.
 
+## CSRF
+
+- Signed **double-submit cookie**, implemented in `packages/server-core/src/framework/csrf` (`csrf.ts` + `createCsrf.ts`) and mounted by `BaseServer`. Intentionally app-specific, not a generic/dependency-backed middleware.
+- Token format is `hmac.random`, where `hmac = HMAC-SHA256(CSRF_TOKEN, random)` over 32 random bytes. A valid cookie token is reused while it keeps verifying.
+- Cookie is hardcoded: `psifi.x-csrf-token` in dev, `__Host-psifi.x-csrf-token` in production; `httpOnly`, `SameSite=Lax`, `Secure` in production, `Path=/`. Header name is hardcoded to `x-csrf-token`.
+- `GET /csrf-token` issues the token (body + `Set-Cookie`). The cookie is `httpOnly`, so the browser sends it automatically while the SPA echoes the body value in the `x-csrf-token` header.
+- `validateCsrfToken` requires the cookie and header to be present, equal, and HMAC-valid. `GET`/`HEAD`/`OPTIONS` are exempt; `ignoredPaths` (relative to `basePath`) exempt provider webhooks — backend config is `{ secret: env.CSRF_TOKEN, ignoredPaths: ["/mails"] }`.
+- Client (`apps/web/lib/api.ts`) lazily fetches the token behind a single-flight promise, sets `x-csrf-token` on mutating requests, and on `403` clears the cache and retries exactly once (guarded by `_csrfRetried`).
+- Config surface is deliberately minimal: `{ secret, ignoredPaths?, basePath? }`. Everything else is a hardcoded constant; there is no session/IP binding.
+
 ## Queues & jobs
 
 - **BullMQ** (Redis) is the primary queue; contract definitions in `packages/contract/src/worker/contracts` (`mail`, `audit`, `audit-report`).
