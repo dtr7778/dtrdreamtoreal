@@ -39,7 +39,7 @@ export class Server extends BaseServer {
         redisClient: container.get<ExtendedRedis>(CONTAINER_TYPES.Redis),
       },
       interceptors: [LoggerInterceptor],
-      beforeBodyParser: (app) => {
+      beforeSecurityMiddleware: (app) => {
         app.all(
           "/api/auth/*splat",
           toNodeHandler(container.get<AuthType>(CONTAINER_TYPES.Auth))
