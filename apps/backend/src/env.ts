@@ -1,6 +1,9 @@
 import { createEnv } from "@t3-oss/env-core";
 import z from "zod";
 
+const domainRegex =
+  /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+
 export const env = createEnv({
   skipValidation:
     process.env.NODE_ENV === "test" ||
@@ -41,10 +44,12 @@ export const env = createEnv({
     RESEND_EVENT_WEBHOOK_SECRET: z.string().min(1),
     APP_NAME: z.string().min(1),
     SITE_URL: z.url(),
-    DOMAIN_NAME: z.string().optional(),
+    DOMAIN_NAME: z
+      .string()
+      .transform((val) => val.replace("www.", ""))
+      .pipe(z.string().regex(domainRegex, "Invalid DOMAIN_NAME format")),
     SUPPORT_MAIL: z.email(),
     SYSTEM_MAIL: z.email(),
-    BETTER_AUTH_URL: z.url(),
     BETTER_AUTH_SECRET: z.string().min(1),
     GOOGLE_AUTH_CLIENT_ID: z.string().min(1),
     GOOGLE_AUTH_CLIENT_SECRET: z.string().min(1),
@@ -74,7 +79,6 @@ export const env = createEnv({
           DOMAIN_NAME: undefined,
           SUPPORT_MAIL: "support@example.com",
           SYSTEM_MAIL: "system@acme.com",
-          BETTER_AUTH_URL: "http://localhost:8000",
           BETTER_AUTH_SECRET: "secret",
           GOOGLE_AUTH_CLIENT_ID: "client_id",
           GOOGLE_AUTH_CLIENT_SECRET: "client_secret",
@@ -105,7 +109,6 @@ export const env = createEnv({
           DOMAIN_NAME: process.env.DOMAIN_NAME,
           SUPPORT_MAIL: process.env.SUPPORT_MAIL,
           SYSTEM_MAIL: process.env.SYSTEM_MAIL,
-          BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
           BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
           GOOGLE_AUTH_CLIENT_ID: process.env.GOOGLE_AUTH_CLIENT_ID,
           GOOGLE_AUTH_CLIENT_SECRET: process.env.GOOGLE_AUTH_CLIENT_SECRET,

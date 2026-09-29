@@ -50,14 +50,11 @@ export type AuthMailHooks = Pick<
 >;
 
 export interface CreateBetterAuthBaseConfig {
-  baseURL?: BaseURLConfig | undefined;
+  domainName: string;
   secret: string;
   appName: string;
-  /** Public site URL, used in outbound mail links. */
-  siteUrl: string;
   isDev: boolean;
-  trustedOrigins: string[];
-  domainName?: string;
+  port?: number;
   errorPagePath: string;
   database: DatabaseType;
   secondaryStorage: SecondaryStorage;
@@ -68,10 +65,6 @@ export interface CreateBetterAuthBaseConfig {
     redirectURI: string;
   };
   plugins?: BetterAuthPlugin[];
-}
-
-function resolveCookieDomain(domainName: string): string {
-  return `.${domainName.trim().replace(/^\.+/, "")}`;
 }
 
 function getIp(headers: Headers): string {
@@ -114,6 +107,43 @@ function assertMailSent(result: AuthMailResult): void {
   }
 }
 
+type DomainConfig = {
+  siteUrl: string;
+  baseURL: BaseURLConfig;
+  trustedOrigins: string[];
+  crossSubDomainCookies: { enabled: boolean; domain: string } | undefined;
+};
+
+function getDomainConfig(
+  domainName: string,
+  isDev: boolean,
+  port: number = 3000
+): DomainConfig {
+  if (isDev) {
+    const localOrigin = `http://localhost:${port}`;
+
+    return {
+      siteUrl: localOrigin,
+      baseURL: localOrigin,
+      trustedOrigins: [localOrigin],
+      crossSubDomainCookies: undefined,
+    };
+  }
+  return {
+    siteUrl: `https://${domainName}`,
+    baseURL: {
+      allowedHosts: [domainName, `www.${domainName}`],
+      fallback: `https://${domainName}`,
+      protocol: "auto",
+    },
+    trustedOrigins: [`https://${domainName}`, `https://www.${domainName}`],
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: `.${domainName}`,
+    },
+  };
+}
+
 /**
  * Shared better-auth configuration.
  *
@@ -133,8 +163,11 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
     );
   }
 
+  const { siteUrl, baseURL, trustedOrigins, crossSubDomainCookies } =
+    getDomainConfig(config.domainName, config.isDev, config?.port);
+
   return betterAuth({
-    baseURL: config.baseURL,
+    baseURL,
     secret: config.secret,
     appName: config.appName,
     database: drizzleAdapter(config.database, {
@@ -151,15 +184,12 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
       storage: "secondary-storage",
     },
     telemetry: { enabled: true },
-    trustedOrigins: config.trustedOrigins,
+    trustedOrigins,
     advanced: {
       database: {
         generateId: false,
       },
-      crossSubDomainCookies:
-        config.domainName && !config.isDev
-          ? { enabled: true, domain: resolveCookieDomain(config.domainName) }
-          : undefined,
+      crossSubDomainCookies: crossSubDomainCookies,
     },
     databaseHooks: {
       user: {
@@ -311,7 +341,7 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
                 browser: [parsed.browser, parsed.os].filter(Boolean).join(" "),
                 ipAddress: ip,
                 approximateLocation: "not available",
-                secureAccountUrl: `${config.siteUrl}/dashboard/settings/reset-password`,
+                secureAccountUrl: `${siteUrl}/dashboard/settings/reset-password`,
               });
 
               assertMailSent(result);
@@ -384,7 +414,7 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
                 const result = await config.mailHooks.sendWelcomeMail({
                   to: user.email,
                   userName: user.name,
-                  dashboardUrl: `${config.siteUrl}/dashboard`,
+                  dashboardUrl: `${siteUrl}/dashboard`,
                 });
 
                 assertMailSent(result);

@@ -2,7 +2,6 @@ import { nextCookies } from "better-auth/next-js";
 
 import { createBullmqBetterAuth } from "@workspace/auth";
 import { createSecondaryStorage } from "@workspace/auth/upstash-secondary-storage";
-import { expandTrustedOrigins } from "@workspace/lib/utils";
 
 import { ERROR_PAGE_PATH } from "@/constants";
 
@@ -12,13 +11,11 @@ import { bullmqMail } from "../mail/bullmq-mail";
 import { redisClient } from "../redis-client";
 
 export const auth = createBullmqBetterAuth({
-  baseURL: env.BETTER_AUTH_URL,
+  domainName: env.DOMAIN_NAME,
+  port: 3000,
   secret: env.BETTER_AUTH_SECRET,
   appName: env.NEXT_PUBLIC_SITE_NAME,
-  siteUrl: env.NEXT_PUBLIC_SITE_URL,
   isDev: env.NODE_ENV !== "production",
-  trustedOrigins: expandTrustedOrigins(env.NEXT_PUBLIC_SITE_URL),
-  domainName: env.DOMAIN_NAME,
   errorPagePath: ERROR_PAGE_PATH,
   database: db,
   secondaryStorage: createSecondaryStorage(redisClient),
