@@ -24,12 +24,6 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         path: "/dashboard",
         pathRegex: /^\/dashboard$/,
       },
-      {
-        title: "Notifications",
-        icon: <Bell />,
-        path: "/dashboard/notifications",
-        pathRegex: /^\/dashboard\/notifications$/,
-      },
     ],
   },
   {
@@ -98,6 +92,12 @@ export const footerMenuLinks: Array<SidebarMenuLinkType> = [
     icon: <User />,
     path: "/dashboard/profile",
     pathRegex: /^\/dashboard\/profile$/,
+  },
+  {
+    title: "Notifications",
+    icon: <Bell />,
+    path: "/dashboard/notifications",
+    pathRegex: /^\/dashboard\/notifications$/,
   },
   {
     title: "Settings",
