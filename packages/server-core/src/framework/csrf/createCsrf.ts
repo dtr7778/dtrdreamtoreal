@@ -3,7 +3,6 @@ import type { INextFunction, IRequest, IResponse } from "../types";
 import {
   type CsrfConfig,
   generateCsrfToken,
-  resolveCsrfConfig,
   setCsrfCookie,
   shouldProtectRequest,
   validateCsrfToken,
@@ -19,15 +18,13 @@ export interface CsrfUtilities {
 }
 
 export function createCsrf(config: CsrfConfig): CsrfUtilities {
-  const resolvedConfig = resolveCsrfConfig(config);
-
   return {
-    generateToken: (req) => generateCsrfToken(req, resolvedConfig),
-    setCsrfCookie: (res, token) => setCsrfCookie(res, token, resolvedConfig),
+    generateToken: (req) => generateCsrfToken(req, config),
+    setCsrfCookie,
     middleware: (req: IRequest, _res: IResponse, next: INextFunction) => {
       if (
-        !shouldProtectRequest(req, resolvedConfig) ||
-        validateCsrfToken(req, resolvedConfig)
+        !shouldProtectRequest(req, config) ||
+        validateCsrfToken(req, config)
       ) {
         next();
         return;

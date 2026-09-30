@@ -50,7 +50,7 @@ export const CompanyTable = pgTable(
       name: "company_createdBy_fkey",
       columns: [table.createdBy],
       foreignColumns: [UserTable.id],
-    }).onDelete("set null"),
+    }).onDelete("cascade"),
     index("companies_createdBy_idx").on(table.createdBy),
     index("companies_name_idx").on(table.name),
   ]

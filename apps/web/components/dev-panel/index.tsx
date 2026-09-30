@@ -1,5 +1,7 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
+
 import { NODE_ENV_TYPE } from "@workspace/lib/types";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -12,6 +14,16 @@ import {
   useDevPanelContext,
 } from "./DevPanelContext";
 
+const emptySubscribe = () => () => {};
+
+function useIsClient() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
 export function DevPanel({
   currentEnv,
   envVars,
@@ -19,7 +31,9 @@ export function DevPanel({
   envVars: Array<EnvVarType>;
   currentEnv: NODE_ENV_TYPE;
 }) {
-  if (typeof window === "undefined") return null;
+  const isClient = useIsClient();
+
+  if (!isClient) return null;
   if (currentEnv === "production") return null;
   return (
     <DevPanelContextProvider

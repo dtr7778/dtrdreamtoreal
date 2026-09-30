@@ -12,12 +12,7 @@ export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   : never;
 
 export type HTTPMethods =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "PATCH"
-  | "DELETE"
-  | "OPTIONS";
+  "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
 
 export * from "./contract.types";
 
@@ -36,3 +31,19 @@ export type PermissionType = {
   resource: ResourceTypeEnumType;
   action: ActionTypeEnumType;
 };
+
+export interface InputValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ApiResponseType<T = unknown> {
+  success: boolean;
+  message: string;
+  statusCode: number;
+  data: T;
+  error?: unknown;
+  stack?: string;
+  inputErrors?: InputValidationError[];
+}

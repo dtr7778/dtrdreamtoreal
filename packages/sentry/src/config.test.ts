@@ -3,10 +3,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   appTag,
   isSentryEnabled,
+  isSpotlightEnabled,
+  normalizeDsn,
   resolveDataCollection,
   resolveEnvironment,
   resolveLogLevels,
   resolveRelease,
+  resolveSpotlight,
   resolveTracesSampleRate,
   scrubEvent,
 } from "./config";
@@ -17,6 +20,7 @@ const SENTRY_ENV_KEYS = [
   "SENTRY_ENVIRONMENT",
   "SENTRY_RELEASE",
   "SENTRY_TRACES_SAMPLE_RATE",
+  "SENTRY_SPOTLIGHT",
   "NODE_ENV",
 ] as const;
 
@@ -132,5 +136,35 @@ describe("sentry config", () => {
     expect(result.request.headers["set-cookie"]).toBe("[REDACTED]");
     expect(result.request.headers["x-api-key"]).toBe("[REDACTED]");
     expect(result.request.headers["user-agent"]).toBe("vitest");
+  });
+
+  it("normalizes empty dsn values to undefined", () => {
+    expect(normalizeDsn(undefined)).toBeUndefined();
+    expect(normalizeDsn("")).toBeUndefined();
+    expect(normalizeDsn("   ")).toBeUndefined();
+    expect(normalizeDsn("https://key@sentry.io/1")).toBe(
+      "https://key@sentry.io/1"
+    );
+  });
+
+  it("resolves spotlight from the env var", () => {
+    expect(resolveSpotlight(undefined)).toBeUndefined();
+    expect(resolveSpotlight("")).toBeUndefined();
+    expect(resolveSpotlight("true")).toBe(true);
+    expect(resolveSpotlight("1")).toBe(true);
+    expect(resolveSpotlight("false")).toBe(false);
+    expect(resolveSpotlight("0")).toBe(false);
+    expect(resolveSpotlight("http://localhost:8969/stream")).toBe(
+      "http://localhost:8969/stream"
+    );
+  });
+
+  it("detects whether spotlight is enabled", () => {
+    expect(isSpotlightEnabled(undefined)).toBe(false);
+    expect(isSpotlightEnabled("")).toBe(false);
+    expect(isSpotlightEnabled("false")).toBe(false);
+    expect(isSpotlightEnabled("0")).toBe(false);
+    expect(isSpotlightEnabled("true")).toBe(true);
+    expect(isSpotlightEnabled("http://localhost:8969/stream")).toBe(true);
   });
 });

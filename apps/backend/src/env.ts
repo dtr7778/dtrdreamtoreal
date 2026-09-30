@@ -1,6 +1,8 @@
 import { createEnv } from "@t3-oss/env-core";
 import z from "zod";
 
+import { normalizeDsn } from "@workspace/sentry/config";
+
 const domainRegex =
   /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
@@ -56,7 +58,7 @@ export const env = createEnv({
     SUPABASE_URL: z.url(),
     SUPABASE_SECRET_KEY: z.string().min(1),
     SUPABASE_STORAGE_BUCKET_NAME: z.string().min(1),
-    SENTRY_DSN: z.url().optional(),
+    SENTRY_DSN: z.preprocess(normalizeDsn, z.url().optional()),
   },
   runtimeEnv:
     process.env.NODE_ENV === "test"

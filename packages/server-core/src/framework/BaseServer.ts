@@ -49,10 +49,23 @@ export interface BaseServerConfig {
   version: string;
   basePath?: string;
   corsConfig: CorsConfig;
-  csrfConfig: CsrfConfig;
+  csrfConfig: Omit<CsrfConfig, "basePath">;
   rateLimitConfig: IoRedisRatelimitConfig;
   interceptors?: readonly ClassConstructor<IInterceptor>[];
+  /** Runs before the security middlewares (CORS, CSP nonce, Helmet). */
+  beforeSecurityMiddleware?: (app: IApplication) => void;
+  /** Runs before the cookie-parser middleware. */
+  beforeCookieParser?: (app: IApplication) => void;
+  /** Runs before the rate-limit middleware. */
+  beforeRateLimit?: (app: IApplication) => void;
+  /** Runs before the JSON body parser. */
   beforeBodyParser?: (app: IApplication) => void;
+  /** Runs after the JSON body parser, before CSRF verification. */
+  afterBodyParser?: (app: IApplication) => void;
+  /** Runs before controllers are mounted. */
+  beforeControllers?: (app: IApplication) => void;
+  /** Runs after controllers and OpenAPI docs are mounted, before the not-found handler. */
+  afterControllers?: (app: IApplication) => void;
   /**
    * Express `trust proxy` setting. Defaults to `TRUST_PROXY` env (parsed as a
    * number/boolean), falling back to `1` (single reverse proxy).
@@ -98,9 +111,12 @@ export abstract class BaseServer implements IBaseServer {
       );
     });
 
+    config.beforeSecurityMiddleware?.(this.app);
+    this.app.use(corsMiddleware(config.corsConfig));
     this.app.use(nonceMiddleware());
     this.app.use(helmetMiddleware());
-    this.app.use(corsMiddleware(config.corsConfig));
+
+    config.beforeCookieParser?.(this.app);
     this.app.use(cookieParserMiddleware);
 
     const { generateToken, setCsrfCookie, middleware } = createCsrf({
@@ -109,10 +125,10 @@ export abstract class BaseServer implements IBaseServer {
     });
 
     const rateLimit = createRatelimit(config.rateLimitConfig);
+    config.beforeRateLimit?.(this.app);
     this.app.use(rateLimitMiddleware(rateLimit));
 
-    // Registered after the rate limiter so token minting cannot be hammered.
-    this.app.get(`${config.basePath}/csrf-token`, (req, res) => {
+    this.app.get("/csrf-token", (req, res) => {
       const token = generateToken(req);
       setCsrfCookie(res, token);
       sendApiResponse(res)(
@@ -127,8 +143,11 @@ export abstract class BaseServer implements IBaseServer {
     config.beforeBodyParser?.(this.app);
 
     this.app.use(jsonMiddleware());
+    config.afterBodyParser?.(this.app);
     this.app.use(middleware);
     this.app.use(urlEncoderMiddleware());
+
+    config.beforeControllers?.(this.app);
 
     const globalInterceptors = [...(config.interceptors ?? [])];
 
@@ -156,6 +175,8 @@ export abstract class BaseServer implements IBaseServer {
         controllerClasses: config.controllerClasses,
       });
     }
+
+    config.afterControllers?.(this.app);
 
     this.app.use(notFoundHandler);
     this.app.use(csrfErrorMiddleware);

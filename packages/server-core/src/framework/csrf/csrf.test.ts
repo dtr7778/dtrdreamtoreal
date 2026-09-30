@@ -1,16 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { IRequest, IResponse } from "../types";
 import {
   generateCsrfToken,
-  resolveCsrfConfig,
   setCsrfCookie,
   shouldProtectRequest,
   validateCsrfToken,
 } from "./csrf";
 
 const SECRET = "test-secret";
-const COOKIE_NAME = "x-csrf-token";
+const COOKIE_NAME = "psifi.x-csrf-token";
+const HEADER_NAME = "x-csrf-token";
 
 function createRequest(overrides: Record<string, unknown> = {}): IRequest {
   return {
@@ -25,62 +25,22 @@ function createRequest(overrides: Record<string, unknown> = {}): IRequest {
 function authorizeRequest(token: string): IRequest {
   return createRequest({
     cookies: { [COOKIE_NAME]: token },
-    headers: { "x-csrf-token": token },
+    headers: { [HEADER_NAME]: token },
   });
 }
 
 describe("generateCsrfToken", () => {
   it("generates an hmac.random token", () => {
-    const token = generateCsrfToken(createRequest(), {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-    });
+    const token = generateCsrfToken(createRequest(), { secret: SECRET });
 
     expect(token).toMatch(/^[a-f0-9]+\.[a-f0-9]+$/);
   });
 
-  it("generates tokens of the configured size", () => {
-    const token = generateCsrfToken(createRequest(), {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-      size: 16,
-    });
-
-    const [, randomValue] = token.split(".");
-    expect(randomValue).toHaveLength(32);
-  });
-
   it("reuses an existing valid cookie token", () => {
-    const request = createRequest();
-    const token = generateCsrfToken(request, {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-    });
-
-    const withCookie = createRequest({
-      cookies: { [COOKIE_NAME]: token },
-    });
-
-    expect(
-      generateCsrfToken(withCookie, { secret: SECRET, cookieName: COOKIE_NAME })
-    ).toBe(token);
-  });
-
-  it("generates a new token when overwrite is true", () => {
-    const request = createRequest();
-    const token = generateCsrfToken(request, {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-    });
+    const token = generateCsrfToken(createRequest(), { secret: SECRET });
     const withCookie = createRequest({ cookies: { [COOKIE_NAME]: token } });
 
-    const regenerated = generateCsrfToken(withCookie, {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-      overwrite: true,
-    });
-
-    expect(regenerated).not.toBe(token);
+    expect(generateCsrfToken(withCookie, { secret: SECRET })).toBe(token);
   });
 
   it("generates a new token when the existing cookie is invalid", () => {
@@ -88,106 +48,97 @@ describe("generateCsrfToken", () => {
       cookies: { [COOKIE_NAME]: "invalid.token" },
     });
 
-    const token = generateCsrfToken(withCookie, {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-    });
+    const token = generateCsrfToken(withCookie, { secret: SECRET });
 
     expect(token).not.toBe("invalid.token");
-    expect(
-      validateCsrfToken(authorizeRequest(token), {
-        secret: SECRET,
-        cookieName: COOKIE_NAME,
-      })
-    ).toBe(true);
-  });
-
-  it("binds the token to the session identifier", () => {
-    const token = generateCsrfToken(createRequest({ ip: "1.1.1.1" }), {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-    });
-
-    const otherSession = createRequest({
-      ip: "2.2.2.2",
-      cookies: { [COOKIE_NAME]: token },
-      headers: { "x-csrf-token": token },
-    });
-
-    expect(
-      validateCsrfToken(otherSession, {
-        secret: SECRET,
-        cookieName: COOKIE_NAME,
-      })
-    ).toBe(false);
+    expect(validateCsrfToken(authorizeRequest(token), { secret: SECRET })).toBe(
+      true
+    );
   });
 });
 
 describe("validateCsrfToken", () => {
-  const config = { secret: SECRET, cookieName: COOKIE_NAME };
-
   function validToken() {
-    return generateCsrfToken(createRequest(), config);
+    return generateCsrfToken(createRequest(), { secret: SECRET });
   }
 
   it("accepts a matching cookie and header", () => {
+    expect(
+      validateCsrfToken(authorizeRequest(validToken()), { secret: SECRET })
+    ).toBe(true);
+  });
+
+  it("reads the token from an array header value", () => {
     const token = validToken();
-    expect(validateCsrfToken(authorizeRequest(token), config)).toBe(true);
+    const request = createRequest({
+      cookies: { [COOKIE_NAME]: token },
+      headers: { [HEADER_NAME]: [token] },
+    });
+
+    expect(validateCsrfToken(request, { secret: SECRET })).toBe(true);
   });
 
   it("rejects when the header is missing", () => {
     const token = validToken();
     const request = createRequest({ cookies: { [COOKIE_NAME]: token } });
-    expect(validateCsrfToken(request, config)).toBe(false);
+
+    expect(validateCsrfToken(request, { secret: SECRET })).toBe(false);
   });
 
   it("rejects when the cookie is missing", () => {
     const token = validToken();
-    const request = createRequest({ headers: { "x-csrf-token": token } });
-    expect(validateCsrfToken(request, config)).toBe(false);
+    const request = createRequest({ headers: { [HEADER_NAME]: token } });
+
+    expect(validateCsrfToken(request, { secret: SECRET })).toBe(false);
   });
 
   it("rejects when cookie and header differ", () => {
     const token = validToken();
     const request = createRequest({
       cookies: { [COOKIE_NAME]: token },
-      headers: { "x-csrf-token": `${token}x` },
+      headers: { [HEADER_NAME]: `${token}x` },
     });
-    expect(validateCsrfToken(request, config)).toBe(false);
+
+    expect(validateCsrfToken(request, { secret: SECRET })).toBe(false);
   });
 
   it("rejects a tampered hmac", () => {
-    const token = validToken();
-    const [, randomValue] = token.split(".");
-    const tampered = `deadbeef.${randomValue}`;
-    expect(validateCsrfToken(authorizeRequest(tampered), config)).toBe(false);
+    const [, randomValue] = validToken().split(".");
+
+    expect(
+      validateCsrfToken(authorizeRequest(`deadbeef.${randomValue}`), {
+        secret: SECRET,
+      })
+    ).toBe(false);
   });
 
   it("rejects a tampered random value", () => {
-    const token = validToken();
-    const [hmac] = token.split(".");
+    const [hmac] = validToken().split(".");
+
     expect(
-      validateCsrfToken(authorizeRequest(`${hmac}.deadbeef`), config)
+      validateCsrfToken(authorizeRequest(`${hmac}.deadbeef`), {
+        secret: SECRET,
+      })
     ).toBe(false);
   });
 
   it("rejects an empty cookie value", () => {
-    expect(validateCsrfToken(authorizeRequest(""), config)).toBe(false);
+    expect(validateCsrfToken(authorizeRequest(""), { secret: SECRET })).toBe(
+      false
+    );
   });
 
   it("rejects a token signed with a different secret", () => {
-    const token = validToken();
     expect(
-      validateCsrfToken(authorizeRequest(token), {
+      validateCsrfToken(authorizeRequest(validToken()), {
         secret: "another-secret",
-        cookieName: COOKIE_NAME,
       })
     ).toBe(false);
   });
 });
 
 describe("shouldProtectRequest", () => {
-  const config = { secret: SECRET, cookieName: COOKIE_NAME };
+  const config = { secret: SECRET };
 
   it.each(["GET", "HEAD", "OPTIONS"])("skips %s requests", (method) => {
     expect(shouldProtectRequest(createRequest({ method }), config)).toBe(false);
@@ -196,88 +147,87 @@ describe("shouldProtectRequest", () => {
   it.each(["POST", "PUT", "PATCH", "DELETE"])(
     "protects %s requests",
     (method) => {
-      expect(shouldProtectRequest(createRequest({ method }), config)).toBe(
-        true
-      );
+      expect(shouldProtectRequest(createRequest({ method }), config)).toBe(true);
     }
   );
 
-  describe("ignoredPaths", () => {
-    const ignoredConfig = {
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-      basePath: "/api/v1",
-      ignoredPaths: ["/mails/resend"],
-    };
+  const ignoredConfig = {
+    secret: SECRET,
+    basePath: "/api/v1",
+    ignoredPaths: ["/mails/resend"],
+  };
 
-    it("skips webhook paths under the base path", () => {
-      expect(
-        shouldProtectRequest(
-          createRequest({ path: "/api/v1/mails/resend/inbound" }),
-          ignoredConfig
-        )
-      ).toBe(false);
-    });
+  it("skips webhook paths under the base path", () => {
+    expect(
+      shouldProtectRequest(
+        createRequest({ path: "/api/v1/mails/resend/inbound" }),
+        ignoredConfig
+      )
+    ).toBe(false);
+  });
 
-    it("protects the frontend mail endpoint", () => {
-      expect(
-        shouldProtectRequest(
-          createRequest({ path: "/api/v1/mails/" }),
-          ignoredConfig
-        )
-      ).toBe(true);
-    });
+  it("protects the frontend mail endpoint", () => {
+    expect(
+      shouldProtectRequest(
+        createRequest({ path: "/api/v1/mails/" }),
+        ignoredConfig
+      )
+    ).toBe(true);
+  });
 
-    it("does not match paths that share the ignored prefix", () => {
-      expect(
-        shouldProtectRequest(
-          createRequest({ path: "/api/v1/mails/resendish" }),
-          ignoredConfig
-        )
-      ).toBe(true);
-    });
+  it("does not match paths that share the ignored prefix", () => {
+    expect(
+      shouldProtectRequest(
+        createRequest({ path: "/api/v1/mails/resendish" }),
+        ignoredConfig
+      )
+    ).toBe(true);
+  });
 
-    it("matches full paths when no base path is configured", () => {
-      expect(
-        shouldProtectRequest(
-          createRequest({ path: "/mails/resend/outbound" }),
-          {
-            secret: SECRET,
-            cookieName: COOKIE_NAME,
-            ignoredPaths: ["/mails/resend"],
-          }
-        )
-      ).toBe(false);
-    });
-
-    it("supports a custom skipCsrfProtection predicate", () => {
-      expect(
-        shouldProtectRequest(createRequest({ path: "/anything" }), {
-          secret: SECRET,
-          cookieName: COOKIE_NAME,
-          skipCsrfProtection: () => true,
-        })
-      ).toBe(false);
-    });
+  it("matches full paths when no base path is configured", () => {
+    expect(
+      shouldProtectRequest(createRequest({ path: "/mails/resend/outbound" }), {
+        secret: SECRET,
+        ignoredPaths: ["/mails/resend"],
+      })
+    ).toBe(false);
   });
 });
 
 describe("setCsrfCookie", () => {
-  it("sets the cookie with the configured name and options", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("sets the development cookie with secure defaults", () => {
     const cookie = vi.fn();
     const response = { cookie } as unknown as IResponse;
-    const resolved = resolveCsrfConfig({
-      secret: SECRET,
-      cookieName: COOKIE_NAME,
-      cookieOptions: { httpOnly: true, path: "/" },
-    });
 
-    setCsrfCookie(response, "token.value", resolved);
+    setCsrfCookie(response, "token.value");
 
     expect(cookie).toHaveBeenCalledWith(
       COOKIE_NAME,
       "token.value",
-      expect.objectContaining({ httpOnly: true, path: "/" })
+      expect.objectContaining({
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: false,
+      })
+    );
+  });
+
+  it("uses the __Host- prefixed cookie in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const cookie = vi.fn();
+    const response = { cookie } as unknown as IResponse;
+
+    setCsrfCookie(response, "token.value");
+
+    expect(cookie).toHaveBeenCalledWith(
+      "__Host-psifi.x-csrf-token",
+      "token.value",
+      expect.objectContaining({ secure: true, path: "/" })
     );
   });
 });

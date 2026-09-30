@@ -4,9 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 import {
   appTag,
   isSentryEnabled,
+  isSpotlightEnabled,
   resolveDataCollection,
   resolveEnvironment,
   resolveRelease,
+  resolveSpotlight,
   resolveTracesSampleRate,
   scrubEvent,
 } from "@workspace/sentry/config";
@@ -17,9 +19,10 @@ class SentryORPCInstrumentation extends ORPCInstrumentation {
   public readonly name: string = "ORPCInstrumentation";
 }
 
-if (isSentryEnabled(dsn)) {
+if (isSentryEnabled(dsn) || isSpotlightEnabled()) {
   Sentry.init({
     dsn,
+    spotlight: resolveSpotlight(),
     environment: resolveEnvironment(),
     release: resolveRelease(),
     tracesSampleRate: resolveTracesSampleRate(),

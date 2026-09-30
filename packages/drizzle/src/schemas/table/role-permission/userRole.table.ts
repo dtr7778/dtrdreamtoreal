@@ -4,6 +4,7 @@ import {
   index,
   pgTable,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -41,7 +42,7 @@ export const UserRoleTable = pgTable(
     })
       .onDelete("cascade")
       .onUpdate("cascade"),
-    index("user_role_unique").on(table.userId, table.roleId),
+    uniqueIndex("user_role_unique").on(table.userId, table.roleId),
     index("user_role_role_id_idx").on(table.roleId),
     index("user_role_user_id_idx").on(table.userId),
   ]

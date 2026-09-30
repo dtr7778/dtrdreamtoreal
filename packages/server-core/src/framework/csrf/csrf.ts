@@ -4,61 +4,74 @@ import type { CookieOptions } from "express";
 
 import type { IRequest, IResponse } from "../types";
 
-export type CsrfCookieOptions = CookieOptions;
-
 export interface CsrfConfig {
   /** Secret used to sign the CSRF token. */
   secret: string;
-  /** Name of the cookie holding the CSRF token. */
-  cookieName?: string;
-  /** Options applied to the CSRF cookie. */
-  cookieOptions?: CsrfCookieOptions;
-  /** Amount of random bytes embedded in the token. */
-  size?: number;
-  /** HMAC algorithm used to sign the token. */
-  hmacAlgorithm?: string;
-  /** Delimiter used between the HMAC and the random value. */
-  csrfTokenDelimiter?: string;
-  /** Delimiter used when building the signed message. */
-  messageDelimiter?: string;
-  /** HTTP methods that are exempt from CSRF protection. */
-  ignoredMethods?: readonly string[];
-  /**
-   * Path prefixes (relative to `basePath`) that are exempt from CSRF
-   * protection, e.g. `["/mails/resend"]` for provider webhooks.
-   */
+  /** Path prefixes (relative to `basePath`) exempt from CSRF, e.g. webhooks. */
   ignoredPaths?: readonly string[];
   /** Base path stripped from `req.path` before matching `ignoredPaths`. */
   basePath?: string;
-  /** Custom escape hatch to bypass CSRF verification for a request. */
-  skipCsrfProtection?: (req: IRequest) => boolean;
-  /** Resolves the session identifier bound into the signed message. */
-  getSessionIdentifier?: (req: IRequest) => string;
-  /** Extracts the CSRF token provided by the request. */
-  getCsrfTokenFromRequest?: (req: IRequest) => string | undefined;
-  /** Always generate a fresh token instead of reusing a valid cookie. */
-  overwrite?: boolean;
 }
 
-export type ResolvedCsrfConfig = Readonly<
-  Required<Omit<CsrfConfig, "ignoredMethods">> & {
-    resolved: true;
-    ignoredMethods: ReadonlySet<string>;
+const CSRF_HEADER_NAME = "x-csrf-token";
+const CSRF_COOKIE_NAME = "psifi.x-csrf-token";
+const CSRF_SECURE_COOKIE_NAME = "__Host-psifi.x-csrf-token";
+const CSRF_TOKEN_DELIMITER = ".";
+const HMAC_ALGORITHM = "sha256";
+const RANDOM_BYTES = 32;
+const IGNORED_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+function getCookieName(): string {
+  return isProduction() ? CSRF_SECURE_COOKIE_NAME : CSRF_COOKIE_NAME;
+}
+
+function getCookieOptions(): CookieOptions {
+  return {
+    sameSite: "lax",
+    path: "/",
+    secure: isProduction(),
+    httpOnly: true,
+  };
+}
+
+function sign(randomValue: string, secret: string): string {
+  return createHmac(HMAC_ALGORITHM, secret).update(randomValue).digest("hex");
+}
+
+function safeCompare(a: string, b: string): boolean {
+  const bufferA = Buffer.from(a, "utf8");
+  const bufferB = Buffer.from(b, "utf8");
+
+  if (bufferA.length !== bufferB.length) {
+    return false;
   }
->;
 
-const DEFAULT_IGNORED_METHODS = ["GET", "HEAD", "OPTIONS"] as const;
-const DEFAULT_CSRF_TOKEN_DELIMITER = ".";
-const DEFAULT_MESSAGE_DELIMITER = "!";
-const DEFAULT_HMAC_ALGORITHM = "sha256";
-const DEFAULT_SIZE = 32;
+  return timingSafeEqual(bufferA, bufferB);
+}
 
-const defaultGetSessionIdentifier = (req: IRequest): string => req.ip ?? "";
+function getCookieToken(req: IRequest): string {
+  return req.cookies?.[getCookieName()] ?? "";
+}
 
-const defaultGetCsrfTokenFromRequest = (req: IRequest): string | undefined => {
-  const header = req.headers["x-csrf-token"];
-  return Array.isArray(header) ? header[0] : header;
-};
+function getHeaderToken(req: IRequest): string {
+  const header = req.headers[CSRF_HEADER_NAME];
+
+  return Array.isArray(header) ? (header[0] ?? "") : (header ?? "");
+}
+
+function verifyToken(token: string, secret: string): boolean {
+  const [hmac, randomValue] = token.split(CSRF_TOKEN_DELIMITER);
+
+  if (!hmac || !randomValue) {
+    return false;
+  }
+
+  return safeCompare(hmac, sign(randomValue, secret));
+}
 
 function normalizeBasePath(basePath: string | undefined): string {
   if (!basePath || basePath === "/") {
@@ -90,179 +103,57 @@ function isIgnoredPath(
   });
 }
 
-export function resolveCsrfConfig(
-  config: CsrfConfig | ResolvedCsrfConfig
-): ResolvedCsrfConfig {
-  if ("resolved" in config) {
-    return config;
+/**
+ * Generates a CSRF token for the given request, reusing an already valid
+ * cookie token when present.
+ */
+export function generateCsrfToken(req: IRequest, config: CsrfConfig): string {
+  const cookieToken = getCookieToken(req);
+
+  if (cookieToken !== "" && verifyToken(cookieToken, config.secret)) {
+    return cookieToken;
   }
 
-  const isProduction = process.env.NODE_ENV === "production";
-  const ignoredPaths = config.ignoredPaths ?? [];
-  const basePath = normalizeBasePath(config.basePath);
-  const userSkipCsrfProtection = config.skipCsrfProtection;
+  const randomValue = randomBytes(RANDOM_BYTES).toString("hex");
+  const hmac = sign(randomValue, config.secret);
 
-  return {
-    resolved: true,
-    secret: config.secret,
-    cookieName:
-      config.cookieName ??
-      (isProduction ? "__Host-psifi.x-csrf-token" : "psifi.x-csrf-token"),
-    cookieOptions: {
-      sameSite: "lax",
-      path: "/",
-      secure: isProduction,
-      httpOnly: true,
-      ...config.cookieOptions,
-    },
-    size: config.size ?? DEFAULT_SIZE,
-    hmacAlgorithm: config.hmacAlgorithm ?? DEFAULT_HMAC_ALGORITHM,
-    csrfTokenDelimiter:
-      config.csrfTokenDelimiter ?? DEFAULT_CSRF_TOKEN_DELIMITER,
-    messageDelimiter: config.messageDelimiter ?? DEFAULT_MESSAGE_DELIMITER,
-    ignoredMethods: new Set(config.ignoredMethods ?? DEFAULT_IGNORED_METHODS),
-    ignoredPaths,
-    basePath,
-    skipCsrfProtection: (req) => {
-      if (userSkipCsrfProtection?.(req)) {
-        return true;
-      }
-
-      return isIgnoredPath(req.path ?? "", basePath, ignoredPaths);
-    },
-    getSessionIdentifier:
-      config.getSessionIdentifier ?? defaultGetSessionIdentifier,
-    getCsrfTokenFromRequest:
-      config.getCsrfTokenFromRequest ?? defaultGetCsrfTokenFromRequest,
-    overwrite: config.overwrite ?? false,
-  };
-}
-
-function constructMessage(
-  req: IRequest,
-  randomValue: string,
-  config: ResolvedCsrfConfig
-): string {
-  const sessionIdentifier = config.getSessionIdentifier(req);
-  return [
-    sessionIdentifier.length,
-    sessionIdentifier,
-    randomValue.length,
-    randomValue,
-  ].join(config.messageDelimiter);
-}
-
-function sign(
-  req: IRequest,
-  randomValue: string,
-  config: ResolvedCsrfConfig
-): string {
-  const message = constructMessage(req, randomValue, config);
-  return createHmac(config.hmacAlgorithm, config.secret)
-    .update(message)
-    .digest("hex");
-}
-
-function safeCompare(a: string, b: string): boolean {
-  const bufferA = Buffer.from(a, "utf8");
-  const bufferB = Buffer.from(b, "utf8");
-
-  if (bufferA.length !== bufferB.length) {
-    return false;
-  }
-
-  return timingSafeEqual(bufferA, bufferB);
-}
-
-function getCsrfTokenFromCookie(
-  req: IRequest,
-  config: ResolvedCsrfConfig
-): string {
-  return req.cookies?.[config.cookieName] ?? "";
-}
-
-function verifyToken(
-  req: IRequest,
-  token: string,
-  config: ResolvedCsrfConfig
-): boolean {
-  const [expectedHmac, randomValue] = token.split(config.csrfTokenDelimiter);
-
-  if (!expectedHmac || !randomValue) {
-    return false;
-  }
-
-  return safeCompare(expectedHmac, sign(req, randomValue, config));
+  return `${hmac}${CSRF_TOKEN_DELIMITER}${randomValue}`;
 }
 
 /**
- * Generates a CSRF token for the given request without touching the response.
- * Reuses an already valid cookie token unless `overwrite` is set.
+ * Validates the CSRF token by requiring the cookie and the `x-csrf-token`
+ * header to match and carry a valid HMAC signature.
  */
-export function generateCsrfToken(
-  req: IRequest,
-  config: CsrfConfig | ResolvedCsrfConfig
-): string {
-  const resolved = resolveCsrfConfig(config);
-  const existingToken = getCsrfTokenFromCookie(req, resolved);
-
-  if (
-    !resolved.overwrite &&
-    existingToken !== "" &&
-    verifyToken(req, existingToken, resolved)
-  ) {
-    return existingToken;
-  }
-
-  const randomValue = randomBytes(resolved.size).toString("hex");
-  const hmac = sign(req, randomValue, resolved);
-
-  return `${hmac}${resolved.csrfTokenDelimiter}${randomValue}`;
-}
-
-/**
- * Validates the CSRF token by comparing the cookie and the request token and
- * verifying the HMAC signature.
- */
-export function validateCsrfToken(
-  req: IRequest,
-  config: CsrfConfig | ResolvedCsrfConfig
-): boolean {
-  const resolved = resolveCsrfConfig(config);
-  const cookieToken = getCsrfTokenFromCookie(req, resolved);
-  const requestToken = resolved.getCsrfTokenFromRequest(req);
+export function validateCsrfToken(req: IRequest, config: CsrfConfig): boolean {
+  const cookieToken = getCookieToken(req);
+  const headerToken = getHeaderToken(req);
 
   if (
     !cookieToken ||
-    !requestToken ||
-    !safeCompare(cookieToken, requestToken)
+    !headerToken ||
+    !safeCompare(cookieToken, headerToken)
   ) {
     return false;
   }
 
-  return verifyToken(req, cookieToken, resolved);
+  return verifyToken(cookieToken, config.secret);
 }
 
 /** Whether the request must pass CSRF verification. */
 export function shouldProtectRequest(
   req: IRequest,
-  config: CsrfConfig | ResolvedCsrfConfig
+  config: CsrfConfig
 ): boolean {
-  const resolved = resolveCsrfConfig(config);
-
-  if (resolved.ignoredMethods.has(req.method ?? "")) {
+  if (IGNORED_METHODS.has(req.method ?? "")) {
     return false;
   }
 
-  return !resolved.skipCsrfProtection(req);
+  const basePath = normalizeBasePath(config.basePath);
+
+  return !isIgnoredPath(req.path ?? "", basePath, config.ignoredPaths ?? []);
 }
 
 /** Sets the CSRF token on the response cookie. */
-export function setCsrfCookie(
-  res: IResponse,
-  token: string,
-  config: CsrfConfig | ResolvedCsrfConfig
-): void {
-  const resolved = resolveCsrfConfig(config);
-  res.cookie(resolved.cookieName, token, resolved.cookieOptions);
+export function setCsrfCookie(res: IResponse, token: string): void {
+  res.cookie(getCookieName(), token, getCookieOptions());
 }

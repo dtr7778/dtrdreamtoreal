@@ -79,7 +79,6 @@ container
       databaseUrl: env.DATABASE_URL,
       isProd: env.NODE_ENV === "production",
       operationMode: "normal",
-      redis: container.get<ExtendedRedis>(CONTAINER_TYPES.Redis),
     })
   )
   .inSingletonScope();

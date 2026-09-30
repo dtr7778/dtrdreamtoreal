@@ -16,6 +16,36 @@ const SENSITIVE_HEADERS = new Set([
   "proxy-authorization",
 ]);
 
+const FALSY_VALUES = new Set(["false", "f", "n", "no", "off", "0"]);
+const TRUTHY_VALUES = new Set(["true", "t", "y", "yes", "on", "1"]);
+
+export function normalizeDsn(value: unknown): unknown {
+  if (typeof value === "string" && value.trim() === "") return undefined;
+  return value;
+}
+
+export function resolveSpotlight(
+  value: string | undefined = process.env.SENTRY_SPOTLIGHT
+): boolean | string | undefined {
+  if (value === undefined) return undefined;
+
+  const trimmed = value.trim();
+  if (trimmed === "") return undefined;
+
+  const normalized = trimmed.toLowerCase();
+  if (FALSY_VALUES.has(normalized)) return false;
+  if (TRUTHY_VALUES.has(normalized)) return true;
+
+  return trimmed;
+}
+
+export function isSpotlightEnabled(
+  value: string | undefined = process.env.SENTRY_SPOTLIGHT
+): boolean {
+  const resolved = resolveSpotlight(value);
+  return resolved !== undefined && resolved !== false;
+}
+
 export function isSentryEnabled(
   dsn: string | undefined = process.env.SENTRY_DSN
 ): boolean {

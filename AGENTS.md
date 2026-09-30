@@ -96,6 +96,16 @@ Requires a local `.env` per app (copied from the corresponding `.env.example`) a
 
 - **better-auth** with the Drizzle adapter; configs in `packages/auth` (`auth.config.base.ts` plus bullmq/qstash variants). Web route `app/api/auth/[...all]` + `proxy.ts` session guard; backend mounts the node handler.
 
+## CSRF
+
+- Signed **double-submit cookie**, implemented in `packages/server-core/src/framework/csrf` (`csrf.ts` + `createCsrf.ts`) and mounted by `BaseServer`. Intentionally app-specific, not a generic/dependency-backed middleware.
+- Token format is `hmac.random`, where `hmac = HMAC-SHA256(CSRF_TOKEN, random)` over 32 random bytes. A valid cookie token is reused while it keeps verifying.
+- Cookie is hardcoded: `psifi.x-csrf-token` in dev, `__Host-psifi.x-csrf-token` in production; `httpOnly`, `SameSite=Lax`, `Secure` in production, `Path=/`. Header name is hardcoded to `x-csrf-token`.
+- `GET /csrf-token` issues the token (body + `Set-Cookie`). The cookie is `httpOnly`, so the browser sends it automatically while the SPA echoes the body value in the `x-csrf-token` header.
+- `validateCsrfToken` requires the cookie and header to be present, equal, and HMAC-valid. `GET`/`HEAD`/`OPTIONS` are exempt; `ignoredPaths` (relative to `basePath`) exempt provider webhooks — backend config is `{ secret: env.CSRF_TOKEN, ignoredPaths: ["/mails"] }`.
+- Client (`apps/web/lib/api.ts`) lazily fetches the token behind a single-flight promise, sets `x-csrf-token` on mutating requests, and on `403` clears the cache and retries exactly once (guarded by `_csrfRetried`).
+- Config surface is deliberately minimal: `{ secret, ignoredPaths?, basePath? }`. Everything else is a hardcoded constant; there is no session/IP binding.
+
 ## Queues & jobs
 
 - **BullMQ** (Redis) is the primary queue; contract definitions in `packages/contract/src/worker/contracts` (`mail`, `audit`, `audit-report`).
@@ -134,7 +144,8 @@ Requires a local `.env` per app (copied from the corresponding `.env.example`) a
 - Backend captures 5xx/unexpected errors centrally in server-core's `errorMiddleware`; BullMQ failures are captured once in the job processor (`failed` events are deliberately not double-captured), plus worker `error`/`stalled` and cron failures.
 - pino logs are bridged into Sentry Logs via `@sentry/node`'s `pinoIntegration` (warn+ in production). No change to `@workspace/lib`'s logger.
 - **Sentry is a no-op when `SENTRY_DSN` is unset** or `SENTRY_DISABLED=true`; unit tests never hit the network. Do not make Sentry env vars required.
-- Env vars: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENABLE_LOGS`, `SENTRY_DISABLED`; build-time `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`. Dev app sets `SENTRY_DISABLED=true`.
+- **Spotlight (local dev)**: set `SENTRY_SPOTLIGHT=true` (and `NEXT_PUBLIC_SENTRY_SPOTLIGHT=true` for the browser) to stream errors/traces/logs to the local Spotlight sidecar even without a DSN. Start it with `pnpm docker:dev:up` (service `spotlight`, UI at `http://localhost:8969`). Set `SENTRY_SPOTLIGHT` to a URL to point at a custom sidecar. `SENTRY_DSN=` (empty) is treated as "unset".
+- Env vars: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENABLE_LOGS`, `SENTRY_DISABLED`, `SENTRY_SPOTLIGHT`, `NEXT_PUBLIC_SENTRY_SPOTLIGHT`; build-time `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`. Dev app sets `SENTRY_DISABLED=true`.
 - Source maps: web uploads via `withSentryConfig`; backend/worker/combined run `scripts/upload-sourcemaps.mjs` in the Docker builder (before `.map` deletion) when `SENTRY_AUTH_TOKEN` is present. CD passes `SENTRY_RELEASE=${GITHUB_SHA}` as a build arg and the token as a BuildKit secret; token-less local/CI builds still succeed.
 
 ## Docs

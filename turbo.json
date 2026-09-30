@@ -52,20 +52,17 @@
     "SENTRY_TRACES_SAMPLE_RATE",
     "SENTRY_ENABLE_LOGS",
     "SENTRY_DISABLED",
+    "SENTRY_SPOTLIGHT",
+    "NEXT_PUBLIC_SENTRY_SPOTLIGHT",
     "SENTRY_AUTH_TOKEN",
     "SENTRY_ORG",
     "SENTRY_PROJECT"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "@workspace/tsup-config#build"],
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist"]
-    },
-    "build:worker": {
-      "dependsOn": ["^build", "@workspace/tsup-config#build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -77,10 +74,6 @@
       "dependsOn": ["^typecheck"]
     },
     "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "dev:worker": {
       "cache": false,
       "persistent": true
     },

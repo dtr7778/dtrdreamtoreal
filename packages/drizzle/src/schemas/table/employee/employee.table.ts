@@ -46,7 +46,7 @@ export const EmployeeTable = pgTable(
       name: "employee_createdBy_fkey",
       columns: [table.createdBy],
       foreignColumns: [UserTable.id],
-    }).onDelete("set null"),
+    }).onDelete("cascade"),
     index("employee_companyId_idx").on(table.companyId),
     index("employee_createdBy_idx").on(table.createdBy),
   ]

@@ -7,7 +7,6 @@ export * from "./BaseServer";
 export * from "./TestBaseServer";
 export type {
   ClassConstructor,
-  ApiResponseType,
   IApplication,
   IGuard,
   IInterceptor,

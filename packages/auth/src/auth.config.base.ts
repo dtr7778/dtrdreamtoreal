@@ -152,17 +152,7 @@ function getDomainConfig(
  * them in here.
  */
 export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
-  const defaultPlugins: Array<BetterAuthPlugin> = [
-    admin({
-      ac: systemAc,
-      roles: systemRoles,
-      defaultRole: RoleEnumSchema.enum.USER,
-      adminRoles: [RoleEnumSchema.enum.ADMIN, RoleEnumSchema.enum.SUPER_ADMIN],
-      defaultBanExpiresIn: 60 * 60 * 24 * 10, // 10 day
-      bannedUserMessage: "Your account is currently banned",
-    }),
-    oneTap(),
-  ];
+  const defaultPlugins: Array<BetterAuthPlugin> = [];
 
   if (!config.isDev) {
     defaultPlugins.push(
@@ -175,8 +165,6 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
 
   const { siteUrl, baseURL, trustedOrigins, crossSubDomainCookies } =
     getDomainConfig(config.domainName, config.isDev, config?.port);
-
-  console.log({ siteUrl, baseURL, trustedOrigins, crossSubDomainCookies });
 
   return betterAuth({
     baseURL,
@@ -522,7 +510,22 @@ export function createBetterAuthBase(config: CreateBetterAuthBaseConfig) {
         assertMailSent(result);
       },
     },
-    plugins: [...defaultPlugins, ...(config.plugins ?? [])],
+    plugins: [
+      admin({
+        ac: systemAc,
+        roles: systemRoles,
+        defaultRole: RoleEnumSchema.enum.USER,
+        adminRoles: [
+          RoleEnumSchema.enum.ADMIN,
+          RoleEnumSchema.enum.SUPER_ADMIN,
+        ],
+        defaultBanExpiresIn: 60 * 60 * 24 * 10, // 10 day
+        bannedUserMessage: "Your account is currently banned",
+      }),
+      ...defaultPlugins,
+      oneTap(),
+      ...(config.plugins ?? []),
+    ],
   });
 }
 
