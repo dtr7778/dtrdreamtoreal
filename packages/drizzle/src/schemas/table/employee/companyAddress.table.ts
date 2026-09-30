@@ -45,7 +45,7 @@ export const CompanyAddressRelation = relations(
       relationName: "CompanyAddressToCompany",
     }),
     address: one(AddressTable, {
-      fields: [CompanyAddressTable.companyId],
+      fields: [CompanyAddressTable.addressId],
       references: [AddressTable.id],
       relationName: "CompanyAddressToAddress",
     }),

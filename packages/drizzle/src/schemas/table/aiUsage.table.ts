@@ -41,7 +41,7 @@ export const AiUsageTable = pgTable(
       name: "ai_usage_createdBy_fkey",
       columns: [table.createdBy],
       foreignColumns: [UserTable.id],
-    }).onDelete("set null"),
+    }).onDelete("cascade"),
     index("ai_usages_createdBy_idx").on(table.createdBy),
   ]
 );

@@ -64,7 +64,7 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
     relationName: "AccountToUser",
   }),
   roles: many(UserRoleTable, {
-    relationName: "UserToUserRole",
+    relationName: "UserRoleToUser",
   }),
   // file
   uploadedFiles: many(FileTable, {

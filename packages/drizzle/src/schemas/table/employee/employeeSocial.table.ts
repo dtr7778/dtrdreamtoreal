@@ -31,24 +31,30 @@ export const EmployeeSocialTable = pgTable(
   ]
 );
 
-export const EmployeeSocialRelation = relations(EmployeeSocialTable, ({ one }) => ({
-  employee: one(EmployeeTable, {
-    fields: [EmployeeSocialTable.employeeId],
-    references: [EmployeeTable.id],
-    relationName: "EmployeeSocialToEmployee",
-  }),
-  social: one(SocialMediaTable, {
-    fields: [EmployeeSocialTable.employeeId],
-    references: [SocialMediaTable.id],
-    relationName: "EmployeeSocialToSocial",
-  }),
-}));
+export const EmployeeSocialRelation = relations(
+  EmployeeSocialTable,
+  ({ one }) => ({
+    employee: one(EmployeeTable, {
+      fields: [EmployeeSocialTable.employeeId],
+      references: [EmployeeTable.id],
+      relationName: "EmployeeSocialToEmployee",
+    }),
+    social: one(SocialMediaTable, {
+      fields: [EmployeeSocialTable.socialMediaId],
+      references: [SocialMediaTable.id],
+      relationName: "EmployeeSocialToSocial",
+    }),
+  })
+);
 
-export const insertEmployeeSocialSchema = createInsertSchema(EmployeeSocialTable).omit({
+export const insertEmployeeSocialSchema = createInsertSchema(
+  EmployeeSocialTable
+).omit({
   id: true,
   createdAt: true,
 });
-export const selectEmployeeSocialSchema = createSelectSchema(EmployeeSocialTable);
+export const selectEmployeeSocialSchema =
+  createSelectSchema(EmployeeSocialTable);
 
 export type EmployeeSocialDataModel = typeof EmployeeSocialTable.$inferSelect;
 export type InsertEmployeeSocial = z.infer<typeof insertEmployeeSocialSchema>;

@@ -36,18 +36,21 @@ export const EmployeeAddressTable = pgTable(
   ]
 );
 
-export const EmployeeAddressRelation = relations(EmployeeAddressTable, ({ one }) => ({
-  employee: one(EmployeeTable, {
-    fields: [EmployeeAddressTable.employeeId],
-    references: [EmployeeTable.id],
-    relationName: "EmployeeAddressToEmployee",
-  }),
-  address: one(AddressTable, {
-    fields: [EmployeeAddressTable.employeeId],
-    references: [AddressTable.id],
-    relationName: "EmployeeAddressToAddress",
-  }),
-}));
+export const EmployeeAddressRelation = relations(
+  EmployeeAddressTable,
+  ({ one }) => ({
+    employee: one(EmployeeTable, {
+      fields: [EmployeeAddressTable.employeeId],
+      references: [EmployeeTable.id],
+      relationName: "EmployeeAddressToEmployee",
+    }),
+    address: one(AddressTable, {
+      fields: [EmployeeAddressTable.addressId],
+      references: [AddressTable.id],
+      relationName: "EmployeeAddressToAddress",
+    }),
+  })
+);
 
 export const insertEmployeeAddressSchema = createInsertSchema(
   EmployeeAddressTable
@@ -55,7 +58,8 @@ export const insertEmployeeAddressSchema = createInsertSchema(
   id: true,
   createdAt: true,
 });
-export const selectEmployeeAddressSchema = createSelectSchema(EmployeeAddressTable);
+export const selectEmployeeAddressSchema =
+  createSelectSchema(EmployeeAddressTable);
 export const updateEmployeeAddressSchema = createUpdateSchema(
   EmployeeAddressTable
 ).omit({

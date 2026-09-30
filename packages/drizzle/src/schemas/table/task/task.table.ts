@@ -48,7 +48,7 @@ export const TaskTable = pgTable(
       columns: [table.createdBy],
       foreignColumns: [UserTable.id],
     })
-      .onDelete("set null")
+      .onDelete("cascade")
       .onUpdate("cascade"),
     index("tasks_assigned_by_idx").on(table.assignedBy),
     index("tasks_status_idx").on(table.status),

@@ -64,6 +64,13 @@
       "when": 1790624338925,
       "tag": "0008_add_user_track",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790783716715,
+      "tag": "0009_fix_issue",
+      "breakpoints": true
     }
   ]
 }
