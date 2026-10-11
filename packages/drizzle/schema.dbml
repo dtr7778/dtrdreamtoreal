@@ -1,0 +1,852 @@
+table contact_submissions {
+  id text [pk, not null]
+  email_thread_id text [not null]
+  contact_user_id text [not null]
+  subject text
+  message text [not null]
+  status text [not null, default: 'pending']
+  ip_address text
+  user_agent text
+  notes text
+  is_spam integer [not null, default: 0]
+  spam_reason text
+  read_at integer
+  closed_at integer
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    contact_user_id [name: 'contactSubmission_contactUserId_idx']
+    email_thread_id [name: 'contactSubmission_emailThreadId_idx', unique]
+    status [name: 'contactSubmission_status_idx']
+    created_at [name: 'contactSubmission_createdAt_idx']
+  }
+}
+
+table contact_submission_replies {
+  id text [pk, not null]
+  submission_id text [not null]
+  replied_by text [not null]
+  email_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    
+    submission_id [name: 'contactSubmissionReply_submissionId_idx']
+    replied_by [name: 'contactSubmissionReply_repliedBy_idx']
+    email_id [name: 'contactSubmissionReply_emailId_idx', unique]
+    created_at [name: 'contactSubmissionReply_createdAt_idx']
+  }
+}
+
+table contact_users {
+  id text [pk, not null]
+  email text [not null]
+  first_name text [not null]
+  middle_name text
+  last_name text
+  phone text
+  company text
+  is_blocked integer [not null, default: 0]
+  blocked_reason text
+  spam_count integer [not null, default: 0]
+  submission_count integer [not null, default: 0]
+  last_submitted_at integer
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    email [name: 'contactUser_email_idx', unique]
+    first_name [name: 'contactUser_firstName_idx']
+    created_at [name: 'contactUser_createdAt_idx']
+    is_blocked [name: 'contactUser_isBlocked_idx']
+  }
+}
+
+table emails {
+  id text [pk, not null]
+  thread_id text
+  direction text [not null]
+  status text [not null, default: 'draft']
+  resend_id text
+  resend_message_id text
+  q_message_id text
+  subject text
+  text_body text
+  html_body text
+  headers text
+  metadata text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    thread_id [name: 'email_emailThreadId_idx']
+    resend_id [name: 'email_resendId_idx', unique]
+    q_message_id [name: 'email_qMessageId_idx', unique]
+    resend_message_id [name: 'email_messageId_idx']
+    direction [name: 'email_direction_idx']
+    status [name: 'email_status_idx']
+    created_at [name: 'email_createdAt_idx']
+  }
+}
+
+table email_attachments {
+  id text [pk, not null]
+  email_id text [not null]
+  filename text [not null]
+  content_type text [not null]
+  content_id text
+  content_disposition text
+  size integer
+  storage_key text
+  url text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    email_id [name: 'emailAttachment_emailId_idx']
+    content_id [name: 'emailAttachment_contentId_idx']
+  }
+}
+
+table email_recipients {
+  id text [pk, not null]
+  email_id text [not null]
+  type text [not null]
+  email text [not null]
+  name text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    email_id [name: 'emailRecipient_emailId_idx']
+    email [name: 'emailRecipient_email_idx']
+    type [name: 'emailRecipient_type_idx']
+  }
+}
+
+table email_threads {
+  id text [pk, not null]
+  subject text [not null]
+  contact_email text [not null]
+  contact_name text
+  is_closed integer [not null, default: 0]
+  closed_at integer
+  closed_by text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    closed_by [name: 'emailThread_closedBy_idx']
+    contact_email [name: 'emailThread_contactEmail_idx']
+    is_closed [name: 'emailThread_isClosed_idx']
+  }
+}
+
+table lead_companies {
+  id text [pk, not null]
+  name text [not null]
+  legal_name text
+  website text
+  industry text
+  employ_size text
+  email text
+  phone text
+  description text
+  context text [not null, default: `{}`]
+  source text [not null]
+  external_id text
+  created_by text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    created_by [name: 'leadCompany_createdBy_idx']
+    name [name: 'leadCompany_name_idx']
+    (source, external_id) [name: 'leadCompany_source_externalId_idx', unique]
+  }
+}
+
+table lead_company_addresses {
+  id text [pk, not null]
+  lead_company_id text [not null]
+  address_id text [not null]
+  is_primary integer [not null, default: 1]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_company_id [name: 'leadCompanyAddress_leadCompanyId_idx']
+    address_id [name: 'leadCompanyAddress_addressId_idx']
+  }
+}
+
+table lead_company_ai_usages {
+  id text [pk, not null]
+  lead_company_id text [not null]
+  ai_usage_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_company_id [name: 'leadCompanyAiUsage_leadCompanyId_idx']
+    ai_usage_id [name: 'leadCompanyAiUsage_aiUsageId_idx']
+  }
+}
+
+table lead_company_email_threads {
+  id text [pk, not null]
+  lead_company_id text [not null]
+  email_thread_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_company_id [name: 'leadCompanyEmailThread_leadCompanyId_idx']
+    email_thread_id [name: 'leadCompanyEmailThread_emailThreadId_idx']
+  }
+}
+
+table lead_company_socials {
+  id text [pk, not null]
+  lead_company_id text [not null]
+  social_media_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_company_id [name: 'leadCompanySocial_leadCompanyId_idx']
+    social_media_id [name: 'leadCompanySocial_socialMediaId_idx']
+  }
+}
+
+table lead_users {
+  id text [pk, not null]
+  lead_company_id text
+  first_name text [not null]
+  middle_name text
+  last_name text
+  email text
+  phone text
+  job_title text
+  department text
+  website text
+  source text [not null]
+  external_id text
+  created_by text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_company_id [name: 'leadUser_leadCompanyId_idx']
+    created_by [name: 'leadUser_createdBy_idx']
+    (source, external_id) [name: 'leadUser_source_externalId_idx', unique]
+  }
+}
+
+table lead_user_addresses {
+  id text [pk, not null]
+  lead_user_id text [not null]
+  address_id text [not null]
+  is_primary integer [not null, default: 1]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_user_id [name: 'leadUserAddress_leadUserId_idx']
+    address_id [name: 'leadUserAddress_addressId_idx']
+  }
+}
+
+table lead_user_email_threads {
+  id text [pk, not null]
+  lead_user_id text [not null]
+  email_thread_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_user_id [name: 'leadUserEmailThread_leadUserId_idx']
+    email_thread_id [name: 'leadUserEmailThread_emailThreadId_idx']
+  }
+}
+
+table lead_user_socials {
+  id text [pk, not null]
+  lead_user_id text [not null]
+  social_media_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    lead_user_id [name: 'leadUserSocial_leadUserId_idx']
+    social_media_id [name: 'leadUserSocial_socialMediaId_idx']
+  }
+}
+
+table notifications {
+  id text [pk, not null]
+  recipient_id text [not null]
+  actor_id text
+  category text [not null]
+  level text [not null, default: 'INFO']
+  title text [not null]
+  message text [not null]
+  data text
+  is_read integer [not null, default: 0]
+  read_at integer
+  is_archived integer [not null, default: 0]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    recipient_id [name: 'notifications_recipient_idx']
+    (recipient_id, is_read) [name: 'notifications_recipient_read_idx']
+    created_at [name: 'notifications_created_at_idx']
+  }
+}
+
+table permissions {
+  id text [pk, not null]
+  name text [not null]
+  level text [not null]
+  resource text [not null]
+  action text [not null]
+  description text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    (level, resource, action) [name: 'permission_level_resource_action_key', unique]
+    level [name: 'permission_level_idx']
+    resource [name: 'permission_resource_idx']
+    action [name: 'permission_action_idx']
+  }
+}
+
+table roles {
+  id text [pk, not null]
+  role_name text [not null, default: 'USER']
+  description text
+
+  indexes {
+    role_name [name: 'role_name_unique', unique]
+  }
+}
+
+table role_permissions {
+  id text [pk, not null]
+  role_id text [not null]
+  permission_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    (role_id, permission_id) [name: 'role_permission_unique', unique]
+    role_id [name: 'role_permission_role_idx']
+    permission_id [name: 'role_permission_permission_idx']
+  }
+}
+
+table user_roles {
+  id text [pk, not null]
+  role_id text [not null]
+  user_id text [not null]
+  assigned_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    (user_id, role_id) [name: 'user_role_unique', unique]
+    role_id [name: 'user_role_role_id_idx']
+    user_id [name: 'user_role_user_id_idx']
+  }
+}
+
+table audit_items {
+  id text [pk, not null]
+  site_audit_id text [not null]
+  checklist_key text [not null]
+  section text [not null]
+  title text [not null]
+  url text
+  status text [not null, default: 'pending']
+  message text
+  evidence text
+  duration_ms integer
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    site_audit_id [name: 'auditItem_siteAuditId_idx']
+    checklist_key [name: 'auditItem_checklistKey_idx']
+    status [name: 'auditItem_status_idx']
+    url [name: 'auditItem_url_idx']
+    (site_audit_id, checklist_key, url) [name: 'auditItem_site_checklist_url_unq', unique]
+  }
+}
+
+table audit_logs {
+  id text [pk, not null]
+  site_audit_id text [not null]
+  sequence integer [not null]
+  type text [not null]
+  level text [not null, default: 'info']
+  message text [not null]
+  data text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    (site_audit_id, sequence) [name: 'auditLog_siteAuditId_sequence_uq', unique]
+    site_audit_id [name: 'auditLog_siteAuditId_idx']
+    type [name: 'auditLog_type_idx']
+    level [name: 'auditLog_level_idx']
+  }
+}
+
+table cwv_snapshots {
+  id text [pk, not null]
+  site_audit_id text [not null]
+  url text [not null]
+  strategy text [not null]
+  source text [not null]
+  lcp real
+  inp real
+  cls real
+  ttfb real
+  fcp real
+  performance_score real
+  country_code text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    site_audit_id [name: 'cwvSnapshot_siteAuditId_idx']
+    url [name: 'cwvSnapshot_url_idx']
+    strategy [name: 'cwvSnapshot_strategy_idx']
+    source [name: 'cwvSnapshot_source_idx']
+    country_code [name: 'cwvSnapshot_countryCode_idx']
+  }
+}
+
+table site_audits {
+  id text [pk, not null]
+  company_id text [not null]
+  url text [not null]
+  name text [not null]
+  description text
+  status text [not null, default: 'pending']
+  report_image_file_id text
+  error text
+  total_items integer [not null, default: 0]
+  completed_items integer [not null, default: 0]
+  passed_items integer [not null, default: 0]
+  failed_items integer [not null, default: 0]
+  started_at integer
+  completed_at integer
+  triggered_by text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    company_id [name: 'siteAudit_companyId_idx']
+    triggered_by [name: 'siteAudit_triggeredBy_idx']
+    created_at [name: 'siteAudit_createdAt_idx']
+  }
+}
+
+table users {
+  id text [pk, not null]
+  name text [not null]
+  email text [not null]
+  email_verified integer [not null, default: 0]
+  image text
+  role text [not null]
+  banned integer [default: 0]
+  ban_reason text
+  ban_expires integer
+  timezone text [not null, default: 'UTC']
+  locale text [not null, default: 'en-US']
+  currency text [not null, default: 'USD']
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    email [name: 'user_email_key', unique]
+  }
+}
+
+table user_devices {
+  id text [pk, not null]
+  user_id text [not null]
+  fingerprint text [not null]
+  browser text
+  os text
+  device_type text
+  first_seen_at integer [not null, default: `(unixepoch() * 1000)`]
+  last_seen_at integer [not null, default: `(unixepoch() * 1000)`]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    (user_id, fingerprint) [name: 'user_device_user_fingerprint_idx', unique]
+    user_id [name: 'user_device_user_id_idx']
+  }
+}
+
+table user_sessions {
+  id text [pk, not null]
+  user_id text [not null]
+  device_id text
+  session_id text [not null]
+  login_at integer [not null, default: `(unixepoch() * 1000)`]
+  last_seen_at integer [not null, default: `(unixepoch() * 1000)`]
+  logout_at integer
+  expires_at integer
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    
+    user_id [name: 'user_session_user_id_idx']
+    session_id [name: 'user_session_session_id_idx', unique]
+    login_at [name: 'user_session_login_at_idx']
+    last_seen_at [name: 'user_session_last_seen_at_idx']
+  }
+}
+
+table user_events {
+  id text [pk, not null]
+  user_id text
+  email text
+  event text [not null]
+  session_id text
+  device_id text
+  ip_address text
+  user_agent text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    user_id [name: 'user_event_user_id_idx']
+    event [name: 'user_event_event_idx']
+    created_at [name: 'user_event_created_at_idx']
+    session_id [name: 'user_event_session_id_idx']
+  }
+}
+
+table notification_settings {
+  id text [pk, not null]
+  user_id text [not null]
+  category text [not null]
+  email_enabled integer [not null, default: 1]
+  push_enabled integer [not null, default: 1]
+  in_app_enabled integer [not null, default: 1]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    (user_id, category) [name: 'notification_settings_user_category_key', unique]
+  }
+}
+
+table push_subscriptions {
+  id text [pk, not null]
+  user_id text [not null]
+  endpoint text [not null]
+  p256dh text [not null]
+  auth text [not null]
+  expiration_time real
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    endpoint [name: 'push_subscription_endpoint_unique', unique]
+    user_id [name: 'push_subscription_user_id']
+  }
+}
+
+table accounts {
+  id text [pk, not null]
+  account_id text [not null]
+  provider_id text [not null]
+  access_token text
+  refresh_token text
+  id_token text
+  access_token_expires_at integer
+  refresh_token_expires_at integer
+  scope text
+  password text
+  user_id text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    (provider_id, account_id) [name: 'account_accountProvider_accountId_idx', unique]
+    user_id [name: 'account_userId_idx']
+  }
+}
+
+table addresses {
+  id text [pk, not null]
+  type text [not null, default: 'other']
+  street_line_1 text [not null]
+  street_line_2 text
+  city text [not null]
+  state text
+  zip_code text [not null]
+  country text [not null]
+  latitude numeric
+  longitude numeric
+  notes text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+}
+
+table ai_usages {
+  id text [pk, not null]
+  provider text [not null, default: 'openrouter']
+  model text [not null]
+  activity text [not null]
+  prompt_tokens integer [not null, default: 0]
+  completion_tokens integer [not null, default: 0]
+  total_tokens integer [not null, default: 0]
+  cost real
+  latency_ms integer [not null, default: 0]
+  created_by text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    created_by [name: 'ai_usages_createdBy_idx']
+  }
+}
+
+table files {
+  id text [pk, not null]
+  key text [not null]
+  filename text [not null]
+  original_name text [not null]
+  mime_type text [not null]
+  size integer [not null]
+  url text [not null]
+  uploaded_by text
+  entity_type text
+  entity_id text
+  uploaded_at integer [not null, default: `(unixepoch() * 1000)`]
+  deleted_at integer
+  deleted_by text
+
+  indexes {
+    
+    
+    uploaded_by [name: 'file_user_idx']
+    deleted_by [name: 'file_deletedBy_idx']
+    (entity_type, entity_id) [name: 'file_entityType_idx']
+    key [name: 'file_key_idx']
+    uploaded_at [name: 'file_uploadedAt_idx']
+  }
+}
+
+table sessions {
+  id text [pk, not null]
+  token text [not null]
+  ip_address text
+  user_agent text
+  impersonated_by text
+  user_id text [not null]
+  expires_at integer [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    token [name: 'session_token_idx', unique]
+    user_id [name: 'session_userId_idx']
+    expires_at [name: 'session_expiresAt_idx']
+  }
+}
+
+table social_media {
+  id text [pk, not null]
+  type text [not null]
+  platform text [not null]
+  username text [not null]
+  url text [not null]
+  display_name text
+  notes text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    username [name: 'socialMedia_userName_idx']
+  }
+}
+
+table verifications {
+  id text [pk, not null]
+  identifier text [not null]
+  value text [not null]
+  expires_at integer [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+}
+
+table tasks {
+  id text [pk, not null]
+  title text [not null]
+  description text
+  status text [not null, default: 'todo']
+  priority text [not null, default: 'medium']
+  due_date integer
+  assigned_by text
+  created_by text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    assigned_by [name: 'tasks_assigned_by_idx']
+    status [name: 'tasks_status_idx']
+    priority [name: 'tasks_priority_idx']
+    due_date [name: 'tasks_due_date_idx']
+    created_at [name: 'tasks_created_at_idx']
+  }
+}
+
+ref: email_threads.id - contact_submissions.email_thread_id
+
+ref: contact_submissions.contact_user_id > contact_users.id
+
+ref: contact_submission_replies.submission_id - contact_submissions.id
+
+ref: contact_submission_replies.replied_by > users.id
+
+ref: emails.id - contact_submission_replies.email_id
+
+ref: emails.thread_id > email_threads.id
+
+ref: email_attachments.email_id > emails.id
+
+ref: email_recipients.email_id > emails.id
+
+ref: email_threads.closed_by > users.id
+
+ref: lead_companies.created_by - users.id
+
+ref: lead_company_addresses.lead_company_id > lead_companies.id
+
+ref: lead_company_addresses.address_id > addresses.id
+
+ref: lead_company_ai_usages.lead_company_id > lead_companies.id
+
+ref: ai_usages.id - lead_company_ai_usages.ai_usage_id
+
+ref: lead_company_email_threads.lead_company_id > lead_companies.id
+
+ref: lead_company_email_threads.email_thread_id > email_threads.id
+
+ref: lead_company_socials.lead_company_id > lead_companies.id
+
+ref: lead_company_socials.social_media_id > social_media.id
+
+ref: lead_users.created_by - users.id
+
+ref: lead_users.lead_company_id > lead_companies.id
+
+ref: lead_user_addresses.lead_user_id > lead_users.id
+
+ref: lead_user_addresses.address_id > addresses.id
+
+ref: lead_user_email_threads.lead_user_id > lead_users.id
+
+ref: lead_user_email_threads.email_thread_id > email_threads.id
+
+ref: lead_user_socials.lead_user_id > lead_users.id
+
+ref: lead_user_socials.social_media_id > social_media.id
+
+ref: notifications.recipient_id > users.id
+
+ref: notifications.actor_id > users.id
+
+ref: role_permissions.role_id > roles.id
+
+ref: role_permissions.permission_id > permissions.id
+
+ref: user_roles.role_id > roles.id
+
+ref: user_roles.user_id > users.id
+
+ref: audit_items.site_audit_id > site_audits.id
+
+ref: audit_logs.site_audit_id > site_audits.id
+
+ref: cwv_snapshots.site_audit_id > site_audits.id
+
+ref: site_audits.company_id > lead_companies.id
+
+ref: site_audits.triggered_by > users.id
+
+ref: user_devices.user_id > users.id
+
+ref: user_sessions.user_id > users.id
+
+ref: sessions.id - user_sessions.session_id
+
+ref: user_sessions.device_id > user_devices.id
+
+ref: user_events.user_id > users.id
+
+ref: user_events.device_id > user_devices.id
+
+ref: notification_settings.user_id > users.id
+
+ref: push_subscriptions.user_id > users.id
+
+ref: accounts.user_id > users.id
+
+ref: ai_usages.created_by > users.id
+
+ref: files.uploaded_by > users.id
+
+ref: files.deleted_by > users.id
+
+ref: sessions.user_id > users.id
+
+ref: tasks.assigned_by > users.id
+
+ref: tasks.created_by > users.id
