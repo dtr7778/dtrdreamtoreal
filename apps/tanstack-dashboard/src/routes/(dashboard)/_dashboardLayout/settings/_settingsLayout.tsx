@@ -9,7 +9,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { Separator } from "@workspace/ui/components/separator";
 
-export const Route = createFileRoute("/(dashboard)/_dashboardLayout/(settings)/_settingsLayout")({
+export const Route = createFileRoute("/(dashboard)/_dashboardLayout/settings/_settingsLayout")({
   component: RouteComponent,
 });
 

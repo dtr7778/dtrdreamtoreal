@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Spinner } from "@workspace/ui/components/spinner";
 
 export const Route = createFileRoute(
-  "/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/notification"
+  "/(dashboard)/_dashboardLayout/settings/_settingsLayout/notification"
 )({
   pendingComponent: LoadingComponent,
   component: RouteComponent,

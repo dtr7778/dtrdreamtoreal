@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
-  "/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/"
+  "/(dashboard)/_dashboardLayout/settings/_settingsLayout/"
 )({
   component: RouteComponent,
 });

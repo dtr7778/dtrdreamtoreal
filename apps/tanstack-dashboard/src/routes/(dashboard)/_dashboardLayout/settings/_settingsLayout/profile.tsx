@@ -9,7 +9,7 @@ import {
 } from "@workspace/ui/components/card";
 
 export const Route = createFileRoute(
-  "/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/profile"
+  "/(dashboard)/_dashboardLayout/settings/_settingsLayout/profile"
 )({
   component: RouteComponent,
 });

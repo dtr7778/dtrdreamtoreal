@@ -14,7 +14,7 @@ const getConnectedAccounts = createServerFn({ method: "GET" }).handler(
 );
 
 export const Route = createFileRoute(
-  "/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/connected-apps"
+  "/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps"
 )({
   loader: () => getConnectedAccounts(),
   pendingComponent: LoadingComponent,

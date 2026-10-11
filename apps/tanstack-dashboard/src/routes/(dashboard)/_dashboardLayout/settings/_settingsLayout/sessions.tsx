@@ -12,7 +12,7 @@ const getSessions = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const Route = createFileRoute(
-  "/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/sessions"
+  "/(dashboard)/_dashboardLayout/settings/_settingsLayout/sessions"
 )({
   loader: () => getSessions(),
   pendingComponent: LoadingComponent,

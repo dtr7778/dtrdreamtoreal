@@ -20,7 +20,7 @@ const getAccounts = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const Route = createFileRoute(
-  "/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/update-password"
+  "/(dashboard)/_dashboardLayout/settings/_settingsLayout/update-password"
 )({
   loader: () => getAccounts(),
   pendingComponent: LoadingComponent,
