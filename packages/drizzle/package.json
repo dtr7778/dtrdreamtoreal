@@ -1,0 +1,96 @@
+{
+  "name": "@workspace/drizzle",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    "./client": {
+      "import": "./src/clients/drizzle-client.ts",
+      "types": "./src/clients/drizzle-client.ts"
+    },
+    "./client/mock": {
+      "import": "./tests/drizzle-client.mock.ts",
+      "types": "./tests/drizzle-client.mock.ts"
+    },
+    "./schemas": {
+      "import": "./src/schemas/index.ts",
+      "types": "./src/schemas/index.ts"
+    },
+    "./zod-db-enums": {
+      "import": "./src/schemas/enums/zod-db-enums.ts",
+      "types": "./src/schemas/enums/zod-db-enums.ts"
+    },
+    "./enum-values": {
+      "import": "./src/schemas/enums/enum-values.ts",
+      "types": "./src/schemas/enums/enum-values.ts"
+    },
+    "./paginate-query": {
+      "import": "./src/paginate-query/index.ts",
+      "types": "./src/paginate-query/index.ts"
+    },
+    "./sql-helpers": {
+      "import": "./src/sql-helpers.ts",
+      "types": "./src/sql-helpers.ts"
+    },
+    "./helpers": {
+      "import": "./src/helpers/index.ts",
+      "types": "./src/helpers/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:studio:local": "drizzle-kit studio --config=./drizzle.local.config.ts",
+    "db:studio:remote": "drizzle-kit studio --config=./drizzle.config.ts",
+    "db:seed:dev": "NODE_ENV=development tsx ./src/seed/dev-seed/index.ts",
+    "db:seed:prod": "NODE_ENV=production tsx ./src/seed/prod-seed/index.ts",
+    "db:generate-dbml": "tsx ./src/generators/dbml-generator.ts",
+    "db:generate-sql": "tsx ./src/generators/sql-generator.ts",
+    "db:generate-full": "pnpm run db:generate && pnpm run db:generate-dbml && pnpm run db:generate-sql",
+    "db:migrate:local": "wrangler d1 migrations apply dtrdreamtoreal-db-local --local --persist-to=\"../../.wrangler\" --config=\"./wrangler.jsonc\"",
+    "db:migrate:remote": "wrangler d1 migrations apply dtrdreamtoreal-db --remote --env production --config=\"./wrangler.jsonc\"",
+    "db:seed:local": "SEED_REMOTE=false WRANGLER_CONFIG_PATH=\"./wrangler.seed.jsonc\" WRANGLER_PERSIST_PATH=\"../../.wrangler/v3\" tsx ./src/seed/dev-seed/index.ts",
+    "db:seed:remote": "SEED_REMOTE=true WRANGLER_CONFIG_PATH=\"./wrangler.seed.jsonc\" tsx ./src/seed/prod-seed/index.ts",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "catalog:",
+    "@libsql/client": "catalog:",
+    "@types/node": "catalog:",
+    "@variablesoftware/mock-d1": "^0.7.1",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "dotenv": "catalog:",
+    "drizzle-dbml-generator": "^0.10.0",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "wrangler": "catalog:",
+    "zocker": "catalog:"
+  },
+  "dependencies": {
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "drizzle-zod": "^0.8.3",
+    "zod": "catalog:"
+  }
+}

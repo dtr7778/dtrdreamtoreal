@@ -1,0 +1,79 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dtrdreamtoreal-tanstack-dashboard",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true,
+  },
+  "upload_source_maps": true,
+  "services": [
+    {
+      "binding": "AUTH",
+      "service": "dtrdreamtoreal-hono-backend",
+      "entrypoint": "AuthEntrypoint",
+    },
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "MAIL_QUEUE",
+        "queue": "dtrdreamtoreal-mail-queue-local",
+      },
+    ],
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dtrdreamtoreal-db-local",
+      "database_id": "dd2b93c8-d3fd-4de7-8956-15b488c678f6",
+    },
+  ],
+  "env": {
+    "production": {
+      "name": "dtrdreamtoreal-tanstack-dashboard",
+      "routes": [
+        {
+          "pattern": "app.dtrdreamtoreal.com",
+          "zone_name": "dtrdreamtoreal.com",
+          "custom_domain": true,
+        },
+      ],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "VITE_ENVIRONMENT": "production",
+        "VITE_APP_NAME": "Dream To Real",
+        "VITE_SITE_URL": "https://dtrdreamtoreal.com",
+        "VITE_BACKEND_URL": "https://api.dtrdreamtoreal.com",
+        "VITE_AUTH_URL": "https://api.dtrdreamtoreal.com",
+        "VITE_SYSTEM_MAIL": "notification@mail.dtrdreamtoreal.com",
+        "VITE_SUPPORT_MAIL": "support@mail.dtrdreamtoreal.com",
+        "SKIP_ENV_VALIDATION": "true",
+      },
+      "queues": {
+        "producers": [
+          {
+            "binding": "MAIL_QUEUE",
+            "queue": "dtrdreamtoreal-mail-queue",
+          },
+        ],
+      },
+      "services": [
+        {
+          "binding": "AUTH",
+          "service": "dtrdreamtoreal-hono-backend",
+          "entrypoint": "AuthEntrypoint",
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "dtrdreamtoreal-db",
+          "database_id": "fc84e1cc-a96e-40fc-b62e-71f105409167",
+          "migrations_dir": "../../migrations",
+        },
+      ],
+    },
+  },
+}

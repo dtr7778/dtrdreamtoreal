@@ -1,0 +1,60 @@
+{
+  "name": "hono-backend",
+  "version": "0.0.1",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "dev": "wrangler dev --persist-to=\"../../.wrangler\" --env-file=\".env.local\"",
+    "build": "wrangler deploy --dry-run --env production --outdir dist",
+    "start": "wrangler dev --persist-to=\"../../.wrangler\" --env-file=\".env.production.local\" --show-interactive-dev-session=false",
+    "deploy": "wrangler deploy --env production",
+    "cf-typegen": "wrangler types --config=\"wrangler.jsonc\" --env-file=\".env.local\"",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:",
+    "wrangler": "catalog:",
+    "zocker": "catalog:"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "catalog:",
+    "@t3-oss/env-core": "catalog:",
+    "@workspace/auth": "workspace:*",
+    "@workspace/drizzle": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "@workspace/mail": "workspace:*",
+    "@workspace/server-core": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "hono": "catalog:",
+    "resend": "catalog:",
+    "zod": "catalog:"
+  }
+}

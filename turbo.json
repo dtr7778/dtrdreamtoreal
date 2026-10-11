@@ -1,0 +1,53 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "NODE_ENV",
+    "SKIP_ENV_VALIDATION",
+    "WRANGLER_CONFIG_PATH",
+    "WRANGLER_PERSIST_PATH",
+    "SEED_REMOTE",
+    "CLOUDFLARE_ACCOUNT_ID",
+    "CLOUDFLARE_DATABASE_ID",
+    "CLOUDFLARE_D1_TOKEN"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "lint:fix": {
+      "dependsOn": ["^lint:fix"]
+    },
+    "format": {
+      "dependsOn": ["^format"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "generate-routes": {
+      "cache": false,
+      "persistent": true
+    },
+    "cf-typegen": {
+      "cache": false,
+      "persistent": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "@workspace/vitest-config#build": {
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
+      "dependsOn": ["@workspace/vitest-config#build"],
+      "outputs": []
+    }
+  }
+}

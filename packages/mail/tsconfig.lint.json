@@ -1,0 +1,8 @@
+{
+  "extends": "@workspace/typescript-config/react-internal.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

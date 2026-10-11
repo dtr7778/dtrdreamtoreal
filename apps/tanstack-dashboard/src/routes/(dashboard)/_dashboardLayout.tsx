@@ -1,0 +1,69 @@
+import { AppSidebar } from "#/components/shared/sidebar/AppSidebar";
+import { Topbar } from "#/components/shared/topbar";
+import { DEFAULT_UNAUTH_PATH } from "#/constants";
+import { NotificationPermissionProvider } from "#/features/notification/components/NotificationPermissionProvider";
+import { AuthStoreProvider } from "#/stores/zustand/auth/AuthStoreContext";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+
+import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@workspace/ui/components/sidebar";
+
+export const Route = createFileRoute("/(dashboard)/_dashboardLayout")({
+  beforeLoad: async ({ location, context }) => {
+    const user = context?.user;
+    const session = context?.session;
+    const roles = context?.roles;
+    const permissions = context?.permissions;
+
+    if (!user || !session || !roles || !permissions) {
+      throw redirect({
+        href: DEFAULT_UNAUTH_PATH,
+        search: { redirect: location.pathname },
+        replace: true,
+      });
+    }
+
+    return {
+      user,
+      session,
+      roles,
+      permissions,
+    };
+  },
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const { session, user, roles, permissions } = Route.useRouteContext();
+
+  const isAdminUser = roles.some(
+    ({ roleName }) =>
+      roleName === RoleEnumSchema.enum.ADMIN ||
+      roleName === RoleEnumSchema.enum.SUPER_ADMIN
+  );
+
+  return (
+    <NotificationPermissionProvider>
+      <AuthStoreProvider
+        session={session}
+        user={user}
+        permissions={permissions}
+        roles={roles}
+        isAdminUser={isAdminUser}
+      >
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <Topbar />
+            <main className="min-h-[calc(100vh-84px)] flex-1">
+              <Outlet />
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </AuthStoreProvider>
+    </NotificationPermissionProvider>
+  );
+}

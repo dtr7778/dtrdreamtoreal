@@ -1,0 +1,21 @@
+{
+  "extends": "@workspace/typescript-config/base.json",
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declarationDir": "dist/types",
+    "tsBuildInfoFile": "dist/types/tsconfig.tsbuildinfo",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@test/*": ["./test/*"]
+    },
+    "jsx": "react-jsx",
+    "types": ["./worker-configuration.d.ts", "node"]
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules", "dist", "eslint.config.js", "vitest.config.ts"]
+}

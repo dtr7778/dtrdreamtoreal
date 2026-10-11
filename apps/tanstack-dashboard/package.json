@@ -1,0 +1,110 @@
+{
+  "name": "tanstack-dashboard",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "preview": "pnpm run build && vite preview",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc -b",
+    "deploy": "CLOUDFLARE_ENV=production pnpm run build && wrangler deploy",
+    "cf-typegen": "wrangler types --config=\"wrangler.jsonc\" --config=\"../hono-backend/wrangler.jsonc\" --env-file=\".env.local\"",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "catalog:",
+    "@hugeicons/core-free-icons": "catalog:",
+    "@hugeicons/react": "catalog:",
+    "@orpc/client": "catalog:",
+    "@orpc/contract": "^1.15.4",
+    "@orpc/json-schema": "^1.15.4",
+    "@orpc/openapi": "^1.15.4",
+    "@orpc/server": "^1.15.4",
+    "@orpc/tanstack-query": "^1.15.4",
+    "@orpc/zod": "^1.15.4",
+    "@t3-oss/env-core": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "@workspace/auth": "workspace:*",
+    "@workspace/drizzle": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "@workspace/mail": "workspace:*",
+    "@workspace/tanstack-start": "workspace:*",
+    "@workspace/ui": "workspace:*",
+    "date-fns": "catalog:",
+    "drizzle-orm": "catalog:",
+    "hono": "catalog:",
+    "immer": "catalog:",
+    "lucide-react": "catalog:",
+    "motion": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-hot-toast": "catalog:",
+    "tailwindcss": "catalog:",
+    "ua-parser-js": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "catalog:",
+    "@faker-js/faker": "catalog:",
+    "@rolldown/plugin-babel": "catalog:",
+    "@serwist/window": "^9.5.13",
+    "@serwist/vite": "catalog:",
+    "@storybook/react-vite": "catalog:",
+    "@tailwindcss/typography": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@tanstack/devtools-vite": "catalog:",
+    "@tanstack/eslint-config": "catalog:",
+    "@tanstack/react-devtools": "catalog:",
+    "@tanstack/react-query-devtools": "catalog:",
+    "@tanstack/react-router-devtools": "catalog:",
+    "@tanstack/router-cli": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/vite-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "babel-plugin-react-compiler": "catalog:",
+    "eslint": "catalog:",
+    "serwist": "^9.5.13",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "wrangler": "catalog:",
+    "zocker": "catalog:"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss",
+      "sharp",
+      "workerd"
+    ]
+  }
+}

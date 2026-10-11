@@ -1,0 +1,39 @@
+{
+  "apps/hono-backend/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./apps/hono-backend/eslint.config.js"
+  ],
+  "apps/tanstack-dashboard/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./apps/tanstack-dashboard/eslint.config.js"
+  ],
+  "apps/tanstack-web/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./apps/tanstack-web/eslint.config.js"
+  ],
+  "packages/auth/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/auth/eslint.config.js"
+  ],
+  "packages/drizzle/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/drizzle/eslint.config.js"
+  ],
+  "packages/lib/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/lib/eslint.config.js"
+  ],
+  "packages/mail/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/mail/eslint.config.js"
+  ],
+  "packages/server-core/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/server-core/eslint.config.js"
+  ],
+  "packages/tanstack-start/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/tanstack-start/eslint.config.js"
+  ],
+  "packages/ui/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/ui/eslint.config.js"
+  ],
+  "packages/vite-config/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/vite-config/eslint.config.js"
+  ],
+  "packages/vitest-config/**/*.{ts,tsx}": [
+    "eslint --max-warnings 0 --config ./packages/vitest-config/eslint.config.js"
+  ],
+  "*.md": ["prettier --write"]
+}

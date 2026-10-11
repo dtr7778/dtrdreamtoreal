@@ -1,0 +1,18 @@
+{
+  "extends": "@workspace/typescript-config/tanstack-app.json",
+  "compilerOptions": {
+    "paths": {
+      "#/*": ["./src/*"]
+    },
+    "types": [
+      "./worker-configuration.d.ts",
+      "node",
+      "vite/client",
+      "@serwist/vite/typings"
+    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"]
+  },
+  "references": [{ "path": "../hono-backend" }],
+  "include": ["src", "tests", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", "eslint.config.js", "vitest.config.ts"]
+}

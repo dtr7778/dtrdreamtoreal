@@ -1,0 +1,68 @@
+import { faker } from "@faker-js/faker";
+import { zocker } from "zocker";
+
+import type { DatabaseType } from "../../clients/drizzle-client";
+import type {
+  TaskDataModel,
+  UserDataModel} from "../../schemas";
+import {
+  insertTaskSchema,
+  TaskTable
+} from "../../schemas";
+import { seedConfigs } from "../seed.config";
+import { insertChunkedReturning } from "../seed-utils";
+
+export async function seedTasks(
+  db: DatabaseType,
+  users: Array<UserDataModel>
+): Promise<Array<TaskDataModel>> {
+  console.log("🌱 Seeding tasks...");
+
+  const tasksData = zocker(
+    insertTaskSchema.omit({
+      title: true,
+      description: true,
+      createdBy: true,
+      assignedBy: true,
+    })
+  )
+    .generateMany(seedConfigs.targets.tasks)
+    .map((task) => {
+      const createdUser = faker.helpers.arrayElement(users);
+      const title = faker.lorem.sentence({ min: 2, max: 6 });
+      const description = faker.helpers.maybe(
+        () => {
+          return faker.lorem.sentences(2);
+        },
+        { probability: 0.2 }
+      );
+
+      const potentialAssignedUser = users.filter(
+        (user) => user.id !== createdUser.id
+      );
+
+      const assignedUser =
+        potentialAssignedUser.length > 0
+          ? faker.helpers.maybe(
+              () => faker.helpers.arrayElement(potentialAssignedUser),
+              { probability: 0.5 }
+            )
+          : undefined;
+
+      return {
+        ...task,
+        title,
+        description,
+        createdBy: createdUser.id,
+        assignedBy: assignedUser ? assignedUser.id : null,
+      };
+    });
+
+  const tasks = await insertChunkedReturning(tasksData, (chunk) =>
+    db.insert(TaskTable).values(chunk).returning()
+  );
+
+  console.log(`✅ ${tasks.length} Task seeded`);
+
+  return tasks;
+}

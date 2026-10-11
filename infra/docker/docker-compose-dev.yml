@@ -1,0 +1,21 @@
+name: DTR - Dream To Real
+
+services:
+  resendev:
+    image: jupitercl/resendev:latest
+    container_name: resend_dev
+    restart: unless-stopped
+    ports:
+      - "3099:3099"
+    volumes:
+      - resendev_data:/app/data
+    networks:
+      - dtrdreamtoreal_network
+
+networks:
+  dtrdreamtoreal_network:
+    driver: bridge
+
+volumes:
+  resendev_data:
+    driver: local

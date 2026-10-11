@@ -1,0 +1,58 @@
+{
+  "name": "@workspace/mail",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
+  "contributors": [
+    {
+      "name": "Saiful Islam",
+      "email": "saiful.islam.rafi.88@gmail.com"
+    }
+  ],
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./factory": "./src/factory/index.ts",
+    "./producer": "./src/producer/index.ts",
+    "./consumer": "./src/consumer/index.ts",
+    "./transports": "./src/transports/index.ts",
+    "./components/*": "./src/components/*.tsx"
+  },
+  "scripts": {
+    "dev": "email dev --dir='./src/templates/' --port=8088",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@react-email/ui": "^6.9.2",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@workspace/vitest-config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@react-email/editor": "^1.7.8",
+    "@tiptap/react": "catalog:",
+    "@workspace/drizzle": "workspace:*",
+    "@workspace/lib": "workspace:*",
+    "@workspace/ui": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-email": "^6.9.2",
+    "resend": "catalog:",
+    "zod": "catalog:"
+  }
+}
