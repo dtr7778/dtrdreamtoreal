@@ -1,3 +1,4 @@
+export * from "./chat";
 export * from "./contact";
 export * from "./email";
 export * from "./lead";

@@ -6,6 +6,9 @@ import {
   AUDIT_LOG_EVENT_TYPE,
   AUDIT_LOG_LEVEL,
   AUDIT_STATUS,
+  CHAT_MEMBER_ROLE,
+  CHAT_MESSAGE_TYPE,
+  CHAT_ROOM_TYPE,
   CONTACT_STATUS,
   CWV_SOURCE,
   CWV_STRATEGY,
@@ -46,7 +49,8 @@ export const NotificationCategoryEnum = (name: string) =>
 export const NotificationLevelEnum = (name: string) =>
   text(name, { enum: NOTIFICATION_LEVEL });
 
-export const TaskStatusEnum = (name: string) => text(name, { enum: TASK_STATUS });
+export const TaskStatusEnum = (name: string) =>
+  text(name, { enum: TASK_STATUS });
 
 export const TaskPriorityEnum = (name: string) =>
   text(name, { enum: TASK_PRIORITY });
@@ -79,3 +83,12 @@ export const AuditLogEventTypeEnum = (name: string) =>
 
 export const UserEventTypeEnum = (name: string) =>
   text(name, { enum: USER_EVENT_TYPE });
+
+export const ChatRoomTypeEnum = (name: string) =>
+  text(name, { enum: CHAT_ROOM_TYPE });
+
+export const ChatMemberRoleEnum = (name: string) =>
+  text(name, { enum: CHAT_MEMBER_ROLE });
+
+export const ChatMessageTypeEnum = (name: string) =>
+  text(name, { enum: CHAT_MESSAGE_TYPE });

@@ -18,6 +18,7 @@ import {
   FileEntityTypeEnumSchema,
   type FileEntityTypeEnumType,
 } from "../enums/zod-db-enums";
+import { ChatMessageAttachmentTable, ChatRoomTable } from "./chat";
 import { UserTable } from "./user";
 
 export const FileTable = sqliteTable(
@@ -43,14 +44,12 @@ export const FileTable = sqliteTable(
       name: "file_user_fkey",
       columns: [fileTable.uploadedBy],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("set null"),
+    }).onDelete("set null"),
     foreignKey({
       name: "file_deletedBy_fkey",
       columns: [fileTable.deletedBy],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("set null"),
+    }).onDelete("set null"),
     index("file_user_idx").on(fileTable.uploadedBy),
     index("file_deletedBy_idx").on(fileTable.deletedBy),
     index("file_entityType_idx").on(fileTable.entityType, fileTable.entityId),
@@ -59,7 +58,7 @@ export const FileTable = sqliteTable(
   ]
 );
 
-export const FileRelations = relations(FileTable, ({ one }) => ({
+export const FileRelations = relations(FileTable, ({ one, many }) => ({
   uploadedBy: one(UserTable, {
     fields: [FileTable.uploadedBy],
     references: [UserTable.id],
@@ -69,6 +68,12 @@ export const FileRelations = relations(FileTable, ({ one }) => ({
     fields: [FileTable.deletedBy],
     references: [UserTable.id],
     relationName: "FileDeletedToUser",
+  }),
+  chatRoomImages: many(ChatRoomTable, {
+    relationName: "ChatRoomToImageFile",
+  }),
+  chatMessageAttachments: many(ChatMessageAttachmentTable, {
+    relationName: "ChatMessageAttachmentToFile",
   }),
 }));
 

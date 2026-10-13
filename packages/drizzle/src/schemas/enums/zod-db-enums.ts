@@ -7,6 +7,9 @@ import {
   AUDIT_LOG_EVENT_TYPE,
   AUDIT_LOG_LEVEL,
   AUDIT_STATUS,
+  CHAT_MEMBER_ROLE,
+  CHAT_MESSAGE_TYPE,
+  CHAT_ROOM_TYPE,
   CONTACT_STATUS,
   CWV_SOURCE,
   CWV_STRATEGY,
@@ -110,3 +113,12 @@ export type AuditLogEventTypeEnumType = z.infer<
 
 export const UserEventTypeEnumSchema = z.enum(USER_EVENT_TYPE);
 export type UserEventTypeEnumType = z.infer<typeof UserEventTypeEnumSchema>;
+
+export const ChatRoomTypeEnumSchema = z.enum(CHAT_ROOM_TYPE);
+export type ChatRoomTypeEnumType = z.infer<typeof ChatRoomTypeEnumSchema>;
+
+export const ChatMemberRoleEnumSchema = z.enum(CHAT_MEMBER_ROLE);
+export type ChatMemberRoleEnumType = z.infer<typeof ChatMemberRoleEnumSchema>;
+
+export const ChatMessageTypeEnumSchema = z.enum(CHAT_MESSAGE_TYPE);
+export type ChatMessageTypeEnumType = z.infer<typeof ChatMessageTypeEnumSchema>;

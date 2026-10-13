@@ -1,6 +1,8 @@
 export const FILE_ENTITY_TYPES = [
   "profile_image",
   "audit_report_image",
+  "chat_message",
+  "chat_room_image",
 ] as const;
 
 export const ROLES = ["USER", "SUPPORT_AGENT", "ADMIN", "SUPER_ADMIN"] as const;
@@ -164,3 +166,7 @@ export const USER_EVENT_TYPE = [
   "device.new_detected",
   "admin.impersonation",
 ] as const;
+
+export const CHAT_ROOM_TYPE = ["direct", "group"] as const;
+export const CHAT_MEMBER_ROLE = ["owner", "admin", "member"] as const;
+export const CHAT_MESSAGE_TYPE = ["text", "attachment", "system"] as const;

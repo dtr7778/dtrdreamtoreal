@@ -16,6 +16,12 @@ import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { RoleEnumSchema, type RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
 import { AiUsageTable } from "../aiUsage.table";
+import {
+  ChatMessageReactionTable,
+  ChatMessageTable,
+  ChatRoomMemberTable,
+  ChatRoomTable,
+} from "../chat";
 import { ContactSubmissionReplyTable } from "../contact";
 import { EmailThreadTable } from "../email";
 import { FileTable } from "../file.table";
@@ -107,6 +113,19 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   }),
   devices: many(UserDeviceTable, { relationName: "UserDeviceToUser" }),
   events: many(UserEventTable, { relationName: "UserEventToUser" }),
+  // chat
+  chatRoomMemberships: many(ChatRoomMemberTable, {
+    relationName: "ChatRoomMemberToUser",
+  }),
+  createdChatRooms: many(ChatRoomTable, {
+    relationName: "ChatRoomToCreatedBy",
+  }),
+  sendChatMessages: many(ChatMessageTable, {
+    relationName: "ChatMessageToSender",
+  }),
+  chatMessageReactions: many(ChatMessageReactionTable, {
+    relationName: "ChatMessageReactionToUser",
+  }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {
