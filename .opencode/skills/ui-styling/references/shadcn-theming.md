@@ -15,11 +15,13 @@ npm install next-themes
 **2. Create theme provider:**
 
 ```tsx
+// components/theme-provider.tsx
+"use client";
+
 import * as React from "react";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-// components/theme-provider.tsx
 export function ThemeProvider({
   children,
   ...props
@@ -225,7 +227,7 @@ Change colors by modifying CSS variables in `globals.css`:
 
 ### Method 2: Theme Generator
 
-Use shadcn/ui theme generator: <https://ui.shadcn.com/themes>
+Use shadcn/ui theme generator: https://ui.shadcn.com/themes
 
 Select base color, generate theme, copy CSS variables.
 

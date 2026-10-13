@@ -53,12 +53,12 @@ project-root/
 | Component   | Format     | Required | Examples                           |
 | ----------- | ---------- | -------- | ---------------------------------- |
 | type        | lowercase  | Yes      | banner, logo, design, video        |
-| campaign    | kebab-case | Yes\*    | claude-launch, q1-promo, evergreen |
+| campaign    | kebab-case | Yes*     | claude-launch, q1-promo, evergreen |
 | description | kebab-case | Yes      | hero-image, email-header           |
 | timestamp   | YYYYMMDD   | Yes      | 20251209                           |
 | variant     | kebab-case | No       | dark-mode, 1x1, mobile             |
 
-\*Use "evergreen" for non-campaign assets
+*Use "evergreen" for non-campaign assets
 
 ### Examples
 

@@ -143,11 +143,11 @@ Before detailed review, verify:
 - [ ] Metadata updated
 - [ ] Ready for publish/use
 
-**Approved By:** ******\_\_\_******
+**Approved By:** _______________
 
-**Date:** ******\_\_\_******
+**Date:** _______________
 
-**Version:** ******\_\_\_******
+**Version:** _______________
 
 ## Common Issues & Fixes
 
