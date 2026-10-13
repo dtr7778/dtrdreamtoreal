@@ -39,7 +39,7 @@ export function UserManagementTable({
   );
 
   const globalSearch = useDebouncedCallback(
-    (searchValue: string | null) => setSearchFilter(searchValue),
+    (searchValue: string | undefined) => setSearchFilter(searchValue),
     500
   );
 

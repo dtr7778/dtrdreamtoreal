@@ -8,7 +8,7 @@ import { RefreshButton } from "@workspace/ui/components/refresh-button";
 
 interface DataTableGlobalSearchProps {
   searchValue?: string | null | undefined;
-  setSearchValue: (value: string | null) => void;
+  setSearchValue: (value: string | undefined) => void;
   refresh: () => void;
   children?: React.ReactNode;
 }
@@ -28,7 +28,7 @@ export function DataTableGlobalSearch({
   };
 
   const handleReset = () => {
-    setSearchValue(null);
+    setSearchValue(undefined);
     setInputValue("");
   };
 

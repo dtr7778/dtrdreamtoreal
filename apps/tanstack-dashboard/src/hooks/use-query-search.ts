@@ -44,15 +44,11 @@ export function useQuerySearch<const TId extends RouteId>(routeId: TId) {
   );
 
   const setSearchFilter = useCallback(
-    (searchValue: string | null) => {
+    (searchValue: string | undefined) => {
       void navigate({
         search: (prev) => {
           const next: Record<string, unknown> = { ...prev };
-          if (
-            searchValue === null ||
-            searchValue === undefined ||
-            searchValue === ""
-          ) {
+          if (searchValue === undefined || searchValue === "") {
             delete next.search;
           } else {
             next.search = searchValue;
