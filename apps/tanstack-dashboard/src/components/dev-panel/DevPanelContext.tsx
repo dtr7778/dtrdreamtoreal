@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 import type { NODE_ENV_TYPE } from "@workspace/lib/types";
-import { useLocalStorage } from "@workspace/ui/hooks/use-local-storage";
+import { usePersistStorage } from "@workspace/ui/hooks/use-persist-storage";
 
 export type TabType = "console" | "auth" | "env" | "perf" | "storage";
 export type LogType = "log" | "warn" | "error" | "info";
@@ -57,10 +57,15 @@ function DevPanelContextProvider({
 }: DevPanelContextProviderProps) {
   const [errorCount, setErrorCount] = useState<number>(0);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isOpen, setIsOpen] = useLocalStorage<boolean>("dev_panel", false);
-  const [activeTab, setActiveTab] = useLocalStorage<TabType>(
+  const [isOpen, setIsOpen] = usePersistStorage<boolean>(
+    "dev_panel",
+    false,
+    "local"
+  );
+  const [activeTab, setActiveTab] = usePersistStorage<TabType>(
     "dev_panel_active_tab",
-    "console"
+    "console",
+    "local"
   );
 
   const logIdRef = useRef(0);

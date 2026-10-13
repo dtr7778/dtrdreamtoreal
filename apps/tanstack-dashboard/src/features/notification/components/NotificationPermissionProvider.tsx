@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Portal } from "@workspace/ui/components/portal";
-import { useLocalStorage } from "@workspace/ui/hooks/use-local-storage";
+import { usePersistStorage } from "@workspace/ui/hooks/use-persist-storage";
 
 import {
   isPushManagerSupported,
@@ -164,9 +164,10 @@ function NotificationPromptCard({
   platform: DevicePlatform;
   onAllow: () => void;
 }) {
-  const [dismissed, setDismissed] = useLocalStorage<boolean>(
+  const [dismissed, setDismissed] = usePersistStorage<boolean>(
     "notification.dismissed",
-    false
+    false,
+    "local"
   );
 
   if (dismissed) return null;
