@@ -3,6 +3,7 @@ import { seedPermission } from "../permission.seed";
 import { seedRolePermission } from "../rolePermission.seed";
 import { seedRoles } from "../roles.seed";
 import { seedDbClient } from "../seed-db.client";
+import { seedChat } from "./chat.seed";
 import { seedCompanies } from "./company.seed";
 import { seedContacts } from "./contact.seed";
 import { seedEmployees } from "./employee.seed";
@@ -37,6 +38,8 @@ async function main() {
     const notifications = await seedNotifications(db, users);
     const tasks = await seedTasks(db, users);
 
+    const chatRooms = await seedChat(db, users);
+
     console.log("\n📊 Seed Summary:");
 
     console.log(`Roles: ${roles.length}`);
@@ -48,6 +51,7 @@ async function main() {
     console.log(`Contacts: ${contacts.length}`);
     console.log(`Notifications: ${notifications.length}`);
     console.log(`Tasks: ${tasks.length}`);
+    console.log(`Chat Rooms: ${chatRooms.length}`);
 
     console.log("\n🎉 Seed completed successfully!");
   } finally {

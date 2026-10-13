@@ -3,7 +3,7 @@ import * as schema from "../schemas";
 
 export async function clearAll(db: DatabaseType) {
   console.log("🧹 Clearing existing data...");
-  
+
   await db.delete(schema.ContactSubmissionReplyTable);
   await db.delete(schema.EmailAttachmentTable);
   await db.delete(schema.EmailRecipientTable);
@@ -35,6 +35,11 @@ export async function clearAll(db: DatabaseType) {
   await db.delete(schema.RoleTable);
 
   await db.delete(schema.TaskTable);
+  await db.delete(schema.ChatMessageAttachmentTable);
+  await db.delete(schema.ChatMessageReactionTable);
+  await db.delete(schema.ChatMessageTable);
+  await db.delete(schema.ChatRoomMemberTable);
+  await db.delete(schema.ChatRoomTable);
   await db.delete(schema.FileTable);
 
   await db.delete(schema.UserEventTable);

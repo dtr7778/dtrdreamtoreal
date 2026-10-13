@@ -5,5 +5,8 @@ export const seedConfigs = {
     contacts: 50,
     tasks: 20,
     companies: 50,
+    chatRooms: 12,
+    chatMessages: 200,
+    chatAttachments: 40,
   },
 };
