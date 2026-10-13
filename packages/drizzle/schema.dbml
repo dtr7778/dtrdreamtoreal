@@ -1,3 +1,107 @@
+table chat_rooms {
+  id text [pk, not null]
+  type text [not null]
+  name text
+  description text
+  image_file_id text
+  created_by text
+  last_message_at integer
+  is_archived integer [not null, default: 0]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    type [name: 'chatRoom_type_idx']
+    created_by [name: 'chatRoom_createdBy_idx']
+    last_message_at [name: 'chatRoom_lastMessageAt_idx']
+    is_archived [name: 'chatRoom_isArchived_idx']
+  }
+}
+
+table chat_room_members {
+  id text [pk, not null]
+  room_id text [not null]
+  user_id text [not null]
+  role text [not null, default: 'member']
+  is_muted integer [not null, default: 0]
+  last_read_message_id text
+  last_read_at integer
+  joined_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    
+    (room_id, user_id) [name: 'chatRoomMember_roomId_userId_key', unique]
+    room_id [name: 'chatRoomMember_roomId_idx']
+    user_id [name: 'chatRoomMember_userId_idx']
+  }
+}
+
+table chat_messages {
+  id text [pk, not null]
+  room_id text [not null]
+  sender_id text
+  type text [not null, default: 'text']
+  body text
+  parent_message_id text
+  reply_to_message_id text
+  thread_reply_count integer [not null, default: 0]
+  last_reply_at integer
+  edited_at integer
+  metadata text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    
+    
+    room_id [name: 'chatMessage_roomId_idx']
+    sender_id [name: 'chatMessage_senderId_idx']
+    parent_message_id [name: 'chatMessage_parentMessageId_idx']
+    reply_to_message_id [name: 'chatMessage_replyToMessageId_idx']
+    (room_id, created_at) [name: 'chatMessage_roomId_createdAt_idx']
+    created_at [name: 'chatMessage_createdAt_idx']
+  }
+}
+
+table chat_message_reactions {
+  id text [pk, not null]
+  message_id text [not null]
+  user_id text [not null]
+  emoji text [not null]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    (message_id, user_id, emoji) [name: 'chatMessageReaction_messageId_userId_emoji_key', unique]
+    message_id [name: 'chatMessageReaction_messageId_idx']
+    user_id [name: 'chatMessageReaction_userId_idx']
+  }
+}
+
+table chat_message_attachments {
+  id text [pk, not null]
+  message_id text [not null]
+  file_id text [not null]
+  position integer [not null, default: 0]
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    (message_id, file_id) [name: 'chatMessageAttachment_messageId_fileId_key', unique]
+    message_id [name: 'chatMessageAttachment_messageId_idx']
+    file_id [name: 'chatMessageAttachment_fileId_idx']
+  }
+}
+
 table contact_submissions {
   id text [pk, not null]
   email_thread_id text [not null]
@@ -746,6 +850,32 @@ table tasks {
     created_at [name: 'tasks_created_at_idx']
   }
 }
+
+ref: chat_rooms.image_file_id > files.id
+
+ref: chat_rooms.created_by > users.id
+
+ref: chat_room_members.room_id > chat_rooms.id
+
+ref: chat_room_members.user_id > users.id
+
+ref: chat_room_members.last_read_message_id > chat_messages.id
+
+ref: chat_messages.room_id > chat_rooms.id
+
+ref: chat_messages.sender_id > users.id
+
+ref: chat_messages.parent_message_id > chat_messages.id
+
+ref: chat_messages.reply_to_message_id > chat_messages.id
+
+ref: chat_message_reactions.message_id > chat_messages.id
+
+ref: chat_message_reactions.user_id > users.id
+
+ref: chat_message_attachments.message_id > chat_messages.id
+
+ref: chat_message_attachments.file_id > files.id
 
 ref: email_threads.id - contact_submissions.email_thread_id
 
