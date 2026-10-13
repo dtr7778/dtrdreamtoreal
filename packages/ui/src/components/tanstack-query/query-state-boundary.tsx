@@ -20,6 +20,29 @@ function DefaultEmpty() {
   );
 }
 
+function DefaultError({ error }: { error?: Error | null }) {
+  return (
+    <div className="mx-auto space-y-2 max-w-xl px-4 py-6 text-center">
+      <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-destructive/10">
+        <AlertCircle className="size-1/2 animate-pulse text-destructive" />
+      </div>
+      <h1 className="text-2xl leading-tight font-bold text-foreground">
+        Something Went Wrong
+      </h1>
+      {error && (
+        <div className="rounded-lg border border-destructive/20 bg-card/50 p-4 text-left backdrop-blur">
+          <p className="mb-3 font-mono text-xs text-muted-foreground">
+            Error Details:
+          </p>
+          <p className="font-mono text-sm break-all text-foreground">
+            {error.message}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface QueryStateBoundaryProps<T> {
   isLoading: boolean;
   isError: boolean;
@@ -28,6 +51,7 @@ interface QueryStateBoundaryProps<T> {
   isEmpty: (data: T) => boolean;
   loadingFallback?: React.ReactNode;
   emptyFallback?: React.ReactNode;
+  errorFallback?: (error: Error) => React.ReactNode;
   children: (data: T) => React.ReactNode;
 }
 
@@ -39,6 +63,7 @@ export function QueryStateBoundary<T>({
   isEmpty,
   loadingFallback = <DefaultSkeleton />,
   emptyFallback = <DefaultEmpty />,
+  errorFallback,
   children,
 }: QueryStateBoundaryProps<T>) {
   if (isLoading) {
@@ -46,26 +71,8 @@ export function QueryStateBoundary<T>({
   }
 
   if (isError) {
-    return (
-      <div className="mx-auto space-y-2 max-w-xl px-4 py-6 text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-destructive/10">
-          <AlertCircle className="size-1/2 animate-pulse text-destructive" />
-        </div>
-        <h1 className="text-2xl leading-tight font-bold text-foreground">
-          Something Went Wrong
-        </h1>
-        {error && (
-          <div className="rounded-lg border border-destructive/20 bg-card/50 p-4 text-left backdrop-blur">
-            <p className="mb-3 font-mono text-xs text-muted-foreground">
-              Error Details:
-            </p>
-            <p className="font-mono text-sm break-all text-foreground">
-              {error.message}
-            </p>
-          </div>
-        )}
-      </div>
-    );
+    const err = error ?? new Error("Unknown error");
+    return errorFallback ? errorFallback(err) : <DefaultError error={err} />;
   }
 
   if (!data || isEmpty(data)) {
