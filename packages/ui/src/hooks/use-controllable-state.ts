@@ -1,40 +1,46 @@
 import { useCallback, useState } from "react";
 
+import { useAsRef } from "@workspace/ui/hooks/use-as-ref";
+import { useCallbackRef } from "@workspace/ui/hooks/use-callback-ref";
+
 interface UseControllableStateParams<T> {
   prop?: T;
-  defaultProp?: T;
+  defaultProp: T;
   onChange?: (value: T) => void;
 }
+
+type SetStateAction<T> = T | ((prev: T) => T);
 
 export function useControllableState<T>({
   prop,
   defaultProp,
   onChange = () => {},
-}: UseControllableStateParams<T>) {
-  const [uncontrolledProp, setUncontrolledProp] = useState(defaultProp);
+}: UseControllableStateParams<T>): readonly [
+  T,
+  (nextValue: T | ((prev: T) => T)) => void,
+] {
+  const [uncontrolledValue, setUncontrolledValue] = useState<T>(defaultProp);
   const isControlled = prop !== undefined;
-  const value = isControlled ? prop : uncontrolledProp;
+  const value = isControlled ? prop : uncontrolledValue;
+
+  const onChangeRef = useCallbackRef(onChange);
+  const valueRef = useAsRef(value);
 
   const setValue = useCallback(
-    (nextValue: T | ((prev: T) => T)) => {
-      if (isControlled) {
-        const newValue =
-          nextValue instanceof Function ? nextValue(value as T) : nextValue;
-        if (newValue !== value) {
-          onChange(newValue);
-        }
-      } else {
-        setUncontrolledProp((prevState) => {
-          const newValue =
-            nextValue instanceof Function
-              ? nextValue(prevState as T)
-              : nextValue;
-          onChange(newValue);
-          return newValue;
-        });
+    (next: SetStateAction<T>) => {
+      const prev = valueRef.current;
+      const newValue =
+        typeof next === "function" ? (next as (prev: T) => T)(prev) : next;
+
+      if (Object.is(newValue, prev)) return;
+
+      if (!isControlled) {
+        valueRef.current = newValue;
+        setUncontrolledValue(newValue);
       }
+      onChangeRef(newValue);
     },
-    [isControlled, value, onChange]
+    [isControlled, onChangeRef, valueRef]
   );
 
   return [value, setValue] as const;

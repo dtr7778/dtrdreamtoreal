@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import { useAsRef } from "@workspace/ui/hooks/use-as-ref";
 import * as local from "@workspace/ui/lib/localStorage";
 import * as session from "@workspace/ui/lib/sessionStorage";
 
@@ -24,32 +25,37 @@ export function usePersistStorage<T>(
   type: PersistStorageType = "local"
 ) {
   const storage = storages[type];
+  const initialDataRef = useAsRef(initialData);
 
   const [value, setValue] = useState(() => {
     const item = storage.getItem<T>(key);
-    return item ?? initialData;
+    return item === undefined ? initialData : item;
   });
+  const valueRef = useAsRef(value);
 
   const handleDispatch = useCallback(
     (action: DispatchAction<T>) => {
-      if (typeof action === "function") {
-        setValue((prevState) => {
-          const newValue = (action as (prevState: T) => T)(prevState);
-          storage.setItem(key, newValue);
-          return newValue;
-        });
-      } else {
-        setValue(action);
-        storage.setItem(key, action);
-      }
+      const prev = valueRef.current;
+      const next =
+        typeof action === "function"
+          ? (action as (prevState: T) => T)(prev)
+          : action;
+
+      if (Object.is(next, prev)) return;
+
+      valueRef.current = next;
+      setValue(next);
+      storage.setItem(key, next);
     },
-    [key, storage]
+    [key, storage, valueRef]
   );
 
   const handleRemove = useCallback(() => {
     storage.removeItem(key);
-    setValue(undefined as T);
-  }, [key, storage]);
+    const next = initialDataRef.current;
+    valueRef.current = next;
+    setValue(next);
+  }, [key, storage, initialDataRef, valueRef]);
 
   return [value, handleDispatch, handleRemove] as const;
 }
