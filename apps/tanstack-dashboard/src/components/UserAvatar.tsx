@@ -1,3 +1,5 @@
+import { resolveUserImage } from "#/utils/resolveUserImage";
+
 import { formatEnumValue, strInitials } from "@workspace/lib/utils";
 import {
   Avatar,
@@ -41,10 +43,7 @@ export function UserAvatar({
     >
       <div className="relative">
         <Avatar className={cn("size-8", className)}>
-          <AvatarImage
-            src={imageUrl || "/user_placeholder_img.png"}
-            alt={userName}
-          />
+          <AvatarImage src={resolveUserImage(imageUrl)} alt={userName} />
           <AvatarFallback className="text-xs font-semibold uppercase">
             {strInitials(userName)}
           </AvatarFallback>

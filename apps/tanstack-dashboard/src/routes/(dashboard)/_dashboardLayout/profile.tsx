@@ -16,6 +16,7 @@ import {
   TabNavigationList,
   TabNavigationTrigger,
 } from "#/components/tab-navigation";
+import { resolveUserImage } from "#/utils/resolveUserImage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Building2,
@@ -79,10 +80,7 @@ function RouteComponent() {
     >
       <div className="flex items-center gap-4">
         <Avatar className="shrink-0 size-12">
-          <AvatarImage
-            src={user.image || "/user_placeholder_img.png"}
-            alt={user.name}
-          />
+          <AvatarImage src={resolveUserImage(user.image)} alt={user.name} />
           <AvatarFallback>{strInitials(user.name)}</AvatarFallback>
         </Avatar>
 

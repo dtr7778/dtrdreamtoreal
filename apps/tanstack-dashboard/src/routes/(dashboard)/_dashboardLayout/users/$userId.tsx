@@ -18,6 +18,7 @@ import {
 import { requirePermissions } from "#/features/auth/auth.functions";
 import { DetailsStep } from "#/features/user/components/user-details/DetailsStep";
 import { orpcTQClient } from "#/server/orpc";
+import { resolveUserImage } from "#/utils/resolveUserImage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import z from "zod";
@@ -86,10 +87,7 @@ function RouteComponent() {
     >
       <div className="flex md:flex-row flex-col items-center gap-4">
         <Avatar className="size-24">
-          <AvatarImage
-            src={data.image ?? "/user_placeholder_img.png"}
-            alt={data.name}
-          />
+          <AvatarImage src={resolveUserImage(data.image)} alt={data.name} />
           <AvatarFallback className="text-xs font-semibold uppercase">
             {strInitials(data.name)}
           </AvatarFallback>
