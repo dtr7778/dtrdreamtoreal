@@ -22,11 +22,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { useControllablePersistStorage } from "@workspace/ui/hooks/use-controllable-persist-storage";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { cn } from "@workspace/ui/lib/utils";
 
-const SIDEBAR_STORAGE_KEY = "sidebar_state";
+import { useControllableState } from "../hooks/use-controllable-state.js";
+
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
@@ -69,10 +69,9 @@ function SidebarProvider({
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
-  const [open, setOpen] = useControllablePersistStorage<boolean>({
-    key: SIDEBAR_STORAGE_KEY,
-    defaultValue: defaultOpen,
-    value: openProp,
+  const [open, setOpen] = useControllableState<boolean>({
+    defaultProp: defaultOpen,
+    prop: openProp,
     onChange: setOpenProp,
   });
 
