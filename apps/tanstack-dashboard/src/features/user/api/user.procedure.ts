@@ -18,6 +18,7 @@ import {
   isNull,
   lte,
   max,
+  ne,
   or,
 } from "drizzle-orm";
 
@@ -432,7 +433,7 @@ export const listUserForSearchProcedure = userImpl.listUserForSearch
       .from(UserTable)
       .innerJoin(UserRoleTable, eq(UserRoleTable.userId, UserTable.id))
       .innerJoin(RoleTable, eq(UserRoleTable.roleId, RoleTable.id))
-      .where(where)
+      .where(and(where, ne(UserTable.id, context.user.id)))
       .groupBy(UserTable.id);
 
     return apiResponse(API_MESSAGES.USER.GET_ALL_FOR_SEARCH, members);
