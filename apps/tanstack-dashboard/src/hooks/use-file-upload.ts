@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { ChangeEvent, DragEvent, InputHTMLAttributes } from "react";
 
+import { getBlockedFileError } from "@workspace/lib/upload";
 import { formatBytes } from "@workspace/lib/utils";
 
 export interface FileMetadata {
@@ -21,6 +22,7 @@ export interface FileUploadOptions {
   maxFiles?: number; // Only used when multiple is true, defaults to Infinity
   maxSize?: number; // in bytes
   accept?: string;
+  validate?: (file: File) => string | null; // Custom validator, returns an error or null
   multiple?: boolean; // Defaults to false
   initialFiles?: FileMetadata[];
   onFilesChange?: (files: FileWithPreview[]) => void; // Callback when files change
@@ -62,6 +64,7 @@ export function useFileUpload(
     maxFiles = DEFAULT_MAX_FILES,
     maxSize = DEFAULT_MAX_SIZE,
     accept = DEFAULT_MIME_TYPE,
+    validate,
     multiple = false,
     initialFiles = [],
     onFilesChange,
@@ -83,6 +86,9 @@ export function useFileUpload(
   const validateFile = useCallback(
     (file: File | FileMetadata): string | null => {
       if (file instanceof File) {
+        const blockedError = getBlockedFileError(file.name);
+        if (blockedError) return blockedError;
+
         if (file.size > maxSize) {
           return `File "${file.name}" exceeds the maximum size of ${formatBytes(maxSize)}.`;
         }
@@ -113,9 +119,13 @@ export function useFileUpload(
         }
       }
 
+      if (file instanceof File && validate) {
+        return validate(file);
+      }
+
       return null;
     },
-    [accept, maxSize]
+    [accept, maxSize, validate]
   );
 
   const createPreview = useCallback(
