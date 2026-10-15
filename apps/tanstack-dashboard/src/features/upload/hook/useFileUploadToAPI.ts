@@ -1,6 +1,7 @@
 import type { ProgressType } from "#/components/FileUpload";
 import { apiClient } from "#/lib/hono-api";
 import { useMutation } from "@tanstack/react-query";
+import type { InferResponseType } from "hono/client";
 
 import type { FileEntityTypeEnumType } from "@workspace/drizzle/zod-db-enums";
 
@@ -70,20 +71,21 @@ export function useFileUploadToAPI({
   onSuccess,
   onError,
 }: UseFileUploadToAPIOptions = {}) {
-  return useMutation({
-    mutationFn: async ({
-      file,
-      entityType,
-      entityId,
-      scope,
-    }: UploadFileToAPIInput) => {
-      const mimeType = file.type || "application/octet-stream";
+  return useMutation<
+    InferResponseType<(typeof apiClient.upload)["confirm"]["$post"]>,
+    Error,
+    UploadFileToAPIInput
+  >({
+    mutationFn: async ({ file, entityType, entityId, scope }) => {
+      const mimeType = file.type;
+      const size = file.size;
+      const filename = file.name;
 
       const signedRes = await apiClient.upload["signed-url"].$post({
         json: {
-          filename: file.name,
+          filename,
           mimeType,
-          size: file.size,
+          size,
           entityType,
           entityId,
           scope,
@@ -104,7 +106,8 @@ export function useFileUploadToAPI({
         url: signed.data.uploadUrl,
         file,
         headers: {
-          "Content-Type": mimeType,
+          "content-type": mimeType,
+          "content-length": size.toString(),
         },
         onProgress,
       });
@@ -112,10 +115,10 @@ export function useFileUploadToAPI({
       const confirmRes = await apiClient.upload["confirm"].$post({
         json: {
           key: signed.data.key,
-          filename: file.name,
-          originalName: file.name,
+          filename,
+          originalName: filename,
           mimeType,
-          size: file.size,
+          size,
           entityType,
           entityId,
         },
