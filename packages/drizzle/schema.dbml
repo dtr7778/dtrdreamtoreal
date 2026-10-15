@@ -828,26 +828,64 @@ table verifications {
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 }
 
-table tasks {
+table company_tasks {
   id text [pk, not null]
   title text [not null]
   description text
   status text [not null, default: 'todo']
   priority text [not null, default: 'medium']
   due_date integer
-  assigned_by text
-  created_by text [not null]
+  started_at integer
+  completed_at integer
+  source text [not null, default: 'manual']
+  external_id text
+  metadata text
+  assignee_id text
+  assigned_by_id text
+  created_by text
+  updated_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
   indexes {
     
     
-    assigned_by [name: 'tasks_assigned_by_idx']
-    status [name: 'tasks_status_idx']
-    priority [name: 'tasks_priority_idx']
-    due_date [name: 'tasks_due_date_idx']
-    created_at [name: 'tasks_created_at_idx']
+    
+    
+    (source, external_id) [name: 'company_tasks_source_external_id_key', unique]
+    (assignee_id, status) [name: 'company_tasks_assignee_id_status_idx']
+    assigned_by_id [name: 'company_tasks_assigned_by_id_idx']
+    created_by [name: 'company_tasks_created_by_idx']
+    status [name: 'company_tasks_status_idx']
+    priority [name: 'company_tasks_priority_idx']
+    due_date [name: 'company_tasks_due_date_idx']
+    created_at [name: 'company_tasks_created_at_idx']
+  }
+}
+
+table personal_tasks {
+  id text [pk, not null]
+  user_id text [not null]
+  title text [not null]
+  description text
+  status text [not null, default: 'todo']
+  priority text [not null, default: 'medium']
+  due_date integer
+  started_at integer
+  completed_at integer
+  sort_order integer [not null, default: 0]
+  source text [not null, default: 'manual']
+  external_id text
+  metadata text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    (user_id, source, external_id) [name: 'personal_tasks_user_id_source_external_id_key', unique]
+    (user_id, status) [name: 'personal_tasks_user_id_status_idx']
+    (user_id, due_date) [name: 'personal_tasks_user_id_due_date_idx']
+    (user_id, sort_order) [name: 'personal_tasks_user_id_sort_order_idx']
   }
 }
 
@@ -977,6 +1015,12 @@ ref: files.deleted_by > users.id
 
 ref: sessions.user_id > users.id
 
-ref: tasks.assigned_by > users.id
+ref: company_tasks.assignee_id > users.id
 
-ref: tasks.created_by > users.id
+ref: company_tasks.assigned_by_id > users.id
+
+ref: company_tasks.created_by > users.id
+
+ref: company_tasks.updated_by > users.id
+
+ref: personal_tasks.user_id > users.id
