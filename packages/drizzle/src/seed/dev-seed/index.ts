@@ -8,7 +8,7 @@ import { seedCompanies } from "./company.seed";
 import { seedContacts } from "./contact.seed";
 import { seedEmployees } from "./employee.seed";
 import { seedNotifications } from "./notification.seed";
-import { seedTasks } from "./task.seed";
+import { seedCompanyTasks, seedPersonalTasks } from "./task.seed";
 import { seedUsers } from "./user.seed";
 
 async function main() {
@@ -36,7 +36,8 @@ async function main() {
     const contacts = await seedContacts(db);
 
     const notifications = await seedNotifications(db, users);
-    const tasks = await seedTasks(db, users);
+    const companyTasks = await seedCompanyTasks(db, users);
+    const personalTasks = await seedPersonalTasks(db, users);
 
     const chatRooms = await seedChat(db, users);
 
@@ -50,7 +51,8 @@ async function main() {
     console.log(`Employees: ${employees.length}`);
     console.log(`Contacts: ${contacts.length}`);
     console.log(`Notifications: ${notifications.length}`);
-    console.log(`Tasks: ${tasks.length}`);
+    console.log(`Company tasks: ${companyTasks.length}`);
+    console.log(`Personal tasks: ${personalTasks.length}`);
     console.log(`Chat Rooms: ${chatRooms.length}`);
 
     console.log("\n🎉 Seed completed successfully!");
