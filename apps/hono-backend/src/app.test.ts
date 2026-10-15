@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import app from "@/app";
 
+import type { AppEnv } from "./types";
+
 const { handler, appEnv } = vi.hoisted(() => {
   const env = {
     ENVIRONMENT: "production",
@@ -33,7 +35,11 @@ const { handler, appEnv } = vi.hoisted(() => {
   return { handler: vi.fn(), appEnv: env };
 });
 
-vi.mock("cloudflare:workers", () => ({ env: appEnv }));
+vi.mock("cloudflare:workers", () => ({
+  env: appEnv,
+  DurableObject: class {},
+  WorkerEntrypoint: class {},
+}));
 
 vi.mock("@/lib/auth", () => ({
   getAuth: () => ({ handler }),
@@ -46,7 +52,7 @@ describe("api app", () => {
   });
 
   it("serves a public health check", async () => {
-    const res = await app.request("/health", {}, appEnv as unknown as Env);
+    const res = await app.request("/health", {}, appEnv as unknown as AppEnv);
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({

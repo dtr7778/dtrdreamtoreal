@@ -3,11 +3,13 @@ import { createDrizzleClient } from "@workspace/drizzle/client";
 import { logger } from "@workspace/lib/logger";
 import { createMailService } from "@workspace/mail/factory";
 
+import type { AppEnv } from "@/types";
+
 import { getEnv } from "./env";
 
-let cache: { env: Env; auth: AuthType } | null = null;
+let cache: { env: AppEnv; auth: AuthType } | null = null;
 
-function buildAuth(env: Env): AuthType {
+function buildAuth(env: AppEnv): AuthType {
   const database = createDrizzleClient(env.DB);
 
   const mailService = createMailService({
@@ -46,7 +48,7 @@ function buildAuth(env: Env): AuthType {
 /**
  * Build (and memoize per isolate) the better-auth instance for a Worker env.
  */
-export function getAuth(env: Env): AuthType {
+export function getAuth(env: AppEnv): AuthType {
   if (!cache || cache.env !== env) {
     cache = { env, auth: buildAuth(env) };
   }
