@@ -1,1 +1,101 @@
 @import "@workspace/ui/globals.css";
+
+@layer components {
+  .chat-editor,
+  .chat-message-body {
+    word-break: break-word;
+  }
+
+  .chat-editor:focus,
+  .chat-editor:focus-visible {
+    outline: none;
+  }
+
+  .chat-editor p,
+  .chat-message-body p {
+    margin: 0;
+  }
+
+  .chat-editor p + p,
+  .chat-message-body p + p {
+    margin-top: 0.25rem;
+  }
+
+  .chat-editor ul,
+  .chat-message-body ul {
+    list-style: disc;
+    padding-inline-start: 1.25rem;
+  }
+
+  .chat-editor ol,
+  .chat-message-body ol {
+    list-style: decimal;
+    padding-inline-start: 1.25rem;
+  }
+
+  .chat-editor li,
+  .chat-message-body li {
+    margin-top: 0.125rem;
+  }
+
+  .chat-editor li > p,
+  .chat-message-body li > p {
+    margin: 0;
+  }
+
+  .chat-editor blockquote,
+  .chat-message-body blockquote {
+    margin: 0.25rem 0;
+    border-inline-start: 3px solid var(--color-border);
+    padding-inline-start: 0.75rem;
+    color: var(--color-muted-foreground);
+  }
+
+  .chat-editor code,
+  .chat-message-body code {
+    border-radius: calc(var(--radius) * 0.4);
+    background-color: color-mix(in oklab, var(--color-muted) 65%, transparent);
+    padding: 0.1rem 0.3rem;
+    font-family: ui-monospace, "SFMono-Regular", "Menlo", monospace;
+    font-size: 0.85rem;
+  }
+
+  .chat-editor pre,
+  .chat-message-body pre {
+    margin: 0.25rem 0;
+    overflow-x: auto;
+    border-radius: calc(var(--radius) * 0.6);
+    background-color: var(--color-muted);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .chat-editor pre code,
+  .chat-message-body pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .chat-editor a,
+  .chat-message-body a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .chat-mention {
+    border-radius: 0.25rem;
+    text-decoration: underline;
+    color: var(--color-foreground);
+    padding: 0.05rem 0.25rem;
+    font-weight: 500;
+  }
+
+  .chat-editor p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--color-muted-foreground);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+}
