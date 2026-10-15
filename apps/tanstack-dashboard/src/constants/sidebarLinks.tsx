@@ -2,6 +2,7 @@ import type { SidebarGroupMenuLinkType, SidebarMenuLinkType } from "#/types";
 import {
   Bell,
   House,
+  MessageSquare,
   Settings,
   ShieldUser,
   User,
@@ -17,6 +18,12 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         icon: <House />,
         path: "/",
         pathRegex: /\//,
+      },
+      {
+        title: "Chat",
+        icon: <MessageSquare />,
+        path: "/chat",
+        pathRegex: /^\/chat(\/.*)?$/,
       },
     ],
   },
