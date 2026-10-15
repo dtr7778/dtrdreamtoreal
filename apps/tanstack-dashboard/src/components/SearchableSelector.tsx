@@ -45,7 +45,8 @@ interface SearchableSelectorContextProps {
   handleSelect: (itemId: string) => void;
   searchValue: string;
   handleSearchChange: (searchValue: string) => void;
-  value: string | undefined;
+  value: string | Array<string> | undefined;
+  multiple: boolean;
   disabled?: boolean;
 }
 
@@ -62,18 +63,21 @@ function useSearchableSelectorContext() {
   return context;
 }
 
-interface SearchableSelectorProps {
+interface SearchableSelectorProps<TValue extends string | Array<string>> {
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  value: string | undefined;
-  onChange: (value: string | undefined) => void;
+  value: TValue | undefined;
+  onChange: (value: TValue | undefined) => void;
   onSearch: (searchValue: string) => void;
   searchDebounceMs?: number;
   disabled?: boolean;
+  multiple?: boolean;
 }
 
-export function SearchableSelector({
+export function SearchableSelector<
+  TValue extends string | Array<string> = string,
+>({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   children,
@@ -81,8 +85,9 @@ export function SearchableSelector({
   onChange,
   onSearch,
   searchDebounceMs = 500,
+  multiple = false,
   disabled = false,
-}: SearchableSelectorProps) {
+}: SearchableSelectorProps<TValue>) {
   const isMobile = useIsMobile();
   const [searchValue, setSearchValue] = useState("");
 
@@ -107,10 +112,18 @@ export function SearchableSelector({
 
   const handleSelect = useCallback(
     (itemId: string) => {
-      onChange(itemId === value ? undefined : itemId);
+      if (multiple) {
+        const current: Array<string> = Array.isArray(value) ? value : [];
+        const next = current.includes(itemId)
+          ? current.filter((id) => id !== itemId)
+          : [...current, itemId];
+        onChange(next as TValue);
+        return;
+      }
+      onChange((itemId === value ? undefined : itemId) as TValue);
       handleSetOpen(false);
     },
-    [value, onChange, handleSetOpen]
+    [multiple, value, onChange, handleSetOpen]
   );
 
   const handleSearchChange = useCallback(
@@ -130,6 +143,7 @@ export function SearchableSelector({
       searchValue,
       handleSearchChange,
       value,
+      multiple,
       disabled,
     }),
     [
@@ -140,6 +154,7 @@ export function SearchableSelector({
       searchValue,
       handleSearchChange,
       value,
+      multiple,
       disabled,
     ]
   );
@@ -196,8 +211,10 @@ interface SearchableSelectorContentProps<T> {
   title: string;
   description: string;
   className?: string;
+  searchPlaceholder?: string;
   loadingFallback: React.ReactNode;
   emptyFallback: React.ReactNode;
+  errorFallback?: (error: Error) => React.ReactNode;
   children: (item: T) => React.ReactNode;
   data: T[] | undefined;
   isLoading: boolean;
@@ -210,8 +227,10 @@ export function SearchableSelectorContent<T>({
   title,
   description,
   className,
+  searchPlaceholder = "Search...",
   loadingFallback,
   emptyFallback,
+  errorFallback,
   data,
   isLoading,
   isError,
@@ -223,7 +242,7 @@ export function SearchableSelectorContent<T>({
   const commandContent = (
     <Command shouldFilter={false} className={className}>
       <CommandInput
-        placeholder="Search..."
+        placeholder={searchPlaceholder}
         value={searchValue}
         onValueChange={handleSearchChange}
         inputMode="search"
@@ -237,6 +256,7 @@ export function SearchableSelectorContent<T>({
         isEmpty={(d) => d.length === 0}
         loadingFallback={loadingFallback}
         emptyFallback={emptyFallback}
+        errorFallback={errorFallback}
       >
         {(items) => (
           <CommandList className="max-h-75 overflow-y-auto">
@@ -324,13 +344,16 @@ export function SearchableSelectorItem<T>({
   getItemId,
   ...props
 }: SearchableSelectorItemProps<T>) {
-  const { handleSelect, value } = useSearchableSelectorContext();
+  const { handleSelect, value, multiple } = useSearchableSelectorContext();
   const itemId = getItemId(item);
+  const isChecked = multiple
+    ? Array.isArray(value) && value.includes(itemId)
+    : itemId === value;
 
   return (
     <CommandItem
       onSelect={() => handleSelect(itemId)}
-      data-checked={itemId === value}
+      data-checked={isChecked}
       {...props}
     >
       {children}
