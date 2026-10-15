@@ -2,17 +2,9 @@ import {
   ActionTypeEnumSchema,
   PermissionLevelEnumSchema,
 } from "@workspace/drizzle/zod-db-enums";
-import type {
-  ActionTypeEnumType,
-  PermissionLevelEnumType,
-  ResourceTypeEnumType,
-} from "@workspace/drizzle/zod-db-enums";
+import type { ActionTypeEnumType } from "@workspace/drizzle/zod-db-enums";
 
-import {
-  permissionSeparator,
-  type PermissionStrType,
-  type PermissionType,
-} from "../types";
+import type { PermissionType } from "../types";
 
 function buildPermissionMap(
   permissions: Array<PermissionType>
@@ -20,7 +12,7 @@ function buildPermissionMap(
   const permissionMap = new Map<string, Set<ActionTypeEnumType>>();
 
   for (const p of permissions) {
-    const key = `${p.level}${permissionSeparator}${p.resource}`;
+    const key = `${p.level}:${p.resource}`;
 
     if (!permissionMap.has(key)) {
       permissionMap.set(key, new Set());
@@ -41,7 +33,7 @@ function buildPermissionMap(
 
 export function hasPermission(
   userPermissions: Array<PermissionType>,
-  requiredPermissions: Array<PermissionStrType>,
+  requiredPermissions: Array<PermissionType>,
   context: { userId?: string; resourceId?: string }
 ): boolean {
   if (requiredPermissions.length === 0) return true;
@@ -49,13 +41,7 @@ export function hasPermission(
 
   const permissionMap = buildPermissionMap(userPermissions);
 
-  for (const required of requiredPermissions) {
-    const [level, resource, action] = required.split(permissionSeparator) as [
-      PermissionLevelEnumType,
-      ResourceTypeEnumType,
-      ActionTypeEnumType,
-    ];
-
+  for (const { level, resource, action } of requiredPermissions) {
     // Handle self-level permissions
     if (level === PermissionLevelEnumSchema.enum.self) {
       if (
@@ -67,7 +53,7 @@ export function hasPermission(
       }
     }
 
-    const key = `${level}${permissionSeparator}${resource}`;
+    const key = `${level}:${resource}`;
     const actions = permissionMap.get(key);
 
     if (actions && actions.has(action)) {

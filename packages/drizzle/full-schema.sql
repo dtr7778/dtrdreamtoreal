@@ -1,4 +1,4 @@
-◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
 CREATE TABLE `chat_rooms` (
 	`id` text PRIMARY KEY NOT NULL,
 	`type` text NOT NULL,
@@ -366,7 +366,6 @@ CREATE INDEX `notifications_recipient_read_idx` ON `notifications` (`recipient_i
 CREATE INDEX `notifications_created_at_idx` ON `notifications` (`created_at`);
 CREATE TABLE `permissions` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
 	`level` text NOT NULL,
 	`resource` text NOT NULL,
 	`action` text NOT NULL,

@@ -5,14 +5,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { getUserRolesAndPermission } from "@workspace/lib/helpers";
-import type { PermissionStrType, PermissionType } from "@workspace/lib/types";
+import type { PermissionType } from "@workspace/lib/types";
 import { hasPermission } from "@workspace/lib/utils";
 
 import { getAuthSession } from "./auth.server";
 
 export function requirePermissions(
   userPermissions: Array<PermissionType>,
-  inputPermissions: Array<PermissionStrType>,
+  inputPermissions: Array<PermissionType>,
   userId?: string
 ) {
   const isAllowed = hasPermission(userPermissions, inputPermissions, {

@@ -8,10 +8,10 @@ import type {
 } from "../schemas/enums/zod-db-enums";
 import { insertChunkedReturning } from "./seed-utils";
 
-export const separator = ".";
-
-export type PermissionType =
-  `${PermissionLevelEnumType}${typeof separator}${ResourceTypeEnumType}${typeof separator}${ActionTypeEnumType}`;
+export type PermissionType = Pick<
+  PermissionDataModel,
+  "level" | "resource" | "action"
+>;
 
 type CreatePermissionType = {
   level: PermissionLevelEnumType;
@@ -571,7 +571,6 @@ export async function seedPermission(
   const permissions = await insertChunkedReturning(
     permissionsData.map((p) => ({
       ...p,
-      name: `${p.level}${separator}${p.resource}${separator}${p.action}` as PermissionType,
       level: p.level as PermissionLevelEnumType,
       resource: p.resource as ResourceTypeEnumType,
       action: p.action as ActionTypeEnumType,

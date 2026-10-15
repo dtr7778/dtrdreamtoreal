@@ -1,6 +1,6 @@
 import type { LinkProps } from "@tanstack/react-router";
 
-import type { PermissionStrType } from "@workspace/lib/types";
+import type { PermissionType } from "@workspace/lib/types";
 
 export type BreadcrumbRouteType = {
   title: string;
@@ -14,7 +14,7 @@ export type SidebarMenuLinkType = {
   pathRegex: RegExp;
   icon?: React.ReactNode | undefined;
   items?: Array<SidebarMenuLinkType> | undefined;
-  permissions?: Array<PermissionStrType>;
+  permissions?: Array<PermissionType>;
 };
 
 export type SidebarGroupMenuLinkType = {

@@ -49,7 +49,12 @@ export const userImpl = implement(userContract)
   .use(errorMiddleware);
 
 export const listUserProcedure = userImpl.list
-  .use(userPermissionMiddleware(["system.user.manage", "system.user.list"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "user", action: "manage" },
+      { level: "system", resource: "user", action: "list" },
+    ])
+  )
   .handler(async ({ context, input }) => {
     const { where, orderBy, limit, offset, page } = buildPaginateOptions(
       {
@@ -108,7 +113,12 @@ export const listUserProcedure = userImpl.list
   });
 
 export const userDataExportProcedure = userImpl.export
-  .use(userPermissionMiddleware(["system.user.manage", "system.user.list"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "user", action: "manage" },
+      { level: "system", resource: "user", action: "list" },
+    ])
+  )
   .handler(async ({ context, input }) => {
     const { where, orderBy } = buildPaginateOptions(
       {
@@ -300,7 +310,12 @@ export const userStatsProcedure = userImpl.stats
   });
 
 export const profileUpdateProcedure = userImpl.updateProfile
-  .use(userPermissionMiddleware(["self.user.manage", "self.user.update"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "self", resource: "user", action: "manage" },
+      { level: "self", resource: "user", action: "update" },
+    ])
+  )
   .handler(async ({ context, input }) => {
     let imageUrl: string | undefined = undefined;
 
@@ -346,7 +361,12 @@ export const profileUpdateProcedure = userImpl.updateProfile
   });
 
 export const updateUserRoleProcedure = userImpl.updateRole
-  .use(userPermissionMiddleware(["system.user.manage", "system.user.update"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "user", action: "manage" },
+      { level: "system", resource: "user", action: "update" },
+    ])
+  )
   .handler(async ({ input, context, errors }) => {
     const [existUser] = await context.db
       .select({
@@ -386,7 +406,12 @@ export const updateUserRoleProcedure = userImpl.updateRole
   });
 
 export const userDetailsProcedure = userImpl.details
-  .use(userPermissionMiddleware(["system.user.manage", "system.user.read"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "user", action: "manage" },
+      { level: "system", resource: "user", action: "read" },
+    ])
+  )
   .handler(async ({ input, errors, context }) => {
     const lastLoginSq = context.db
       .select({
@@ -418,7 +443,12 @@ export const userDetailsProcedure = userImpl.details
   });
 
 export const listUserForSearchProcedure = userImpl.listUserForSearch
-  .use(userPermissionMiddleware(["system.user.manage", "system.user.list"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "user", action: "manage" },
+      { level: "system", resource: "user", action: "list" },
+    ])
+  )
   .handler(async ({ input, context }) => {
     const { where } = buildPaginateOptions(
       {

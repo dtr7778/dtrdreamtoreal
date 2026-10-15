@@ -22,7 +22,6 @@ export const PermissionTable = sqliteTable(
   "permissions",
   {
     id: db_id,
-    name: text("name").notNull(),
     level: text("level").$type<PermissionLevelEnumType>().notNull(),
     resource: text("resource").$type<ResourceTypeEnumType>().notNull(),
     action: text("action").$type<ActionTypeEnumType>().notNull(),

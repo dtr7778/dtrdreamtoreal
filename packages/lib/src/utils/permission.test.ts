@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { PermissionStrType, PermissionType } from "../types";
+import type { PermissionType } from "../types";
 import { hasPermission } from "./permission";
 
 function permission(
@@ -8,12 +8,7 @@ function permission(
   resource: PermissionType["resource"],
   action: PermissionType["action"]
 ): PermissionType {
-  return {
-    name: `${level}.${resource}.${action}` as PermissionStrType,
-    level,
-    resource,
-    action,
-  };
+  return { level, resource, action };
 }
 
 describe("hasPermission", () => {
@@ -22,18 +17,28 @@ describe("hasPermission", () => {
   });
 
   it("denies when the user has no permissions", () => {
-    expect(hasPermission([], ["system.user.read"], {})).toBe(false);
+    expect(hasPermission([], [permission("system", "user", "read")], {})).toBe(
+      false
+    );
   });
 
   it("allows an exact permission match", () => {
     expect(
-      hasPermission([permission("system", "user", "read")], ["system.user.read"], {})
+      hasPermission(
+        [permission("system", "user", "read")],
+        [permission("system", "user", "read")],
+        {}
+      )
     ).toBe(true);
   });
 
   it("denies an unrelated permission", () => {
     expect(
-      hasPermission([permission("system", "user", "read")], ["system.user.delete"], {})
+      hasPermission(
+        [permission("system", "user", "read")],
+        [permission("system", "user", "delete")],
+        {}
+      )
     ).toBe(false);
   });
 
@@ -41,7 +46,10 @@ describe("hasPermission", () => {
     expect(
       hasPermission(
         [permission("system", "user", "manage")],
-        ["system.user.delete", "system.user.update"],
+        [
+          permission("system", "user", "delete"),
+          permission("system", "user", "update"),
+        ],
         {}
       )
     ).toBe(true);
@@ -51,7 +59,10 @@ describe("hasPermission", () => {
     expect(
       hasPermission(
         [permission("system", "lead", "read")],
-        ["system.user.read", "system.lead.read"],
+        [
+          permission("system", "user", "read"),
+          permission("system", "lead", "read"),
+        ],
         {}
       )
     ).toBe(true);
@@ -59,19 +70,21 @@ describe("hasPermission", () => {
 
   it("denies self-level permissions for another user's resource", () => {
     expect(
-      hasPermission([permission("self", "user", "read")], ["self.user.read"], {
-        userId: "user-1",
-        resourceId: "user-2",
-      })
+      hasPermission(
+        [permission("self", "user", "read")],
+        [permission("self", "user", "read")],
+        { userId: "user-1", resourceId: "user-2" }
+      )
     ).toBe(false);
   });
 
   it("allows self-level permissions for the user's own resource", () => {
     expect(
-      hasPermission([permission("self", "user", "read")], ["self.user.read"], {
-        userId: "user-1",
-        resourceId: "user-1",
-      })
+      hasPermission(
+        [permission("self", "user", "read")],
+        [permission("self", "user", "read")],
+        { userId: "user-1", resourceId: "user-1" }
+      )
     ).toBe(true);
   });
 });

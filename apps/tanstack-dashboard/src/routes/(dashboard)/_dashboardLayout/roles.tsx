@@ -21,7 +21,7 @@ export const Route = createFileRoute("/(dashboard)/_dashboardLayout/roles")({
   beforeLoad: ({ context }) => {
     requirePermissions(
       context.permissions,
-      ["system.role_permission.list"],
+      [{ level: "system", resource: "role_permission", action: "list" }],
       context.user.id
     );
   },

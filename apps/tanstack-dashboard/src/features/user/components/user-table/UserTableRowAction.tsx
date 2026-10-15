@@ -18,10 +18,10 @@ export function UserTableRowAction({
   userData: ListUserContractType["output"]["data"]["data"][number];
 }) {
   const isAllowUpdate = usePermissionCheck([
-    "self.user.manage",
-    "self.user.update",
-    "system.user.manage",
-    "system.user.update",
+    { level: "self", resource: "user", action: "manage" },
+    { level: "self", resource: "user", action: "update" },
+    { level: "system", resource: "user", action: "manage" },
+    { level: "system", resource: "user", action: "update" },
   ]);
 
   return (

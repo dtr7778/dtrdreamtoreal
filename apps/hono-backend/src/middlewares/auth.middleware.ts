@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 
 import { createDrizzleClient } from "@workspace/drizzle/client";
 import { getUserRolesAndPermission } from "@workspace/lib/helpers";
-import type { PermissionStrType } from "@workspace/lib/types";
+import type { PermissionType } from "@workspace/lib/types";
 import { hasPermission } from "@workspace/lib/utils";
 import { ApiError, FORBIDDEN, UNAUTHORIZED } from "@workspace/server-core";
 
@@ -26,7 +26,7 @@ export const authMiddleware: MiddlewareHandler<AuthenticatedBindings> =
   });
 
 export const permissionMiddleware = (
-  requiredPermissions: PermissionStrType[]
+  requiredPermissions: PermissionType[]
 ): MiddlewareHandler<ApiBindings> =>
   createMiddleware<ApiBindings>(async (c, next) => {
     const user = c.get("user");

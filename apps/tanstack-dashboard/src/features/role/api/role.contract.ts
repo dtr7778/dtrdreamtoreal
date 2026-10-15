@@ -38,7 +38,6 @@ const listRoleContract = baseContract
                 .pick({
                   id: true,
                   description: true,
-                  name: true,
                 })
                 .extend({
                   level: PermissionLevelEnumSchema,

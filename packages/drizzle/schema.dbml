@@ -431,7 +431,6 @@ table notifications {
 
 table permissions {
   id text [pk, not null]
-  name text [not null]
   level text [not null]
   resource text [not null]
   action text [not null]

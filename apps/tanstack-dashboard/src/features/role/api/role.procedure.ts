@@ -25,7 +25,11 @@ export const roleImpl = implement(roleContract)
   .use(errorMiddleware);
 
 export const listRoleProcedure = roleImpl.listRole
-  .use(userPermissionMiddleware(["system.role_permission.list"]))
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "role_permission", action: "list" },
+    ])
+  )
   .handler(async ({ context }) => {
     const result = await context.db
       .select({
@@ -40,7 +44,6 @@ export const listRoleProcedure = roleImpl.listRole
             action: PermissionTable.action,
             resource: PermissionTable.resource,
             description: PermissionTable.description,
-            name: PermissionTable.name,
           },
           PermissionTable.id
         ),

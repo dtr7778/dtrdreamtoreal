@@ -5,11 +5,7 @@ import { ORPCError } from "@orpc/client";
 import type { AuthSession, AuthUser } from "@workspace/auth";
 import type { RoleEnumType } from "@workspace/drizzle/zod-db-enums";
 import { getUserRolesAndPermission } from "@workspace/lib/helpers";
-import type {
-  PermissionStrType,
-  PermissionType,
-  RoleType,
-} from "@workspace/lib/types";
+import type { PermissionType, RoleType } from "@workspace/lib/types";
 import { hasPermission } from "@workspace/lib/utils";
 
 import { baseOs } from "../orpc.base";
@@ -118,7 +114,7 @@ export function userRoleMiddleware(userRoles: Array<RoleEnumType>) {
 }
 
 export function userPermissionMiddleware(
-  userPermissions: Array<PermissionStrType>
+  userPermissions: Array<PermissionType>
 ) {
   return baseOs.middleware(async ({ context, next, errors }) => {
     const resolved = await resolveAuthContext(context);

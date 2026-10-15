@@ -18,113 +18,113 @@ export const rolesAndPermissionData: Array<{
     roleName: "USER",
     permissions: [
       // Can manage their own profile and create/join organizations
-      "self.user.read",
-      "self.user.update",
-      "self.invitation.list",
-      "self.invitation.update", // Accept/decline invites
-      "system.task.manage",
+      { level: "self", resource: "user", action: "read" },
+      { level: "self", resource: "user", action: "update" },
+      { level: "self", resource: "invitation", action: "list" },
+      { level: "self", resource: "invitation", action: "update" }, // Accept/decline invites
+      { level: "system", resource: "task", action: "manage" },
     ],
   },
   {
     roleName: "SUPPORT_AGENT",
     permissions: [
       // Self permissions
-      "self.user.read",
-      "self.user.update",
+      { level: "self", resource: "user", action: "read" },
+      { level: "self", resource: "user", action: "update" },
 
       // Cross-org read-only user/org support
-      "system.user.read",
-      "system.user.list",
-      "system.task.manage",
+      { level: "system", resource: "user", action: "read" },
+      { level: "system", resource: "user", action: "list" },
+      { level: "system", resource: "task", action: "manage" },
 
       // Contact permissions
-      "system.contact.read",
-      "system.contact.list",
+      { level: "system", resource: "contact", action: "read" },
+      { level: "system", resource: "contact", action: "list" },
 
       // Lead Company permissions
-      "system.lead_company.read",
-      "system.lead_company.list",
+      { level: "system", resource: "lead_company", action: "read" },
+      { level: "system", resource: "lead_company", action: "list" },
 
       // Lead Employee permissions
-      "system.lead_company_employee.read",
-      "system.lead_company_employee.list",
+      { level: "system", resource: "lead_company_employee", action: "read" },
+      { level: "system", resource: "lead_company_employee", action: "list" },
 
       // Site audit permissions
-      "system.site_audit.read",
-      "system.site_audit.list",
+      { level: "system", resource: "site_audit", action: "read" },
+      { level: "system", resource: "site_audit", action: "list" },
     ],
   },
   {
     roleName: "ADMIN",
     permissions: [
       // Self permissions
-      "self.user.read",
-      "self.user.update",
+      { level: "self", resource: "user", action: "read" },
+      { level: "self", resource: "user", action: "update" },
 
-      "system.role_permission.list",
-      "system.role_permission.read",
+      { level: "system", resource: "role_permission", action: "list" },
+      { level: "system", resource: "role_permission", action: "read" },
 
       // System user management
-      "system.user.read",
-      "system.user.list",
-      "system.user.update",
-      "system.task.manage",
+      { level: "system", resource: "user", action: "read" },
+      { level: "system", resource: "user", action: "list" },
+      { level: "system", resource: "user", action: "update" },
+      { level: "system", resource: "task", action: "manage" },
 
       // Contact permissions
-      "system.contact.read",
-      "system.contact.list",
-      "system.contact.create",
-      "system.contact.update",
-      "system.contact.delete",
+      { level: "system", resource: "contact", action: "read" },
+      { level: "system", resource: "contact", action: "list" },
+      { level: "system", resource: "contact", action: "create" },
+      { level: "system", resource: "contact", action: "update" },
+      { level: "system", resource: "contact", action: "delete" },
 
       // Lead Company permissions
-      "system.lead_company.read",
-      "system.lead_company.list",
-      "system.lead_company.create",
-      "system.lead_company.update",
-      "system.lead_company.delete",
+      { level: "system", resource: "lead_company", action: "read" },
+      { level: "system", resource: "lead_company", action: "list" },
+      { level: "system", resource: "lead_company", action: "create" },
+      { level: "system", resource: "lead_company", action: "update" },
+      { level: "system", resource: "lead_company", action: "delete" },
 
       // Lead Employee permissions
-      "system.lead_company_employee.read",
-      "system.lead_company_employee.list",
-      "system.lead_company_employee.create",
-      "system.lead_company_employee.update",
-      "system.lead_company_employee.delete",
+      { level: "system", resource: "lead_company_employee", action: "read" },
+      { level: "system", resource: "lead_company_employee", action: "list" },
+      { level: "system", resource: "lead_company_employee", action: "create" },
+      { level: "system", resource: "lead_company_employee", action: "update" },
+      { level: "system", resource: "lead_company_employee", action: "delete" },
 
       // Site audit permissions
-      "system.site_audit.read",
-      "system.site_audit.list",
-      "system.site_audit.create",
-      "system.site_audit.update",
-      "system.site_audit.delete",
+      { level: "system", resource: "site_audit", action: "read" },
+      { level: "system", resource: "site_audit", action: "list" },
+      { level: "system", resource: "site_audit", action: "create" },
+      { level: "system", resource: "site_audit", action: "update" },
+      { level: "system", resource: "site_audit", action: "delete" },
     ],
   },
   {
     roleName: "SUPER_ADMIN",
     permissions: [
-      "self.user.read",
-      "self.user.update",
+      { level: "self", resource: "user", action: "read" },
+      { level: "self", resource: "user", action: "update" },
 
-      "system.role_permission.list",
-      "system.role_permission.read",
+      { level: "system", resource: "role_permission", action: "list" },
+      { level: "system", resource: "role_permission", action: "read" },
 
-      "system.user.manage",
-      "system.task.manage",
+      { level: "system", resource: "user", action: "manage" },
+      { level: "system", resource: "task", action: "manage" },
 
       // Contact permissions
-      "system.contact.manage",
-      "system.contact.export",
+      { level: "system", resource: "contact", action: "manage" },
+      { level: "system", resource: "contact", action: "export" },
 
       // Lead Company permissions
-      "system.lead_company.manage",
-      "system.lead_company.export",
+      { level: "system", resource: "lead_company", action: "manage" },
+      { level: "system", resource: "lead_company", action: "export" },
 
       // Lead Employee permissions
-      "system.lead_company_employee.manage",
-      "system.lead_company_employee.export",
+      { level: "system", resource: "lead_company_employee", action: "manage" },
+      { level: "system", resource: "lead_company_employee", action: "export" },
 
       // Site audit permissions
-      "system.site_audit.manage",
+      { level: "system", resource: "site_audit", action: "manage" },
     ],
   },
 ];
@@ -142,7 +142,14 @@ export async function seedRolePermission(
     if (!role) return [];
 
     const permissionsForRole = permissions
-      .filter(({ name }) => r.permissions.includes(name as PermissionType))
+      .filter((permission) =>
+        r.permissions.some(
+          (rp) =>
+            rp.level === permission.level &&
+            rp.resource === permission.resource &&
+            rp.action === permission.action
+        )
+      )
       .map(({ id }) => ({
         roleId: role.id,
         permissionId: id,

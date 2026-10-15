@@ -217,7 +217,7 @@ function RouteComponent() {
                 <div className="flex flex-wrap items-center gap-2">
                   {permissions.map((perm) => (
                     <Badge
-                      key={perm.name}
+                      key={`${perm.level}.${perm.resource}.${perm.action}`}
                       variant="outline"
                       className="font-mono text-xs"
                     >

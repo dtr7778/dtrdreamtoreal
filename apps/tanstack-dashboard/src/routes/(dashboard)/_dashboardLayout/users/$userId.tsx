@@ -39,7 +39,10 @@ export const Route = createFileRoute(
   beforeLoad: ({ context }) => {
     requirePermissions(
       context.permissions,
-      ["system.user.manage", "system.user.read"],
+      [
+        { level: "system", resource: "user", action: "manage" },
+        { level: "system", resource: "user", action: "read" },
+      ],
       context.user.id
     );
   },

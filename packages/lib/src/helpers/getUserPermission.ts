@@ -31,7 +31,6 @@ export async function getUserRolesAndPermission(
 
   const systemRolePermissions = await database
     .select({
-      name: PermissionTable.name,
       level: PermissionTable.level,
       resource: PermissionTable.resource,
       action: PermissionTable.action,
@@ -58,6 +57,6 @@ export async function getUserRolesAndPermission(
 
   return {
     roles: Array.from(roleMap.values()),
-    permissions: systemRolePermissions as Array<PermissionType>,
+    permissions: systemRolePermissions,
   };
 }

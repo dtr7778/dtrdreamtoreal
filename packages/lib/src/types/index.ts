@@ -20,13 +20,7 @@ export type RoleType = {
   roleName: RoleEnumType;
 };
 
-export const permissionSeparator = ".";
-
-export type PermissionStrType =
-  `${PermissionLevelEnumType}${typeof permissionSeparator}${ResourceTypeEnumType}${typeof permissionSeparator}${ActionTypeEnumType}`;
-
 export type PermissionType = {
-  name: PermissionStrType;
   level: PermissionLevelEnumType;
   resource: ResourceTypeEnumType;
   action: ActionTypeEnumType;

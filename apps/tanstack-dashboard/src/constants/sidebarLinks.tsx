@@ -33,7 +33,10 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
       {
         title: "All Users",
         icon: <UsersRound />,
-        permissions: ["system.user.manage", "system.user.list"],
+        permissions: [
+          { level: "system", resource: "user", action: "manage" },
+          { level: "system", resource: "user", action: "list" },
+        ],
         path: "/users",
         pathRegex: /^\/users(\/.*)?$/,
       },
@@ -41,8 +44,8 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         title: "Roles & Permissions",
         icon: <ShieldUser />,
         permissions: [
-          "system.role_permission.manage",
-          "system.role_permission.list",
+          { level: "system", resource: "role_permission", action: "manage" },
+          { level: "system", resource: "role_permission", action: "list" },
         ],
         path: "/roles",
         pathRegex: /^\/roles$/,
