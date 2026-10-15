@@ -1,3 +1,5 @@
+import { buildFaviconLinks, buildOgMeta } from "./og-favicon";
+
 export interface BuildHeadConfig {
   appName: string;
   siteUrl: string;
@@ -55,7 +57,7 @@ export function buildHead(config: BuildHeadConfig) {
   const buildMeta = (
     title: string,
     pageDescription: string,
-    url: string | undefined,
+    url: string | undefined
   ): Array<Record<string, string>> => {
     const meta: Array<Record<string, string>> = [
       { charSet: "utf-8" },
@@ -76,45 +78,25 @@ export function buildHead(config: BuildHeadConfig) {
 
     if (social) {
       meta.push(
-        { property: "og:title", content: title },
-        { property: "og:description", content: pageDescription },
-        { property: "og:site_name", content: appName },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: url ?? baseUrl },
-        { property: "og:image", content: ogImage },
-        { property: "og:image:width", content: "1200" },
-        { property: "og:image:height", content: "630" },
-        { property: "og:image:alt", content: appName },
-        { property: "og:locale", content: "en_US" },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: title },
-        { name: "twitter:description", content: pageDescription },
-        { name: "twitter:image", content: ogImage },
-        { name: "twitter:image:alt", content: appName },
+        ...buildOgMeta({
+          appName,
+          title,
+          description: pageDescription,
+          url: url ?? baseUrl,
+          imageUrl: ogImage,
+        })
       );
     }
 
     return meta;
   };
 
-  const buildLinks = (url: string | undefined): Array<Record<string, string>> => [
+  const buildLinks = (
+    url: string | undefined
+  ): Array<Record<string, string>> => [
     ...stylesheets.map((href) => ({ rel: "stylesheet", href })),
-    { rel: "manifest", href: "/site.webmanifest" },
+    ...buildFaviconLinks(),
     ...(url ? [{ rel: "canonical", href: url }] : []),
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/favicon-96x96.png",
-      sizes: "96x96",
-    },
-    { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-    { rel: "shortcut icon", href: "/favicon.ico" },
-    {
-      rel: "apple-touch-icon",
-      href: "/apple-touch-icon.png",
-      sizes: "180x180",
-      type: "image/png",
-    },
   ];
 
   const globalHead = (): HeadResult => ({
