@@ -166,6 +166,7 @@ export const FileUpload = forwardRef<FileUploadRef, FileUploadProps>(
       accept: resolvedAccept,
       multiple,
       maxSize,
+      validate: validation?.validate,
       initialFiles: getInitialFiles(),
     });
 
