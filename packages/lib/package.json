@@ -25,6 +25,7 @@
   "exports": {
     "./helpers": "./src/helpers/index.ts",
     "./chat": "./src/chat/index.ts",
+    "./tiptap": "./src/tiptap/index.ts",
     "./types": "./src/types/index.ts",
     "./utils": "./src/utils/index.ts",
     "./zod-schemas": "./src/zod-schemas/index.ts",

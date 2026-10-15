@@ -5,6 +5,8 @@ import type {
   RoleEnumType,
 } from "@workspace/drizzle/zod-db-enums";
 
+export * from "./chatRealtime";
+
 export type NODE_ENV_TYPE = "development" | "test" | "production";
 
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
