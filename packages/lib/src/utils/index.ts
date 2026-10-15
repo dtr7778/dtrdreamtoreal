@@ -6,7 +6,6 @@ export * from "./formatDate";
 export * from "./formatDuration";
 export * from "./formatEnum";
 export * from "./formatError";
-export * from "./parseApiResponse";
 export * from "./parseName";
 export * from "./permission";
 export * from "./strInitials";
