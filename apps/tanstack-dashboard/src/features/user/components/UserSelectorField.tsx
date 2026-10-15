@@ -1,4 +1,4 @@
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 
 import {
   SearchableSelector,
@@ -11,8 +11,9 @@ import {
 import { UserAvatar } from "#/components/UserAvatar";
 import { DEFAULT_PAGE_INDEX } from "#/constants";
 import { orpcTQClient } from "#/server/orpc";
+import { resolveUserImage } from "#/utils/resolveUserImage";
 import { useQuery } from "@tanstack/react-query";
-import { Asterisk, Info, UserSearch } from "lucide-react";
+import { Asterisk, Info, UserSearch, X } from "lucide-react";
 import type {
   Control,
   ControllerFieldState,
@@ -22,6 +23,12 @@ import type {
 } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
+import { strInitials } from "@workspace/lib/utils";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@workspace/ui/components/avatar";
 import {
   Field,
   FieldDescription,
@@ -38,6 +45,8 @@ interface UserSelectorFieldProps<TFieldValues extends FieldValues> {
   isDescriptionInfoIconShow?: boolean;
   requiredField?: boolean;
   disabled?: boolean;
+  multiple?: boolean;
+  fetchApi?: boolean;
 }
 
 export function UserSelectorField<TFieldValues extends FieldValues>({
@@ -48,6 +57,8 @@ export function UserSelectorField<TFieldValues extends FieldValues>({
   isDescriptionInfoIconShow,
   requiredField,
   disabled = false,
+  multiple = false,
+  fetchApi = false,
 }: UserSelectorFieldProps<TFieldValues>) {
   const fieldId = useId();
   return (
@@ -69,6 +80,8 @@ export function UserSelectorField<TFieldValues extends FieldValues>({
             fieldState={fieldState}
             id={fieldId}
             disabled={disabled}
+            multiple={multiple}
+            fetchApi={fetchApi}
           />
           {description && (
             <FieldDescription
@@ -91,7 +104,9 @@ interface UserSelectorFieldRenderProps<TFieldValues extends FieldValues> {
   fieldState: ControllerFieldState;
   id: string;
   disabled?: boolean;
+  multiple: boolean;
   placeholder?: string;
+  fetchApi?: boolean;
 }
 
 function UserSelectorFieldRender<TFieldValues extends FieldValues>({
@@ -99,7 +114,9 @@ function UserSelectorFieldRender<TFieldValues extends FieldValues>({
   fieldState,
   id,
   disabled = false,
-  placeholder = "Select User",
+  multiple,
+  placeholder = multiple ? "Select Users" : "Select User",
+  fetchApi = false,
 }: UserSelectorFieldRenderProps<TFieldValues>) {
   const [search, setSearch] = useState<string | undefined>(undefined);
 
@@ -111,65 +128,146 @@ function UserSelectorFieldRender<TFieldValues extends FieldValues>({
         page: DEFAULT_PAGE_INDEX,
         limit: 5,
       },
+      enabled: fetchApi,
+      select: (result) => result.data,
     })
   );
 
+  type UserItem = NonNullable<typeof data>[number];
+
+  const [knownUsers, setKnownUsers] = useState<Map<string, UserItem>>(
+    () => new Map()
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    setKnownUsers((prev) => {
+      let changed = false;
+      const next = new Map(prev);
+      for (const user of data) {
+        if (!next.has(user.id)) {
+          next.set(user.id, user);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [data]);
+
+  const fieldValue = field.value as string | Array<string> | undefined;
+
+  const selectedIds: Array<string> = Array.isArray(fieldValue)
+    ? fieldValue
+    : fieldValue
+      ? [fieldValue]
+      : [];
+
+  const selectedUsers = selectedIds
+    .map((userId) => knownUsers.get(userId))
+    .filter((user): user is UserItem => Boolean(user));
+
   const handleOnChange = useCallback(
-    (value: string | undefined) => {
+    (value: string | Array<string> | undefined) => {
       field.onChange(value);
     },
     [field]
   );
 
+  const removeUser = useCallback(
+    (userId: string) => {
+      field.onChange(selectedIds.filter((selectedId) => selectedId !== userId));
+    },
+    [field, selectedIds]
+  );
+
   return (
-    <SearchableSelector
-      value={field.value}
-      onChange={handleOnChange}
-      onSearch={setSearch}
-      disabled={disabled}
-    >
-      <SearchableSelectorTrigger id={id} aria-invalid={fieldState.invalid}>
-        <UserSearch className="size-4" />
-        {field.value ? (
-          <span className="truncate">
-            {data?.data?.find((userData) => userData.id === field.value)?.name}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">{placeholder}</span>
-        )}
-      </SearchableSelectorTrigger>
-      <SearchableSelectorContent
-        data={data?.data}
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-        title={placeholder}
-        description="Select a user"
-        loadingFallback={
-          <SearchableSelectorLoadingSkeleton>
-            <Skeleton className="h-8" />
-          </SearchableSelectorLoadingSkeleton>
-        }
-        emptyFallback={
-          <SearchableSelectorEmpty
-            message="No users found"
-            icon={<UserSearch className="size-8 opacity-20" />}
-          />
-        }
+    <div>
+      {multiple && selectedUsers.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {selectedUsers.map((user) => (
+            <span
+              key={user.id}
+              className="flex items-center gap-1.5 rounded-md border bg-muted/50 py-1 px-1 text-xs"
+            >
+              <Avatar className="size-5">
+                <AvatarImage
+                  src={resolveUserImage(user.image)}
+                  alt={user.name}
+                />
+                <AvatarFallback className="text-xs font-semibold uppercase">
+                  {strInitials(user.name)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="max-w-32 truncate">{user.name}</span>
+              <button
+                type="button"
+                onClick={() => removeUser(user.id)}
+                disabled={disabled}
+                aria-label={`Remove ${user.name}`}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <SearchableSelector
+        multiple={multiple}
+        value={multiple ? selectedIds : fieldValue}
+        onChange={handleOnChange}
+        onSearch={setSearch}
+        disabled={disabled}
       >
-        {(item) => (
-          <SearchableSelectorItem item={item} getItemId={(user) => user.id}>
-            <UserAvatar
-              userName={item.name}
-              userEmail={item.email}
-              imageUrl={item.image}
-              userRoles={item.roles}
-              showDetails
-              showRoleDetails
+        <SearchableSelectorTrigger id={id} aria-invalid={fieldState.invalid}>
+          <UserSearch className="size-4" />
+          {multiple ? (
+            selectedIds.length > 0 ? (
+              <span className="truncate">{`${selectedIds.length} selected`}</span>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )
+          ) : selectedIds[0] ? (
+            <span className="truncate">
+              {knownUsers.get(selectedIds[0])?.name}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+        </SearchableSelectorTrigger>
+        <SearchableSelectorContent
+          data={data}
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+          title={placeholder}
+          description={multiple ? "Select users" : "Select a user"}
+          loadingFallback={
+            <SearchableSelectorLoadingSkeleton>
+              <Skeleton className="h-8" />
+            </SearchableSelectorLoadingSkeleton>
+          }
+          emptyFallback={
+            <SearchableSelectorEmpty
+              message="No users found"
+              icon={<UserSearch className="size-8 opacity-20" />}
             />
-          </SearchableSelectorItem>
-        )}
-      </SearchableSelectorContent>
-    </SearchableSelector>
+          }
+        >
+          {(item) => (
+            <SearchableSelectorItem item={item} getItemId={(user) => user.id}>
+              <UserAvatar
+                userName={item.name}
+                userEmail={item.email}
+                imageUrl={item.image}
+                userRoles={item.roles}
+                showDetails
+                showRoleDetails
+              />
+            </SearchableSelectorItem>
+          )}
+        </SearchableSelectorContent>
+      </SearchableSelector>
+    </div>
   );
 }
