@@ -15,6 +15,7 @@ export interface R2Config {
 export interface PresignUploadOptions {
   key: string;
   contentType?: string;
+  contentLength?: number;
   expiresIn?: number;
 }
 
@@ -28,7 +29,6 @@ export interface StorageSigner {
   presignDownload(options: PresignDownloadOptions): Promise<string>;
   buildObjectUrl(key: string): string;
 }
-
 
 function buildObjectUrl(config: R2Config, key: string): string {
   const encodedKey = key.split("/").map(encodeURIComponent).join("/");
@@ -54,15 +54,25 @@ export function createStorageSigner(config: R2Config): StorageSigner {
   async function presignUpload({
     key,
     contentType,
+    contentLength,
     expiresIn,
   }: PresignUploadOptions): Promise<string> {
     const url = new URL(buildObjectUrl(config, key));
     url.searchParams.set("X-Amz-Expires", String(expiresIn ?? uploadTtl));
 
+    const headers: Record<string, string> = {};
+    if (contentType) headers["content-type"] = contentType;
+    if (contentLength !== undefined) {
+      headers["content-length"] = String(contentLength);
+    }
+
     const request = await client.sign(url, {
       method: "PUT",
-      headers: contentType ? { "content-type": contentType } : undefined,
-      aws: { signQuery: true, allHeaders: Boolean(contentType) },
+      headers,
+      aws: {
+        signQuery: true,
+        allHeaders: Object.keys(headers).length > 0,
+      },
     });
 
     return request.url;

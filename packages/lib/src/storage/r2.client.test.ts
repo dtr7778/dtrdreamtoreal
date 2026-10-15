@@ -49,6 +49,20 @@ describe("createStorageSigner", () => {
     );
   });
 
+  it("signs the content-length so a different body size is rejected", async () => {
+    const url = new URL(
+      await signer.presignUpload({
+        key: "uploads/general/u1/report.pdf",
+        contentType: "application/pdf",
+        contentLength: 1024,
+      })
+    );
+
+    expect(url.searchParams.get("X-Amz-SignedHeaders")).toContain(
+      "content-length"
+    );
+  });
+
   it("presigns a GET with the download TTL", async () => {
     const url = new URL(
       await signer.presignDownload({
