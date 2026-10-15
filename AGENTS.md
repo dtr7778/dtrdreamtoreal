@@ -1,6 +1,11 @@
 # DTR - Dream To Real
 
-DTR is a software development and digital marketing SEO/AIO/AEO/GEO focused SaaS. This repo is a Turborepo monorepo: two TanStack Start + React 19 apps (a public web app and an internal dashboard) that build with Vite and deploy to Cloudflare Workers via Wrangler, a Storybook component explorer, and shared packages (a shadcn/ui component library, shared utilities, a shared TanStack Start package for cross-app head/SEO metadata and favicon/PWA assets, and shared config packages).
+DTR is a software development and digital marketing SEO/AIO/AEO/GEO focused SaaS. This repo is a Turborepo monorepo with:
+
+- Two TanStack Start + React 19 apps (`apps/tanstack-web`, a public web app, and `apps/tanstack-dashboard`, an internal dashboard) that build with Vite and deploy to Cloudflare Workers via Wrangler.
+- `apps/hono-backend`, a Hono API worker deployed with Wrangler.
+- `apps/storybook`, a Storybook component explorer.
+- Shared packages: a shadcn/ui component library (`@workspace/ui`), a Drizzle schema and DB tooling (`@workspace/drizzle`), auth (`@workspace/auth`), transactional email templates (`@workspace/mail`), server-side core logic (`@workspace/server-core`), shared utilities (`@workspace/lib`), a shared TanStack Start package for cross-app head/SEO metadata and favicon/PWA assets (`@workspace/tanstack-start`), and shared config packages (`@workspace/eslint-config`, `@workspace/typescript-config`, `@workspace/vite-config`, `@workspace/vitest-config`).
 
 > Older notes describe a Next.js app with an Express API and a BullMQ worker. That stack does not exist in this repo — ignore it.
 
@@ -17,7 +22,7 @@ Use graphify to decide significance:
 ## Monorepo
 
 - **pnpm workspaces + Turborepo**; Node `>=24` (`.nvmrc` is `24.20.0`), pnpm `12.6.0` (`packageManager` in root `package.json`, pinned in CI).
-- `apps/*` are deployables, `packages/*` are shared libraries.
+- `apps/*` are deployables (`tanstack-web`, `tanstack-dashboard`, `hono-backend`, `storybook`), `packages/*` are shared libraries. `infra/docker` holds local dev containers.
 - Shared dependency versions are pinned once via pnpm **`catalog:`** in `pnpm-workspace.yaml`. Add a version there and reference it as `"catalog:"` — do not hardcode versions in leaf `package.json`s.
 
 ## Commands
@@ -28,6 +33,9 @@ Run from the repo root (Turbo fans out to affected workspaces):
 - `pnpm dev` — start all dev servers (`turbo dev`).
 - `pnpm build` / `pnpm lint` / `pnpm lint:fix` / `pnpm typecheck` / `pnpm test` — Turbo tasks.
 - `pnpm format` — prettier across workspaces.
+- `pnpm generate-routes` — regenerate TanStack Router route trees (`turbo generate-routes`).
+- `pnpm cf-typegen` — regenerate Cloudflare Worker types (`turbo cf-typegen`).
+- `pnpm commit` — conventional-commit prompt (`cz`).
 - `pnpm test:projects` / `pnpm test:projects:watch` — root Vitest projects (incl. Storybook browser tests).
 - `pnpm docker:dev:up` / `pnpm docker:dev:down` — local resend-dev containers (`infra/docker/docker-compose-dev.yml`).
 
@@ -47,7 +55,7 @@ Rules:
 
 <!-- BEGIN:turborepo-agent-rules -->
 
-# This is NOT the Turborepo you know
+## This is NOT the Turborepo you know
 
 Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
 
