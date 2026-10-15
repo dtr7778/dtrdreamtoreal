@@ -8,11 +8,14 @@ import { ResendMailTransport } from "@workspace/mail/transports";
 import app from "./app";
 import { getAuth } from "./lib/auth";
 import { validateEnv } from "./lib/env";
+import type { AppEnv } from "./types";
+
+export { ChatHubDurableObject } from "./modules/chat/chat-hub.do";
 
 /**
  * RPC entrypoint
  */
-export class AuthEntrypoint extends WorkerEntrypoint<Env> {
+export class AuthEntrypoint extends WorkerEntrypoint<AppEnv> {
   async getSession(headers: Headers) {
     return getAuth(this.env).api.getSession({ headers });
   }
@@ -60,4 +63,4 @@ export default {
 
     await mailQueueProcessor.handleBatch(batch);
   },
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<AppEnv>;

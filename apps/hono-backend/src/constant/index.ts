@@ -21,6 +21,19 @@ export const API_MESSAGES = {
     NOT_ALLOWED: "You don't have permission to access this file.",
     TOO_LARGE: "File is too large.",
     UNSUPPORTED_TYPE: "This file type is not allowed.",
+    BLOCKED_TYPE:
+      "Executable and script files must be zipped before uploading.",
+    SANITIZE_FAILED: "We couldn't process this file. Please try again.",
+  },
+  CHAT: {
+    SEND_MESSAGE: "Message send successfully",
+    TOGGLE_REACTION: "Reaction updated successfully",
+    MARK_READ: "Conversatoin marked as read",
+    ROOM_NOT_FOUND: "Conversatoin not found",
+    NOT_A_MEMBER: "You are not a member of this conversation",
+    MESSAGE_NOT_FOUND: "Message not found",
+    ATTACHMENT_INVALID: "One or more attachments are invalid",
+    EMPTY_MESSAGE: "Message must have text or an attachment",
   },
 };
 

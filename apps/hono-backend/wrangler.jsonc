@@ -21,6 +21,12 @@
       "database_id": "dd2b93c8-d3fd-4de7-8956-15b488c678f6",
     },
   ],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["ChatHubDurableObject"] },
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "CHAT_HUB", "class_name": "ChatHubDurableObject" }],
+  },
   "queues": {
     "producers": [
       {
@@ -92,6 +98,11 @@
           "database_id": "fc84e1cc-a96e-40fc-b62e-71f105409167",
         },
       ],
+      "durable_objects": {
+        "bindings": [
+          { "name": "CHAT_HUB", "class_name": "ChatHubDurableObject" },
+        ],
+      },
       "r2_buckets": [
         {
           "binding": "BUCKET",

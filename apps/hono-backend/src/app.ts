@@ -3,13 +3,14 @@ import { configureOpenAPI, createApp } from "@workspace/server-core";
 import { getAuth } from "@/lib/auth";
 import { getEnv } from "@/lib/env";
 
+import chatRouter from "@/modules/chat";
 import mailRouter from "@/modules/mail";
 import uploadRouter from "@/modules/upload";
-import type { ApiVariables } from "@/types";
+import type { ApiVariables, AppEnv } from "@/types";
 
 import packageJSON from "../package.json" with { type: "json" };
 
-const app = createApp<Env, ApiVariables>({
+const app = createApp<AppEnv, ApiVariables>({
   logger: {
     serviceName: "Hono backend",
     logLevel: getEnv("LOG_LEVEL"),
@@ -31,7 +32,7 @@ configureOpenAPI(app, {
   version: packageJSON.version,
 });
 
-const routes = [mailRouter, uploadRouter] as const;
+const routes = [mailRouter, chatRouter, uploadRouter] as const;
 
 routes.forEach((route) => {
   app.route("/", route);
