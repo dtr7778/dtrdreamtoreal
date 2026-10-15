@@ -1,21 +1,25 @@
-import { THEME_COLOR } from "./brand";
-
-export interface SiteHeadOptions {
+export interface BuildHeadConfig {
   appName: string;
   siteUrl: string;
-  title: string;
+  defaultTitle: string;
+  titleTemplate: string;
   description: string;
+  themeColor: string;
   robots?: string;
   stylesheets?: ReadonlyArray<string>;
   ogImagePath?: string;
   social?: boolean;
 }
 
-export interface SiteHeadMatch {
+export type HeadPageOptions = {
   pathname: string;
-}
+  description?: string;
+} & (
+  | { title: string; titleByTemplate?: never }
+  | { titleByTemplate: string; title?: never }
+);
 
-export interface SiteHeadConfig {
+export interface HeadResult {
   meta: Array<Record<string, string>>;
   links: Array<Record<string, string>>;
 }
@@ -23,36 +27,42 @@ export interface SiteHeadConfig {
 const GOOGLEBOT_DEFAULT =
   "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1";
 
-export function siteHead(options: SiteHeadOptions) {
+export function buildHead(config: BuildHeadConfig) {
   const {
     appName,
     siteUrl,
-    title,
+    defaultTitle,
+    titleTemplate,
     description,
+    themeColor,
     robots = "index, follow",
     stylesheets = [],
     ogImagePath = "/opengraph-image.jpeg",
     social = true,
-  } = options;
+  } = config;
+
+  if (!titleTemplate.includes("%s")) {
+    throw new Error('buildHead: titleTemplate must contain "%s"');
+  }
 
   const baseUrl = siteUrl.replace(/\/$/, "");
+  const ogImage = `${baseUrl}${ogImagePath}`;
+  const googlebot = robots.includes("noindex") ? robots : GOOGLEBOT_DEFAULT;
 
-  return ({
-    matches,
-  }: {
-    matches: ReadonlyArray<SiteHeadMatch>;
-  }): SiteHeadConfig => {
-    const pathname = matches.at(-1)?.pathname ?? "/";
-    const canonicalUrl = pathname === "/" ? baseUrl : `${baseUrl}${pathname}`;
-    const ogImage = `${baseUrl}${ogImagePath}`;
-    const googlebot = robots.includes("noindex") ? robots : GOOGLEBOT_DEFAULT;
+  const canonicalUrl = (pathname: string) =>
+    pathname === "/" ? baseUrl : `${baseUrl}${pathname}`;
 
+  const buildMeta = (
+    title: string,
+    pageDescription: string,
+    url: string | undefined,
+  ): Array<Record<string, string>> => {
     const meta: Array<Record<string, string>> = [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: THEME_COLOR },
+      { name: "theme-color", content: themeColor },
       { title },
-      { name: "description", content: description },
+      { name: "description", content: pageDescription },
       { name: "robots", content: robots },
       { name: "googlebot", content: googlebot },
       { name: "format-detection", content: "telephone=no" },
@@ -67,10 +77,10 @@ export function siteHead(options: SiteHeadOptions) {
     if (social) {
       meta.push(
         { property: "og:title", content: title },
-        { property: "og:description", content: description },
+        { property: "og:description", content: pageDescription },
         { property: "og:site_name", content: appName },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: canonicalUrl },
+        { property: "og:url", content: url ?? baseUrl },
         { property: "og:image", content: ogImage },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },
@@ -78,32 +88,53 @@ export function siteHead(options: SiteHeadOptions) {
         { property: "og:locale", content: "en_US" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
+        { name: "twitter:description", content: pageDescription },
         { name: "twitter:image", content: ogImage },
-        { name: "twitter:image:alt", content: appName }
+        { name: "twitter:image:alt", content: appName },
       );
     }
 
-    const links: Array<Record<string, string>> = [
-      ...stylesheets.map((href) => ({ rel: "stylesheet", href })),
-      { rel: "manifest", href: "/site.webmanifest" },
-      { rel: "canonical", href: canonicalUrl },
-      {
-        rel: "icon",
-        type: "image/png",
-        href: "/favicon-96x96.png",
-        sizes: "96x96",
-      },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "shortcut icon", href: "/favicon.ico" },
-      {
-        rel: "apple-touch-icon",
-        href: "/apple-touch-icon.png",
-        sizes: "180x180",
-        type: "image/png",
-      },
-    ];
-
-    return { meta, links };
+    return meta;
   };
+
+  const buildLinks = (url: string | undefined): Array<Record<string, string>> => [
+    ...stylesheets.map((href) => ({ rel: "stylesheet", href })),
+    { rel: "manifest", href: "/site.webmanifest" },
+    ...(url ? [{ rel: "canonical", href: url }] : []),
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon-96x96.png",
+      sizes: "96x96",
+    },
+    { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    { rel: "shortcut icon", href: "/favicon.ico" },
+    {
+      rel: "apple-touch-icon",
+      href: "/apple-touch-icon.png",
+      sizes: "180x180",
+      type: "image/png",
+    },
+  ];
+
+  const globalHead = (): HeadResult => ({
+    meta: buildMeta(defaultTitle, description, undefined),
+    links: buildLinks(undefined),
+  });
+
+  const head = (options: HeadPageOptions): HeadResult => {
+    const title =
+      options.titleByTemplate === undefined
+        ? options.title
+        : titleTemplate.replace("%s", () => options.titleByTemplate);
+    const pageDescription = options.description ?? description;
+    const url = canonicalUrl(options.pathname);
+
+    return {
+      meta: buildMeta(title, pageDescription, url),
+      links: buildLinks(url),
+    };
+  };
+
+  return { globalHead, head };
 }
