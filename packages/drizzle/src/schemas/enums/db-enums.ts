@@ -22,6 +22,7 @@ import {
   SOCIAL_MEDIA_PLATFROM_TYPE,
   SOCIAL_MEDIA_TYPE,
   TASK_PRIORITY,
+  TASK_SOURCE,
   TASK_STATUS,
   USER_EVENT_TYPE,
 } from "./enum-values";
@@ -54,6 +55,9 @@ export const TaskStatusEnum = (name: string) =>
 
 export const TaskPriorityEnum = (name: string) =>
   text(name, { enum: TASK_PRIORITY });
+
+export const TaskSourceEnum = (name: string) =>
+  text(name, { enum: TASK_SOURCE });
 
 export const AddressTypeEnum = (name: string) =>
   text(name, { enum: ADDRESS_TYPE });

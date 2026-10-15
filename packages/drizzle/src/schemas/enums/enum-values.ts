@@ -94,6 +94,8 @@ export const TASK_STATUS = [
 
 export const TASK_PRIORITY = ["low", "medium", "high"] as const;
 
+export const TASK_SOURCE = ["manual", "mcp", "webhook", "system"] as const;
+
 export const ADDRESS_TYPE = [
   "billing",
   "shipping",

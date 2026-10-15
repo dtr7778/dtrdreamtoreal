@@ -26,6 +26,7 @@ import {
   SOCIAL_MEDIA_PLATFROM_TYPE,
   SOCIAL_MEDIA_TYPE,
   TASK_PRIORITY,
+  TASK_SOURCE,
   TASK_STATUS,
   USER_EVENT_TYPE,
 } from "./enum-values";
@@ -77,6 +78,9 @@ export type TaskStatusEnumType = z.infer<typeof TaskStatusEnumSchema>;
 
 export const TaskPriorityEnumSchema = z.enum(TASK_PRIORITY);
 export type TaskPriorityEnumType = z.infer<typeof TaskPriorityEnumSchema>;
+
+export const TaskSourceEnumSchema = z.enum(TASK_SOURCE);
+export type TaskSourceEnumType = z.infer<typeof TaskSourceEnumSchema>;
 
 export const AddressTypeEnumSchema = z.enum(ADDRESS_TYPE);
 export type AddressTypeEnumType = z.infer<typeof AddressTypeEnumSchema>;

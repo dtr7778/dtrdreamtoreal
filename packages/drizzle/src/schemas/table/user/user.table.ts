@@ -30,7 +30,7 @@ import { NotificationTable } from "../notification";
 import { UserRoleTable } from "../role-permission";
 import { SessionTable } from "../session.table";
 import { SiteAuditTable } from "../siteAudit";
-import { TaskTable } from "../task";
+import { CompanyTaskTable, PersonalTaskTable } from "../task";
 import { NotificationSettingsTable } from "./notificationSetting.table";
 import { PushSubscriptionTable } from "./pushSubscription.table";
 import { UserDeviceTable } from "./userDevice.table";
@@ -94,8 +94,21 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
     relationName: "PushSubscriptionToUser",
   }),
   // task
-  assignedTasks: many(TaskTable, { relationName: "TaskToAssignedBy" }),
-  createdTasks: many(TaskTable, { relationName: "TaskToCreatedBy" }),
+  assignedCompanyTasks: many(CompanyTaskTable, {
+    relationName: "CompanyTaskToAssignee",
+  }),
+  delegatedCompanyTasks: many(CompanyTaskTable, {
+    relationName: "CompanyTaskToAssignedBy",
+  }),
+  createdCompanyTasks: many(CompanyTaskTable, {
+    relationName: "CompanyTaskToCreatedBy",
+  }),
+  updatedCompanyTasks: many(CompanyTaskTable, {
+    relationName: "CompanyTaskToUpdatedBy",
+  }),
+  personalTasks: many(PersonalTaskTable, {
+    relationName: "PersonalTaskToUser",
+  }),
   // email
   closedEmailThreads: many(EmailThreadTable, {
     relationName: "EmailThreadToClosedBy",
