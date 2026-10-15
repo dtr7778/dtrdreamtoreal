@@ -1,23 +1,14 @@
-import { env } from "#/lib/env";
+import { head } from "#/lib/siteHead";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/contact")({
-  head: () => {
-    const title = `Contact Us | ${env.VITE_APP_NAME}`;
-    const description =
-      "Contact about web development, software, SEO or AI search projects. We reply within one business day.";
-
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
-      ],
-    };
-  },
+  head: ({ match }) =>
+    head({
+      titleByTemplate: "Contact Us",
+      pathname: match.pathname,
+      description:
+        "Contact about web development, software, SEO or AI search projects. We reply within one business day.",
+    }),
   component: RouteComponent,
 });
 
