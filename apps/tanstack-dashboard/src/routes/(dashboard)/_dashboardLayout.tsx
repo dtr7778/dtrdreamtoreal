@@ -1,8 +1,10 @@
 import { AppSidebar } from "#/components/shared/sidebar/AppSidebar";
 import { Topbar } from "#/components/shared/topbar";
 import { DEFAULT_UNAUTH_PATH } from "#/constants";
+import { ChatRealtimeProvider } from "#/features/chat/components/ChatRealtimeProvider";
 import { NotificationPermissionProvider } from "#/features/notification/components/NotificationPermissionProvider";
 import { AuthStoreProvider } from "#/stores/zustand/auth/AuthStoreContext";
+import { useSettingStore } from "#/stores/zustand/setting/settingStore";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
@@ -39,6 +41,9 @@ export const Route = createFileRoute("/(dashboard)/_dashboardLayout")({
 function RouteComponent() {
   const { session, user, roles, permissions } = Route.useRouteContext();
 
+  const sidebarOpen = useSettingStore((state) => state.sidebar.open);
+  const setSidebarOpen = useSettingStore((state) => state.setSidebarOpen);
+
   const isAdminUser = roles.some(
     ({ roleName }) =>
       roleName === RoleEnumSchema.enum.ADMIN ||
@@ -54,15 +59,17 @@ function RouteComponent() {
         roles={roles}
         isAdminUser={isAdminUser}
       >
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            <Topbar />
-            <main className="min-h-[calc(100vh-84px)] flex-1">
-              <Outlet />
-            </main>
-          </SidebarInset>
-        </SidebarProvider>
+        <ChatRealtimeProvider>
+          <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <AppSidebar />
+            <SidebarInset>
+              <Topbar />
+              <main className="min-h-[calc(100vh-84px)] flex-1">
+                <Outlet />
+              </main>
+            </SidebarInset>
+          </SidebarProvider>
+        </ChatRealtimeProvider>
       </AuthStoreProvider>
     </NotificationPermissionProvider>
   );

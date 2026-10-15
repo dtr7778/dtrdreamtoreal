@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { env } from "#/lib/env";
 import { orpcClient } from "#/server/orpc";
+import { useSettingStore } from "#/stores/zustand/setting/settingStore";
 import { X } from "lucide-react";
 
 import { detectDevice } from "@workspace/lib/helpers";
@@ -16,7 +17,6 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Portal } from "@workspace/ui/components/portal";
-import { usePersistStorage } from "@workspace/ui/hooks/use-persist-storage";
 
 import {
   isPushManagerSupported,
@@ -164,10 +164,11 @@ function NotificationPromptCard({
   platform: DevicePlatform;
   onAllow: () => void;
 }) {
-  const [dismissed, setDismissed] = usePersistStorage<boolean>(
-    "notification.dismissed",
-    false,
-    "local"
+  const dismissed = useSettingStore(
+    (state) => state.notification.promptDismissed
+  );
+  const dismissNotificationPrompt = useSettingStore(
+    (state) => state.dismissNotificationPrompt
   );
 
   if (dismissed) return null;
@@ -183,7 +184,7 @@ function NotificationPromptCard({
               {isIOS ? "Enable notifications (PWA)" : "Stay in the loop"}
             </CardTitle>
             <button
-              onClick={() => setDismissed(true)}
+              onClick={dismissNotificationPrompt}
               className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
               aria-label="Dismiss"
             >
@@ -211,7 +212,7 @@ function NotificationPromptCard({
           </Button>
           <Button
             variant="outline"
-            onClick={() => setDismissed(true)}
+            onClick={dismissNotificationPrompt}
             className="flex-1"
           >
             Not now

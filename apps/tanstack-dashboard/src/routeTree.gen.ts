@@ -21,15 +21,18 @@ import { Route as dashboardDashboardLayoutNotificationsRouteImport } from './rou
 import { Route as dashboardDashboardLayoutProfileRouteImport } from './routes/(dashboard)/_dashboardLayout/profile'
 import { Route as dashboardDashboardLayoutRolesRouteImport } from './routes/(dashboard)/_dashboardLayout/roles'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout'
+import { Route as dashboardDashboardLayoutChatChatLayoutRouteImport } from './routes/(dashboard)/_dashboardLayout/chat/_chatLayout'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout'
 import { Route as dashboardDashboardLayoutUsersIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/users/index'
 import { Route as dashboardDashboardLayoutUsersUserIdRouteImport } from './routes/(dashboard)/_dashboardLayout/users/$userId'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/index'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/connected-apps'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/notification'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/profile'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/sessions'
-import { Route as dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRouteImport } from './routes/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/update-password'
+import { Route as dashboardDashboardLayoutChatChatLayoutIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/chat/_chatLayout/index'
+import { Route as dashboardDashboardLayoutChatChatLayoutChatRoomIdRouteImport } from './routes/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout/index'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutNotificationRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout/notification'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutProfileRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout/profile'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutSessionsRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout/sessions'
+import { Route as dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout/update-password'
 
 const authAuthLayoutRoute = authAuthLayoutRouteImport.update({
   id: '/(auth)/_authLayout',
@@ -96,9 +99,16 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const dashboardDashboardLayoutsettingsSettingsLayoutRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutRouteImport.update({
-    id: '/(settings)/_settingsLayout',
+const dashboardDashboardLayoutChatChatLayoutRoute =
+  dashboardDashboardLayoutChatChatLayoutRouteImport.update({
+    id: '/chat/_chatLayout',
+    path: '/chat',
+    getParentRoute: () => dashboardDashboardLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutSettingsSettingsLayoutRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutRouteImport.update({
+    id: '/settings/_settingsLayout',
+    path: '/settings',
     getParentRoute: () => dashboardDashboardLayoutRoute,
   } as any)
 const dashboardDashboardLayoutUsersIndexRoute =
@@ -113,52 +123,56 @@ const dashboardDashboardLayoutUsersUserIdRoute =
     path: '/users/$userId',
     getParentRoute: () => dashboardDashboardLayoutRoute,
   } as any)
-const dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRouteImport.update(
+const dashboardDashboardLayoutChatChatLayoutIndexRoute =
+  dashboardDashboardLayoutChatChatLayoutIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => dashboardDashboardLayoutChatChatLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute =
+  dashboardDashboardLayoutChatChatLayoutChatRoomIdRouteImport.update({
+    id: '/$chatRoomId',
+    path: '/$chatRoomId',
+    getParentRoute: () => dashboardDashboardLayoutChatChatLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => dashboardDashboardLayoutSettingsSettingsLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRouteImport.update(
     {
-      id: '/settings/',
-      path: '/settings/',
-      getParentRoute: () => dashboardDashboardLayoutsettingsSettingsLayoutRoute,
+      id: '/connected-apps',
+      path: '/connected-apps',
+      getParentRoute: () => dashboardDashboardLayoutSettingsSettingsLayoutRoute,
     } as any,
   )
-const dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRouteImport.update(
+const dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutNotificationRouteImport.update({
+    id: '/notification',
+    path: '/notification',
+    getParentRoute: () => dashboardDashboardLayoutSettingsSettingsLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => dashboardDashboardLayoutSettingsSettingsLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutSessionsRouteImport.update({
+    id: '/sessions',
+    path: '/sessions',
+    getParentRoute: () => dashboardDashboardLayoutSettingsSettingsLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute =
+  dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRouteImport.update(
     {
-      id: '/settings/connected-apps',
-      path: '/settings/connected-apps',
-      getParentRoute: () => dashboardDashboardLayoutsettingsSettingsLayoutRoute,
-    } as any,
-  )
-const dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRouteImport.update(
-    {
-      id: '/settings/notification',
-      path: '/settings/notification',
-      getParentRoute: () => dashboardDashboardLayoutsettingsSettingsLayoutRoute,
-    } as any,
-  )
-const dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRouteImport.update(
-    {
-      id: '/settings/profile',
-      path: '/settings/profile',
-      getParentRoute: () => dashboardDashboardLayoutsettingsSettingsLayoutRoute,
-    } as any,
-  )
-const dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRouteImport.update(
-    {
-      id: '/settings/sessions',
-      path: '/settings/sessions',
-      getParentRoute: () => dashboardDashboardLayoutsettingsSettingsLayoutRoute,
-    } as any,
-  )
-const dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute =
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRouteImport.update(
-    {
-      id: '/settings/update-password',
-      path: '/settings/update-password',
-      getParentRoute: () => dashboardDashboardLayoutsettingsSettingsLayoutRoute,
+      id: '/update-password',
+      path: '/update-password',
+      getParentRoute: () => dashboardDashboardLayoutSettingsSettingsLayoutRoute,
     } as any,
   )
 
@@ -173,14 +187,18 @@ export interface FileRoutesByFullPath {
   '/roles': typeof dashboardDashboardLayoutRolesRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/': typeof dashboardDashboardLayoutIndexRoute
+  '/chat': typeof dashboardDashboardLayoutChatChatLayoutRouteWithChildren
+  '/settings': typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   '/users/$userId': typeof dashboardDashboardLayoutUsersUserIdRoute
   '/users/': typeof dashboardDashboardLayoutUsersIndexRoute
-  '/settings/connected-apps': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute
-  '/settings/notification': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute
-  '/settings/profile': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute
-  '/settings/sessions': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute
-  '/settings/update-password': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute
-  '/settings/': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute
+  '/chat/$chatRoomId': typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
+  '/settings/connected-apps': typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
+  '/settings/notification': typeof dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute
+  '/settings/profile': typeof dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
+  '/settings/sessions': typeof dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
+  '/settings/update-password': typeof dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  '/chat/': typeof dashboardDashboardLayoutChatChatLayoutIndexRoute
+  '/settings/': typeof dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth-error': typeof authAuthLayoutAuthErrorRoute
@@ -195,12 +213,14 @@ export interface FileRoutesByTo {
   '/': typeof dashboardDashboardLayoutIndexRoute
   '/users/$userId': typeof dashboardDashboardLayoutUsersUserIdRoute
   '/users': typeof dashboardDashboardLayoutUsersIndexRoute
-  '/settings/connected-apps': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute
-  '/settings/notification': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute
-  '/settings/profile': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute
-  '/settings/sessions': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute
-  '/settings/update-password': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute
-  '/settings': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute
+  '/chat/$chatRoomId': typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
+  '/settings/connected-apps': typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
+  '/settings/notification': typeof dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute
+  '/settings/profile': typeof dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
+  '/settings/sessions': typeof dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
+  '/settings/update-password': typeof dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  '/chat': typeof dashboardDashboardLayoutChatChatLayoutIndexRoute
+  '/settings': typeof dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -216,15 +236,18 @@ export interface FileRoutesById {
   '/(dashboard)/_dashboardLayout/roles': typeof dashboardDashboardLayoutRolesRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/(dashboard)/_dashboardLayout/': typeof dashboardDashboardLayoutIndexRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout': typeof dashboardDashboardLayoutsettingsSettingsLayoutRouteWithChildren
+  '/(dashboard)/_dashboardLayout/chat/_chatLayout': typeof dashboardDashboardLayoutChatChatLayoutRouteWithChildren
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout': typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   '/(dashboard)/_dashboardLayout/users/$userId': typeof dashboardDashboardLayoutUsersUserIdRoute
   '/(dashboard)/_dashboardLayout/users/': typeof dashboardDashboardLayoutUsersIndexRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/connected-apps': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/notification': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/profile': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/sessions': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/update-password': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute
-  '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/': typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute
+  '/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId': typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps': typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout/notification': typeof dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout/profile': typeof dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout/sessions': typeof dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout/update-password': typeof dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  '/(dashboard)/_dashboardLayout/chat/_chatLayout/': typeof dashboardDashboardLayoutChatChatLayoutIndexRoute
+  '/(dashboard)/_dashboardLayout/settings/_settingsLayout/': typeof dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -239,13 +262,17 @@ export interface FileRouteTypes {
     | '/roles'
     | '/api/rpc/$'
     | '/'
+    | '/chat'
+    | '/settings'
     | '/users/$userId'
     | '/users/'
+    | '/chat/$chatRoomId'
     | '/settings/connected-apps'
     | '/settings/notification'
     | '/settings/profile'
     | '/settings/sessions'
     | '/settings/update-password'
+    | '/chat/'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -261,11 +288,13 @@ export interface FileRouteTypes {
     | '/'
     | '/users/$userId'
     | '/users'
+    | '/chat/$chatRoomId'
     | '/settings/connected-apps'
     | '/settings/notification'
     | '/settings/profile'
     | '/settings/sessions'
     | '/settings/update-password'
+    | '/chat'
     | '/settings'
   id:
     | '__root__'
@@ -281,15 +310,18 @@ export interface FileRouteTypes {
     | '/(dashboard)/_dashboardLayout/roles'
     | '/api/rpc/$'
     | '/(dashboard)/_dashboardLayout/'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout'
+    | '/(dashboard)/_dashboardLayout/chat/_chatLayout'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout'
     | '/(dashboard)/_dashboardLayout/users/$userId'
     | '/(dashboard)/_dashboardLayout/users/'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/connected-apps'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/notification'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/profile'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/sessions'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/update-password'
-    | '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/'
+    | '/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/notification'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/profile'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/sessions'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/update-password'
+    | '/(dashboard)/_dashboardLayout/chat/_chatLayout/'
+    | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -384,11 +416,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRouteImport
+    '/(dashboard)/_dashboardLayout/chat/_chatLayout': {
+      id: '/(dashboard)/_dashboardLayout/chat/_chatLayout'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof dashboardDashboardLayoutChatChatLayoutRouteImport
+      parentRoute: typeof dashboardDashboardLayoutRoute
+    }
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteImport
       parentRoute: typeof dashboardDashboardLayoutRoute
     }
     '/(dashboard)/_dashboardLayout/users/': {
@@ -405,47 +444,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardDashboardLayoutUsersUserIdRouteImport
       parentRoute: typeof dashboardDashboardLayoutRoute
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/'
-      path: '/settings'
+    '/(dashboard)/_dashboardLayout/chat/_chatLayout/': {
+      id: '/(dashboard)/_dashboardLayout/chat/_chatLayout/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof dashboardDashboardLayoutChatChatLayoutIndexRouteImport
+      parentRoute: typeof dashboardDashboardLayoutChatChatLayoutRoute
+    }
+    '/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId': {
+      id: '/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId'
+      path: '/$chatRoomId'
+      fullPath: '/chat/$chatRoomId'
+      preLoaderRoute: typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRouteImport
+      parentRoute: typeof dashboardDashboardLayoutChatChatLayoutRoute
+    }
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout/': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout/'
+      path: '/'
       fullPath: '/settings/'
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRouteImport
-      parentRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRoute
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutIndexRouteImport
+      parentRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRoute
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/connected-apps': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/connected-apps'
-      path: '/settings/connected-apps'
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps'
+      path: '/connected-apps'
       fullPath: '/settings/connected-apps'
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRouteImport
-      parentRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRoute
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRouteImport
+      parentRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRoute
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/notification': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/notification'
-      path: '/settings/notification'
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout/notification': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout/notification'
+      path: '/notification'
       fullPath: '/settings/notification'
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRouteImport
-      parentRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRoute
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutNotificationRouteImport
+      parentRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRoute
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/profile': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/profile'
-      path: '/settings/profile'
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout/profile': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout/profile'
+      path: '/profile'
       fullPath: '/settings/profile'
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRouteImport
-      parentRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRoute
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutProfileRouteImport
+      parentRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRoute
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/sessions': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/sessions'
-      path: '/settings/sessions'
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout/sessions': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout/sessions'
+      path: '/sessions'
       fullPath: '/settings/sessions'
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRouteImport
-      parentRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRoute
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutSessionsRouteImport
+      parentRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRoute
     }
-    '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/update-password': {
-      id: '/(dashboard)/_dashboardLayout/(settings)/_settingsLayout/settings/update-password'
-      path: '/settings/update-password'
+    '/(dashboard)/_dashboardLayout/settings/_settingsLayout/update-password': {
+      id: '/(dashboard)/_dashboardLayout/settings/_settingsLayout/update-password'
+      path: '/update-password'
       fullPath: '/settings/update-password'
-      preLoaderRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRouteImport
-      parentRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRoute
+      preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRouteImport
+      parentRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRoute
     }
   }
 }
@@ -470,34 +523,52 @@ const authAuthLayoutRouteWithChildren = authAuthLayoutRoute._addFileChildren(
   authAuthLayoutRouteChildren,
 )
 
-interface dashboardDashboardLayoutsettingsSettingsLayoutRouteChildren {
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute
-  dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute
+interface dashboardDashboardLayoutChatChatLayoutRouteChildren {
+  dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute: typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
+  dashboardDashboardLayoutChatChatLayoutIndexRoute: typeof dashboardDashboardLayoutChatChatLayoutIndexRoute
 }
 
-const dashboardDashboardLayoutsettingsSettingsLayoutRouteChildren: dashboardDashboardLayoutsettingsSettingsLayoutRouteChildren =
+const dashboardDashboardLayoutChatChatLayoutRouteChildren: dashboardDashboardLayoutChatChatLayoutRouteChildren =
   {
-    dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutSettingsConnectedAppsRoute,
-    dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutSettingsNotificationRoute,
-    dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutSettingsProfileRoute,
-    dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutSettingsSessionsRoute,
-    dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutSettingsUpdatePasswordRoute,
-    dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutSettingsIndexRoute,
+    dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute:
+      dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute,
+    dashboardDashboardLayoutChatChatLayoutIndexRoute:
+      dashboardDashboardLayoutChatChatLayoutIndexRoute,
   }
 
-const dashboardDashboardLayoutsettingsSettingsLayoutRouteWithChildren =
-  dashboardDashboardLayoutsettingsSettingsLayoutRoute._addFileChildren(
-    dashboardDashboardLayoutsettingsSettingsLayoutRouteChildren,
+const dashboardDashboardLayoutChatChatLayoutRouteWithChildren =
+  dashboardDashboardLayoutChatChatLayoutRoute._addFileChildren(
+    dashboardDashboardLayoutChatChatLayoutRouteChildren,
+  )
+
+interface dashboardDashboardLayoutSettingsSettingsLayoutRouteChildren {
+  dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
+  dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute
+  dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
+  dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
+  dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
+}
+
+const dashboardDashboardLayoutSettingsSettingsLayoutRouteChildren: dashboardDashboardLayoutSettingsSettingsLayoutRouteChildren =
+  {
+    dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute,
+    dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutNotificationRoute,
+    dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutProfileRoute,
+    dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute,
+    dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute,
+    dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutIndexRoute,
+  }
+
+const dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren =
+  dashboardDashboardLayoutSettingsSettingsLayoutRoute._addFileChildren(
+    dashboardDashboardLayoutSettingsSettingsLayoutRouteChildren,
   )
 
 interface dashboardDashboardLayoutRouteChildren {
@@ -505,7 +576,8 @@ interface dashboardDashboardLayoutRouteChildren {
   dashboardDashboardLayoutProfileRoute: typeof dashboardDashboardLayoutProfileRoute
   dashboardDashboardLayoutRolesRoute: typeof dashboardDashboardLayoutRolesRoute
   dashboardDashboardLayoutIndexRoute: typeof dashboardDashboardLayoutIndexRoute
-  dashboardDashboardLayoutsettingsSettingsLayoutRoute: typeof dashboardDashboardLayoutsettingsSettingsLayoutRouteWithChildren
+  dashboardDashboardLayoutChatChatLayoutRoute: typeof dashboardDashboardLayoutChatChatLayoutRouteWithChildren
+  dashboardDashboardLayoutSettingsSettingsLayoutRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   dashboardDashboardLayoutUsersUserIdRoute: typeof dashboardDashboardLayoutUsersUserIdRoute
   dashboardDashboardLayoutUsersIndexRoute: typeof dashboardDashboardLayoutUsersIndexRoute
 }
@@ -517,8 +589,10 @@ const dashboardDashboardLayoutRouteChildren: dashboardDashboardLayoutRouteChildr
     dashboardDashboardLayoutProfileRoute: dashboardDashboardLayoutProfileRoute,
     dashboardDashboardLayoutRolesRoute: dashboardDashboardLayoutRolesRoute,
     dashboardDashboardLayoutIndexRoute: dashboardDashboardLayoutIndexRoute,
-    dashboardDashboardLayoutsettingsSettingsLayoutRoute:
-      dashboardDashboardLayoutsettingsSettingsLayoutRouteWithChildren,
+    dashboardDashboardLayoutChatChatLayoutRoute:
+      dashboardDashboardLayoutChatChatLayoutRouteWithChildren,
+    dashboardDashboardLayoutSettingsSettingsLayoutRoute:
+      dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren,
     dashboardDashboardLayoutUsersUserIdRoute:
       dashboardDashboardLayoutUsersUserIdRoute,
     dashboardDashboardLayoutUsersIndexRoute:
