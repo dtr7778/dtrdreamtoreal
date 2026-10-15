@@ -2,6 +2,7 @@ import { DevPanel } from "#/components/dev-panel";
 import { SerwistProvider } from "#/components/SerwistProvider";
 import { requireSessions } from "#/features/auth/auth.functions";
 import { env } from "#/lib/env";
+import { globalHead } from "#/lib/siteHead";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
@@ -13,11 +14,8 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
 
-import { SITE_DESCRIPTION, siteHead } from "@workspace/tanstack-start";
 import { TanstackQueryProvider } from "@workspace/ui/components/tanstack-query/tanstack-query-provider";
 import { ThemeProvider } from "@workspace/ui/components/theme-provider";
-
-import appCss from "../styles.css?url";
 
 interface RouterContextProps {
   queryClient: QueryClient;
@@ -34,15 +32,7 @@ export const Route = createRootRouteWithContext<RouterContextProps>()({
       permissions: result?.permissions,
     };
   },
-  head: siteHead({
-    appName: env.VITE_APP_NAME,
-    siteUrl: env.VITE_SITE_URL,
-    title: `Dashboard | ${env.VITE_APP_NAME}`,
-    description: SITE_DESCRIPTION,
-    robots: "noindex, nofollow",
-    social: false,
-    stylesheets: [appCss],
-  }),
+  head: () => globalHead(),
   shellComponent: RootDocument,
 });
 

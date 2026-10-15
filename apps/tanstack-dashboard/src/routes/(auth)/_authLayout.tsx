@@ -2,6 +2,7 @@ import { AuthBackgroundShape } from "#/components/decors/AuthBackgroundShape";
 import { SiteLogo } from "#/components/SiteLogo";
 import { DEFAULT_AUTH_PATH } from "#/constants";
 import { env } from "#/lib/env";
+import { head } from "#/lib/siteHead";
 import {
   createFileRoute,
   Link,
@@ -17,16 +18,12 @@ export const Route = createFileRoute("/(auth)/_authLayout")({
       throw redirect({ to: DEFAULT_AUTH_PATH, replace: true });
     }
   },
-  head: () => ({
-    meta: [
-      { title: `${env.VITE_APP_NAME} - Authentication page` },
-      {
-        name: "description",
-        content: `Authentication pages for ${env.VITE_APP_NAME}`,
-      },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
+  head: ({ match }) =>
+    head({
+      titleByTemplate: "Authentication page",
+      pathname: match.pathname,
+      description: `Authentication pages for ${env.VITE_APP_NAME}`,
+    }),
   component: AuthLayout,
 });
 

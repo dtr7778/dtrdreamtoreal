@@ -1,5 +1,5 @@
 import { authErrors } from "#/features/auth/authErrors";
-import { env } from "#/lib/env";
+import { head } from "#/lib/siteHead";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import z from "zod";
@@ -8,13 +8,11 @@ import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardFooter } from "@workspace/ui/components/card";
 
 export const Route = createFileRoute("/(auth)/_authLayout/auth-error")({
-  head: () => ({
-    meta: [
-      {
-        title: `Error Page | Authentication page - ${env.VITE_APP_NAME}`,
-      },
-    ],
-  }),
+  head: ({ match }) =>
+    head({
+      titleByTemplate: "Error Page",
+      pathname: match.pathname,
+    }),
   validateSearch: z.object({
     error: z.string().optional(),
   }),

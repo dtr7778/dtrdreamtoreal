@@ -1,7 +1,7 @@
 import { DEFAULT_AUTH_PATH } from "#/constants";
 import { SignInForm } from "#/features/auth/components/forms/SignInForm";
 import { SocialAuth } from "#/features/auth/components/SocialAuth";
-import { env } from "#/lib/env";
+import { head } from "#/lib/siteHead";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import z from "zod";
 
@@ -15,9 +15,11 @@ import {
 } from "@workspace/ui/components/card";
 
 export const Route = createFileRoute("/(auth)/_authLayout/sign-in")({
-  head: () => ({
-    meta: [{ title: `Sign In | Authentication page - ${env.VITE_APP_NAME}` }],
-  }),
+  head: ({ match }) =>
+    head({
+      titleByTemplate: "Sign In",
+      pathname: match.pathname,
+    }),
   validateSearch: z.object({
     redirect: z.string().optional(),
     invitationId: z.uuid().optional(),

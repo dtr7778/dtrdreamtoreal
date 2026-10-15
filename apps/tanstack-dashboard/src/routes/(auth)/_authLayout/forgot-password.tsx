@@ -1,3 +1,5 @@
+import { ForgetPasswordForm } from "#/features/auth/components/forms/ForgetPasswordForm";
+import { head } from "#/lib/siteHead";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
@@ -9,17 +11,12 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 
-import { ForgetPasswordForm } from "#/features/auth/components/forms/ForgetPasswordForm";
-import { env } from "#/lib/env";
-
 export const Route = createFileRoute("/(auth)/_authLayout/forgot-password")({
-  head: () => ({
-    meta: [
-      {
-        title: `Forgot Password | Authentication page - ${env.VITE_APP_NAME}`,
-      },
-    ],
-  }),
+  head: ({ match }) =>
+    head({
+      titleByTemplate: "Forgot Password",
+      pathname: match.pathname,
+    }),
   component: ForgotPasswordPage,
 });
 

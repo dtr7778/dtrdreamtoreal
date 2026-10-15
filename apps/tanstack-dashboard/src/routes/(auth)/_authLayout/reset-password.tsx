@@ -1,5 +1,5 @@
 import { ResetPasswordForm } from "#/features/auth/components/forms/ResetPasswordForm";
-import { env } from "#/lib/env";
+import { head } from "#/lib/siteHead";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 
@@ -11,13 +11,11 @@ import {
 } from "@workspace/ui/components/card";
 
 export const Route = createFileRoute("/(auth)/_authLayout/reset-password")({
-  head: () => ({
-    meta: [
-      {
-        title: `Reset Password | Authentication page - ${env.VITE_APP_NAME}`,
-      },
-    ],
-  }),
+  head: ({ match }) =>
+    head({
+      titleByTemplate: "Reset Password",
+      pathname: match.pathname,
+    }),
   validateSearch: z.object({
     error: z.string().optional(),
     token: z.string().optional(),
