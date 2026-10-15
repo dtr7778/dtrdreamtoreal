@@ -18,14 +18,16 @@ export interface AuthVariables {
   session: AuthSession;
 }
 
-export type ApiBindings = AppBindings<Env, ApiVariables>;
+export type AppEnv = Env;
 
-export type AuthenticatedBindings = AppBindings<Env, AuthVariables>;
+export type ApiBindings = AppBindings<AppEnv, ApiVariables>;
+
+export type AuthenticatedBindings = AppBindings<AppEnv, AuthVariables>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type ApiOpenAPI<S extends Schema = {}> = AppOpenAPI<
   S,
-  Env,
+  AppEnv,
   ApiVariables
 >;
 

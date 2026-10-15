@@ -7,6 +7,8 @@ import { createDrizzleClient } from "@workspace/drizzle/client";
 import { FileTable } from "@workspace/drizzle/schemas";
 import type { FileEntityTypeEnumType } from "@workspace/drizzle/zod-db-enums";
 import { buildObjectKey, isKeyOwnedByUser } from "@workspace/lib/storage";
+import { getSanitizedFileKind, isBlockedFileName } from "@workspace/lib/upload";
+import type { SanitizedFileKind } from "@workspace/lib/upload";
 import {
   ApiError,
   apiResponse,
@@ -29,6 +31,7 @@ import {
 } from "@/constant";
 import type { ApiRouteHandler } from "@/types";
 
+import { sanitizeUploadedMarkup } from "./file-sanitizer";
 import { getStorageSigner } from "./r2.server";
 import type {
   AssignEntityRouteType,
@@ -45,8 +48,30 @@ function resolveUploadScope(input: {
   return input.scope ?? input.entityType ?? DEFAULT_UPLOAD_SCOPE;
 }
 
+async function sanitizeStoredMarkup(
+  key: string,
+  kind: SanitizedFileKind,
+  contentType: string
+): Promise<number> {
+  const stored = await workerEnv.BUCKET.get(key);
+  if (!stored) {
+    throw new Error(`Stored object missing for key ${key}`);
+  }
+
+  const cleaned = new TextEncoder().encode(
+    sanitizeUploadedMarkup(await stored.text(), kind)
+  );
+
+  await workerEnv.BUCKET.put(key, cleaned, {
+    httpMetadata: { contentType },
+  });
+
+  return cleaned.byteLength;
+}
+
 function assertUploadAllowed(input: {
   entityType?: FileEntityTypeEnumType;
+  filename: string;
   mimeType: string;
   size: number;
 }) {
@@ -67,6 +92,13 @@ function assertUploadAllowed(input: {
     throw new ApiError({
       message: API_MESSAGES.UPLOAD.TOO_LARGE,
       statusCode: REQUEST_TOO_LONG,
+    });
+  }
+
+  if (isBlockedFileName(input.filename)) {
+    throw new ApiError({
+      message: API_MESSAGES.UPLOAD.BLOCKED_TYPE,
+      statusCode: UNSUPPORTED_MEDIA_TYPE,
     });
   }
 
@@ -138,9 +170,17 @@ export const getFileHandler: ApiRouteHandler<GetFileRouteType> = async (c) => {
   headers.set("Content-Type", file.mimeType);
   headers.set("Accept-Ranges", "bytes");
   headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set(
+    "Content-Security-Policy",
+    "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+  );
+  const forceDownload =
+    c.req.query("download") === "1" ||
+    getSanitizedFileKind(file.filename) !== null;
   headers.set(
     "Content-Disposition",
-    `${c.req.query("download") === "1" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(file.originalName)}`
+    `${forceDownload ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(file.originalName)}`
   );
 
   if (!("body" in object) || !object.body) {
@@ -181,6 +221,7 @@ export const getUploadUrlHandler: ApiRouteHandler<
   const uploadUrl = await getStorageSigner().presignUpload({
     key,
     contentType: input.mimeType,
+    contentLength: input.size,
   });
 
   return apiResponse(c, {
@@ -222,12 +263,33 @@ export const confirmUploadHandler: ApiRouteHandler<
   try {
     assertUploadAllowed({
       entityType: input.entityType,
+      filename: input.filename,
       mimeType,
       size: object.size,
     });
   } catch (error) {
     await workerEnv.BUCKET.delete(input.key);
     throw error;
+  }
+
+  let storedSize = object.size;
+  const sanitizedKind = getSanitizedFileKind(input.filename);
+
+  if (sanitizedKind) {
+    try {
+      storedSize = await sanitizeStoredMarkup(
+        input.key,
+        sanitizedKind,
+        mimeType
+      );
+    } catch (error) {
+      await workerEnv.BUCKET.delete(input.key);
+      throw new ApiError({
+        statusCode: BAD_REQUEST,
+        message: API_MESSAGES.UPLOAD.SANITIZE_FAILED,
+        cause: error,
+      });
+    }
   }
 
   const database = createDrizzleClient(c.env.DB);
@@ -242,7 +304,7 @@ export const confirmUploadHandler: ApiRouteHandler<
       filename: input.filename,
       originalName: input.originalName,
       mimeType,
-      size: object.size,
+      size: storedSize,
       url: `${getEnv("BACKEND_URL").replace(/\/$/, "")}/files/${id}`,
       uploadedBy: user.id,
       entityType: input.entityType,

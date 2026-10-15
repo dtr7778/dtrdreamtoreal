@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/sanitize-html": "catalog:",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "@workspace/vitest-config": "workspace:*",
@@ -55,6 +56,7 @@
     "drizzle-orm": "catalog:",
     "hono": "catalog:",
     "resend": "catalog:",
+    "sanitize-html": "catalog:",
     "zod": "catalog:"
   }
 }

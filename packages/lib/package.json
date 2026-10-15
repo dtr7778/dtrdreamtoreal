@@ -24,11 +24,13 @@
   },
   "exports": {
     "./helpers": "./src/helpers/index.ts",
+    "./chat": "./src/chat/index.ts",
     "./types": "./src/types/index.ts",
     "./utils": "./src/utils/index.ts",
     "./zod-schemas": "./src/zod-schemas/index.ts",
     "./logger": "./src/logger.ts",
     "./storage": "./src/storage/index.ts",
+    "./upload": "./src/upload/index.ts",
     "./user-api-schema": "./src/user.api-schema.ts"
   },
   "devDependencies": {
