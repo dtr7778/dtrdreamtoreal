@@ -168,7 +168,10 @@ export async function buildCompanyTaskListQuery(db: DatabaseType) {
     ...task,
     assignees: assignees
       .slice()
-      .sort((a, b) => Number(a.assignedAt) - Number(b.assignedAt))
+      .sort(
+        (a, b) =>
+          Number(a.assignedAt) - Number(b.assignedAt) || a.id.localeCompare(b.id)
+      )
       .map((assignee) => ({
         id: assignee.id,
         name: assignee.name,
