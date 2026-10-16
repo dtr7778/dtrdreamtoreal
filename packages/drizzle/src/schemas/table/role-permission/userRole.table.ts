@@ -8,7 +8,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_id } from "../../db-utils";
 import { UserTable } from "../user";
@@ -29,14 +29,12 @@ export const UserRoleTable = sqliteTable(
       name: "fk_user_roles_role_id",
       columns: [table.roleId],
       foreignColumns: [RoleTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     foreignKey({
       name: "fk_user_roles_user_id",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     uniqueIndex("user_role_unique").on(table.userId, table.roleId),
     index("user_role_role_id_idx").on(table.roleId),
     index("user_role_user_id_idx").on(table.userId),
@@ -56,11 +54,18 @@ export const UserRoleRelations = relations(UserRoleTable, ({ one }) => ({
   }),
 }));
 
-export const insertUserRoleSchema = createInsertSchema(UserRoleTable).omit({
+export const insertUserRoleSchema = createInsertSchema(UserRoleTable, {
+  roleId: z.uuid(),
+  userId: z.uuid(),
+}).omit({
   id: true,
   assignedAt: true,
 });
-export const selectUserRoleSchema = createSelectSchema(UserRoleTable);
+export const selectUserRoleSchema = createSelectSchema(UserRoleTable, {
+  id: z.uuid(),
+  roleId: z.uuid(),
+  userId: z.uuid(),
+});
 
 export type UserRoleDataModel = typeof UserRoleTable.$inferInsert;
 export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;

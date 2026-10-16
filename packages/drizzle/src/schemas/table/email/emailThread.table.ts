@@ -76,6 +76,7 @@ export const EmailThreadRelations = relations(
 
 export const insertEmailThreadSchema = createInsertSchema(EmailThreadTable, {
   contactEmail: z.email(),
+  closedBy: z.uuid().nullish(),
 }).omit({
   id: true,
   createdAt: true,
@@ -83,9 +84,12 @@ export const insertEmailThreadSchema = createInsertSchema(EmailThreadTable, {
 });
 export const selectEmailThreadSchema = createSelectSchema(EmailThreadTable, {
   contactEmail: z.email(),
+  id: z.uuid(),
+  closedBy: z.uuid().nullish(),
 });
 export const updateEmailThreadSchema = createUpdateSchema(EmailThreadTable, {
   contactEmail: z.email().nullish(),
+  closedBy: z.uuid().nullish(),
 }).omit({ id: true, createdAt: true });
 
 export type EmailThreadDataModel = typeof EmailThreadTable.$inferSelect;

@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../db-utils";
 import { LeadCompanyAiUsageTable } from "./lead";
@@ -56,12 +56,19 @@ export const AiUsageRelation = relations(AiUsageTable, ({ one }) => ({
   }),
 }));
 
-export const insertAiUsageSchema = createInsertSchema(AiUsageTable).omit({
+export const insertAiUsageSchema = createInsertSchema(AiUsageTable, {
+  createdBy: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
 });
-export const selectAiUsageSchema = createSelectSchema(AiUsageTable);
-export const updateAiUsageSchema = createUpdateSchema(AiUsageTable).omit({
+export const selectAiUsageSchema = createSelectSchema(AiUsageTable, {
+  id: z.uuid(),
+  createdBy: z.uuid(),
+});
+export const updateAiUsageSchema = createUpdateSchema(AiUsageTable, {
+  createdBy: z.uuid().optional(),
+}).omit({
   id: true,
   createdAt: true,
 });

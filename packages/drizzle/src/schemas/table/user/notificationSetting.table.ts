@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { NotificationCategoryEnum } from "../../enums/db-enums";
@@ -40,8 +40,7 @@ export const NotificationSettingsTable = sqliteTable(
       name: "notification_settings_user_fkey",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     uniqueIndex("notification_settings_user_category_key").on(
       table.userId,
       table.category
@@ -61,17 +60,27 @@ export const NotificationSettingsRelations = relations(
 );
 
 export const insertNotificationSettingsSchema = createInsertSchema(
-  NotificationSettingsTable
+  NotificationSettingsTable,
+  {
+    userId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export const selectNotificationSettingsSchema = createSelectSchema(
-  NotificationSettingsTable
+  NotificationSettingsTable,
+  {
+    id: z.uuid(),
+    userId: z.uuid(),
+  }
 );
 export const updateNotificationSettingsSchema = createUpdateSchema(
-  NotificationSettingsTable
+  NotificationSettingsTable,
+  {
+    userId: z.uuid().optional(),
+  }
 ).omit({
   id: true,
   createdAt: true,

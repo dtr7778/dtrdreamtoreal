@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { ContactStatusEnum } from "../../enums/db-enums";
@@ -76,7 +76,11 @@ export const ContactSubmissionRelations = relations(
 );
 
 export const insertContactSubmissionSchema = createInsertSchema(
-  ContactSubmissionTable
+  ContactSubmissionTable,
+  {
+    emailThreadId: z.uuid(),
+    contactUserId: z.uuid(),
+  }
 ).omit({
   id: true,
   readAt: true,
@@ -85,10 +89,19 @@ export const insertContactSubmissionSchema = createInsertSchema(
   updatedAt: true,
 });
 export const selectContactSubmissionSchema = createSelectSchema(
-  ContactSubmissionTable
+  ContactSubmissionTable,
+  {
+    id: z.uuid(),
+    emailThreadId: z.uuid(),
+    contactUserId: z.uuid(),
+  }
 );
 export const updateContactSubmissionSchema = createUpdateSchema(
-  ContactSubmissionTable
+  ContactSubmissionTable,
+  {
+    emailThreadId: z.uuid().optional(),
+    contactUserId: z.uuid().optional(),
+  }
 ).omit({ id: true, createdAt: true });
 
 export type ContactSubmissionDataModel =

@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { EmailTable } from "../email";
@@ -73,17 +73,33 @@ export const ContactSubmissionReplyRelations = relations(
 );
 
 export const insertContactSubmissionReplySchema = createInsertSchema(
-  ContactSubmissionReplyTable
+  ContactSubmissionReplyTable,
+  {
+    submissionId: z.uuid(),
+    repliedBy: z.uuid(),
+    emailId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export const selectContactSubmissionReplySchema = createSelectSchema(
-  ContactSubmissionReplyTable
+  ContactSubmissionReplyTable,
+  {
+    id: z.uuid(),
+    submissionId: z.uuid(),
+    repliedBy: z.uuid(),
+    emailId: z.uuid(),
+  }
 );
 export const updateContactSubmissionReplySchema = createUpdateSchema(
-  ContactSubmissionReplyTable
+  ContactSubmissionReplyTable,
+  {
+    submissionId: z.uuid().optional(),
+    repliedBy: z.uuid().optional(),
+    emailId: z.uuid().optional(),
+  }
 ).omit({ id: true, createdAt: true });
 
 export type ContactSubmissionReplyDataModel =

@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_id, db_soft_delete } from "../db-utils";
 import {
@@ -79,6 +79,8 @@ export const FileRelations = relations(FileTable, ({ one, many }) => ({
 
 export const insertFileSchema = createInsertSchema(FileTable, {
   entityType: FileEntityTypeEnumSchema.optional(),
+  entityId: z.uuid().nullish(),
+  uploadedBy: z.uuid().nullish(),
 }).omit({
   id: true,
   uploadedAt: true,
@@ -87,9 +89,15 @@ export const insertFileSchema = createInsertSchema(FileTable, {
 });
 export const selectFileSchema = createSelectSchema(FileTable, {
   entityType: FileEntityTypeEnumSchema.optional(),
+  id: z.uuid(),
+  entityId: z.uuid().nullish(),
+  uploadedBy: z.uuid().nullish(),
+  deletedBy: z.uuid().nullish(),
 });
 export const updateFileSchema = createUpdateSchema(FileTable, {
   entityType: FileEntityTypeEnumSchema.optional(),
+  entityId: z.uuid().nullish(),
+  uploadedBy: z.uuid().nullish(),
 }).omit({
   id: true,
   uploadedAt: true,

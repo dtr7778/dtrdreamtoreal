@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { EmailDirectionEnum, EmailStatusEnum } from "../../enums/db-enums";
@@ -83,13 +83,20 @@ export const EmailRelations = relations(EmailTable, ({ one, many }) => ({
   }),
 }));
 
-export const insertEmailSchema = createInsertSchema(EmailTable).omit({
+export const insertEmailSchema = createInsertSchema(EmailTable, {
+  threadId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectEmailSchema = createSelectSchema(EmailTable);
-export const updateEmailSchema = createUpdateSchema(EmailTable).omit({
+export const selectEmailSchema = createSelectSchema(EmailTable, {
+  id: z.uuid(),
+  threadId: z.uuid().nullish(),
+});
+export const updateEmailSchema = createUpdateSchema(EmailTable, {
+  threadId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
 });

@@ -44,12 +44,15 @@ export const insertEmailRecipientSchema = createInsertSchema(
   EmailRecipientTable,
   {
     email: z.email(),
+    emailId: z.uuid(),
   }
 ).omit({ id: true, createdAt: true });
 export const selectEmailRecipientSchema = createSelectSchema(
   EmailRecipientTable,
   {
     email: z.email(),
+    id: z.uuid(),
+    emailId: z.uuid(),
   }
 );
 

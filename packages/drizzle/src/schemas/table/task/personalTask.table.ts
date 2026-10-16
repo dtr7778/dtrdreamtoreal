@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import {
@@ -78,14 +78,17 @@ export const PersonalTaskRelations = relations(
   })
 );
 
-export const insertPersonalTaskSchema = createInsertSchema(
-  PersonalTaskTable
-).omit({
+export const insertPersonalTaskSchema = createInsertSchema(PersonalTaskTable, {
+  userId: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectPersonalTaskSchema = createSelectSchema(PersonalTaskTable);
+export const selectPersonalTaskSchema = createSelectSchema(PersonalTaskTable, {
+  id: z.uuid(),
+  userId: z.uuid(),
+});
 export const updatePersonalTaskSchema = createUpdateSchema(
   PersonalTaskTable
 ).omit({

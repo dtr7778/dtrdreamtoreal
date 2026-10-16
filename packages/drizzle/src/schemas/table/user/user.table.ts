@@ -154,6 +154,7 @@ export const selectUserSchema = createSelectSchema(UserTable, {
   email: z.email(),
   image: z.url().nullable(),
   role: RoleEnumSchema,
+  id: z.uuid(),
 });
 export const updateUserSchema = createUpdateSchema(UserTable, {
   email: z.email().optional(),

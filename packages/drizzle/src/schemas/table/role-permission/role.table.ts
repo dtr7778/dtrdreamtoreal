@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_id } from "../../db-utils";
 import { RoleEnum } from "../../enums/db-enums";
@@ -34,7 +34,9 @@ export const RoleRelations = relations(RoleTable, ({ many }) => ({
 export const insertRoleSchema = createInsertSchema(RoleTable).omit({
   id: true,
 });
-export const selectRoleSchema = createSelectSchema(RoleTable);
+export const selectRoleSchema = createSelectSchema(RoleTable, {
+  id: z.uuid(),
+});
 export const updateRoleSchema = createUpdateSchema(RoleTable).omit({
   id: true,
 });

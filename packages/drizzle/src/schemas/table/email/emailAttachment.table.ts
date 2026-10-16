@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { EmailTable } from "./email.table";
@@ -53,12 +53,23 @@ export const EmailAttachmentRelations = relations(
 );
 
 export const insertEmailAttachmentSchema = createInsertSchema(
-  EmailAttachmentTable
+  EmailAttachmentTable,
+  {
+    emailId: z.uuid(),
+  }
 ).omit({ id: true, createdAt: true });
-export const selectEmailAttachmentSchema =
-  createSelectSchema(EmailAttachmentTable);
+export const selectEmailAttachmentSchema = createSelectSchema(
+  EmailAttachmentTable,
+  {
+    id: z.uuid(),
+    emailId: z.uuid(),
+  }
+);
 export const updateEmailAttachmentSchema = createUpdateSchema(
-  EmailAttachmentTable
+  EmailAttachmentTable,
+  {
+    emailId: z.uuid().optional(),
+  }
 ).omit({ id: true, createdAt: true });
 
 export type EmailAttachmentDataModel = typeof EmailAttachmentTable.$inferSelect;

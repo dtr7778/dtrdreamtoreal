@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { ChatRoomTypeEnum } from "../../enums/db-enums";
@@ -78,13 +78,23 @@ export const ChatRoomRelations = relations(ChatRoomTable, ({ one, many }) => ({
   }),
 }));
 
-export const insertChatRoomSchema = createInsertSchema(ChatRoomTable).omit({
+export const insertChatRoomSchema = createInsertSchema(ChatRoomTable, {
+  imageFileId: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectChatRoomSchema = createSelectSchema(ChatRoomTable);
-export const updateChatRoomSchema = createUpdateSchema(ChatRoomTable).omit({
+export const selectChatRoomSchema = createSelectSchema(ChatRoomTable, {
+  id: z.uuid(),
+  imageFileId: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
+});
+export const updateChatRoomSchema = createUpdateSchema(ChatRoomTable, {
+  imageFileId: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

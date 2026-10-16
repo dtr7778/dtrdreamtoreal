@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { SocialMediaTable } from "../socialMedia.table";
@@ -48,13 +48,22 @@ export const LeadCompanySocialRelation = relations(
 );
 
 export const insertLeadCompanySocialSchema = createInsertSchema(
-  LeadCompanySocialTable
+  LeadCompanySocialTable,
+  {
+    leadCompanyId: z.uuid(),
+    socialMediaId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
 });
 export const selectLeadCompanySocialSchema = createSelectSchema(
-  LeadCompanySocialTable
+  LeadCompanySocialTable,
+  {
+    id: z.uuid(),
+    leadCompanyId: z.uuid(),
+    socialMediaId: z.uuid(),
+  }
 );
 
 export type LeadCompanySocialDataModel =

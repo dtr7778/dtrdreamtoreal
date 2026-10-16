@@ -7,7 +7,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { PermissionTable } from "./permission.table";
@@ -26,14 +26,12 @@ export const RolePermissionTable = sqliteTable(
       name: "role_permission_role_fkey",
       columns: [table.roleId],
       foreignColumns: [RoleTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     foreignKey({
       name: "role_permission_permission_fkey",
       columns: [table.permissionId],
       foreignColumns: [PermissionTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     uniqueIndex("role_permission_unique").on(table.roleId, table.permissionId),
     index("role_permission_role_idx").on(table.roleId),
     index("role_permission_permission_idx").on(table.permissionId),
@@ -57,13 +55,23 @@ export const RolePermissionRelations = relations(
 );
 
 export const insertRolePermissionSchema = createInsertSchema(
-  RolePermissionTable
+  RolePermissionTable,
+  {
+    roleId: z.uuid(),
+    permissionId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
 });
-export const selectRolePermissionSchema =
-  createSelectSchema(RolePermissionTable);
+export const selectRolePermissionSchema = createSelectSchema(
+  RolePermissionTable,
+  {
+    id: z.uuid(),
+    roleId: z.uuid(),
+    permissionId: z.uuid(),
+  }
+);
 
 export type RolePermissionDataModel = typeof RolePermissionTable.$inferSelect;
 export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;

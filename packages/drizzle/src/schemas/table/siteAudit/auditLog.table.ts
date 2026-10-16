@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { AuditLogEventTypeEnum, AuditLogLevelEnum } from "../../enums/db-enums";
@@ -55,10 +55,15 @@ export const AuditLogRelation = relations(AuditLogTable, ({ one }) => ({
   }),
 }));
 
-export const insertAuditLogSchema = createInsertSchema(AuditLogTable).omit({
+export const insertAuditLogSchema = createInsertSchema(AuditLogTable, {
+  siteAuditId: z.uuid(),
+}).omit({
   id: true,
 });
-export const selectAuditLogSchema = createSelectSchema(AuditLogTable);
+export const selectAuditLogSchema = createSelectSchema(AuditLogTable, {
+  id: z.uuid(),
+  siteAuditId: z.uuid(),
+});
 export const updateAuditLogSchema = createUpdateSchema(AuditLogTable).omit({
   id: true,
   siteAuditId: true,

@@ -8,7 +8,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { FileTable } from "../file.table";
@@ -60,10 +60,19 @@ export const ChatMessageAttachmentRelations = relations(
 );
 
 export const insertChatMessageAttachmentSchema = createInsertSchema(
-  ChatMessageAttachmentTable
+  ChatMessageAttachmentTable,
+  {
+    messageId: z.uuid(),
+    fileId: z.uuid(),
+  }
 ).omit({ id: true, createdAt: true });
 export const selectChatMessageAttachmentSchema = createSelectSchema(
-  ChatMessageAttachmentTable
+  ChatMessageAttachmentTable,
+  {
+    id: z.uuid(),
+    messageId: z.uuid(),
+    fileId: z.uuid(),
+  }
 );
 
 export type ChatMessageAttachmentDataModel =

@@ -7,7 +7,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { UserTable } from "../user";
@@ -60,10 +60,19 @@ export const ChatMessageReactionRelations = relations(
 );
 
 export const insertChatMessageReactionSchema = createInsertSchema(
-  ChatMessageReactionTable
+  ChatMessageReactionTable,
+  {
+    messageId: z.uuid(),
+    userId: z.uuid(),
+  }
 ).omit({ id: true, createdAt: true });
 export const selectChatMessageReactionSchema = createSelectSchema(
-  ChatMessageReactionTable
+  ChatMessageReactionTable,
+  {
+    id: z.uuid(),
+    messageId: z.uuid(),
+    userId: z.uuid(),
+  }
 );
 
 export type ChatMessageReactionDataModel =

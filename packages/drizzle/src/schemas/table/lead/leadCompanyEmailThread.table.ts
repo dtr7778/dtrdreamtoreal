@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { EmailThreadTable } from "../email/emailThread.table";
@@ -48,13 +48,22 @@ export const LeadCompanyEmailThreadRelation = relations(
 );
 
 export const insertLeadCompanyEmailThreadSchema = createInsertSchema(
-  LeadCompanyEmailThreadTable
+  LeadCompanyEmailThreadTable,
+  {
+    leadCompanyId: z.uuid(),
+    emailThreadId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
 });
 export const selectLeadCompanyEmailThreadSchema = createSelectSchema(
-  LeadCompanyEmailThreadTable
+  LeadCompanyEmailThreadTable,
+  {
+    id: z.uuid(),
+    leadCompanyId: z.uuid(),
+    emailThreadId: z.uuid(),
+  }
 );
 
 export type LeadCompanyEmailThreadDataModel =

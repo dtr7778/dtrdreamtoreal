@@ -93,6 +93,7 @@ export const LeadCompanyRelation = relations(
 export const insertLeadCompanySchema = createInsertSchema(LeadCompanyTable, {
   website: z.url().optional(),
   email: z.email().optional(),
+  createdBy: z.uuid().nullish(),
 }).omit({
   id: true,
   updatedAt: true,
@@ -101,6 +102,8 @@ export const insertLeadCompanySchema = createInsertSchema(LeadCompanyTable, {
 export const selectLeadCompanySchema = createSelectSchema(LeadCompanyTable, {
   website: z.url().nullable(),
   email: z.email().nullable(),
+  id: z.uuid(),
+  createdBy: z.uuid().nullish(),
 });
 export const updateLeadCompanySchema = createUpdateSchema(LeadCompanyTable, {
   website: z.url().optional(),

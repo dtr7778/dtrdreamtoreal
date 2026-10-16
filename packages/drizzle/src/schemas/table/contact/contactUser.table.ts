@@ -61,6 +61,7 @@ export const insertContactUserSchema = createInsertSchema(ContactUserTable, {
 });
 export const selectContactUserSchema = createSelectSchema(ContactUserTable, {
   email: z.email(),
+  id: z.uuid(),
 });
 export const updateContactUserSchema = createUpdateSchema(ContactUserTable, {
   email: z.email().nullish(),

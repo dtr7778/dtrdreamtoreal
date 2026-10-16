@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_id, db_updated_at } from "../../db-utils";
 import { ChatMemberRoleEnum } from "../../enums/db-enums";
@@ -85,15 +85,32 @@ export const ChatRoomMemberRelations = relations(
 );
 
 export const insertChatRoomMemberSchema = createInsertSchema(
-  ChatRoomMemberTable
+  ChatRoomMemberTable,
+  {
+    roomId: z.uuid(),
+    userId: z.uuid(),
+    lastReadMessageId: z.uuid().nullish(),
+  }
 ).omit({
   id: true,
   updatedAt: true,
 });
-export const selectChatRoomMemberSchema =
-  createSelectSchema(ChatRoomMemberTable);
+export const selectChatRoomMemberSchema = createSelectSchema(
+  ChatRoomMemberTable,
+  {
+    id: z.uuid(),
+    roomId: z.uuid(),
+    userId: z.uuid(),
+    lastReadMessageId: z.uuid().nullish(),
+  }
+);
 export const updateChatRoomMemberSchema = createUpdateSchema(
-  ChatRoomMemberTable
+  ChatRoomMemberTable,
+  {
+    roomId: z.uuid().optional(),
+    userId: z.uuid().optional(),
+    lastReadMessageId: z.uuid().nullish(),
+  }
 ).omit({
   id: true,
   joinedAt: true,

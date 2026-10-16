@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { SessionTable } from "../session.table";
@@ -78,17 +78,26 @@ export const UserSessionRelations = relations(UserSessionTable, ({ one }) => ({
   }),
 }));
 
-export const insertUserSessionSchema = createInsertSchema(
-  UserSessionTable
-).omit({
+export const insertUserSessionSchema = createInsertSchema(UserSessionTable, {
+  userId: z.uuid(),
+  deviceId: z.uuid().nullish(),
+  sessionId: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectUserSessionSchema = createSelectSchema(UserSessionTable);
-export const updateUserSessionSchema = createUpdateSchema(
-  UserSessionTable
-).omit({
+export const selectUserSessionSchema = createSelectSchema(UserSessionTable, {
+  id: z.uuid(),
+  userId: z.uuid(),
+  deviceId: z.uuid().nullish(),
+  sessionId: z.uuid(),
+});
+export const updateUserSessionSchema = createUpdateSchema(UserSessionTable, {
+  userId: z.uuid().optional(),
+  deviceId: z.uuid().nullish(),
+  sessionId: z.uuid().optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

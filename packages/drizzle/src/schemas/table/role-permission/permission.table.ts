@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import {
@@ -63,6 +63,7 @@ export const selectPermissionSchema = createSelectSchema(PermissionTable, {
   level: PermissionLevelEnumSchema,
   resource: ResourceTypeEnumSchema,
   action: ActionTypeEnumSchema,
+  id: z.uuid(),
 });
 export const updatePermissionSchema = createUpdateSchema(PermissionTable, {
   level: PermissionLevelEnumSchema,

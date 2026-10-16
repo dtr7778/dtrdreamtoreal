@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { UserTable } from "./user.table";
@@ -68,13 +68,20 @@ export const UserDeviceRelations = relations(
   })
 );
 
-export const insertUserDeviceSchema = createInsertSchema(UserDeviceTable).omit({
+export const insertUserDeviceSchema = createInsertSchema(UserDeviceTable, {
+  userId: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectUserDeviceSchema = createSelectSchema(UserDeviceTable);
-export const updateUserDeviceSchema = createUpdateSchema(UserDeviceTable).omit({
+export const selectUserDeviceSchema = createSelectSchema(UserDeviceTable, {
+  id: z.uuid(),
+  userId: z.uuid(),
+});
+export const updateUserDeviceSchema = createUpdateSchema(UserDeviceTable, {
+  userId: z.uuid().optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

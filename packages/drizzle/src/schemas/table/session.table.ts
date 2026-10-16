@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../db-utils";
 import { UserSessionTable } from "./user";
@@ -36,8 +36,7 @@ export const SessionTable = sqliteTable(
       name: "session_user_fkey",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     uniqueIndex("session_token_idx").on(table.token),
     index("session_userId_idx").on(table.userId),
     index("session_expiresAt_idx").on(table.expiresAt),
@@ -57,13 +56,20 @@ export const SessionRelations = relations(SessionTable, ({ one }) => ({
   }),
 }));
 
-export const insertSessionSchema = createInsertSchema(SessionTable).omit({
+export const insertSessionSchema = createInsertSchema(SessionTable, {
+  userId: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectSessionSchema = createSelectSchema(SessionTable);
-export const updateSessionSchema = createUpdateSchema(SessionTable).omit({
+export const selectSessionSchema = createSelectSchema(SessionTable, {
+  id: z.uuid(),
+  userId: z.uuid(),
+});
+export const updateSessionSchema = createUpdateSchema(SessionTable, {
+  userId: z.uuid().optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

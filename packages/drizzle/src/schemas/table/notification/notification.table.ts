@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import {
@@ -44,14 +44,12 @@ export const NotificationTable = sqliteTable(
       name: "notifications_recipient_fkey",
       columns: [table.recipientId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     foreignKey({
       name: "notifications_actor_fkey",
       columns: [table.actorId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("set null"),
+    }).onDelete("set null"),
     index("notifications_recipient_idx").on(table.recipientId),
     index("notifications_recipient_read_idx").on(
       table.recipientId,
@@ -77,17 +75,23 @@ export const NotificationRelations = relations(
   })
 );
 
-export const insertNotificationSchema = createInsertSchema(
-  NotificationTable
-).omit({
+export const insertNotificationSchema = createInsertSchema(NotificationTable, {
+  recipientId: z.uuid(),
+  actorId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectNotificationSchema = createSelectSchema(NotificationTable);
-export const updateNotificationSchema = createUpdateSchema(
-  NotificationTable
-).omit({
+export const selectNotificationSchema = createSelectSchema(NotificationTable, {
+  id: z.uuid(),
+  recipientId: z.uuid(),
+  actorId: z.uuid().nullish(),
+});
+export const updateNotificationSchema = createUpdateSchema(NotificationTable, {
+  recipientId: z.uuid().optional(),
+  actorId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

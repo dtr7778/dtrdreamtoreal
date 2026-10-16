@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { AddressTable } from "../address.table";
@@ -61,16 +61,29 @@ export const LeadCompanyAddressRelation = relations(
 );
 
 export const insertLeadCompanyAddressSchema = createInsertSchema(
-  LeadCompanyAddressTable
+  LeadCompanyAddressTable,
+  {
+    leadCompanyId: z.uuid(),
+    addressId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
 });
 export const selectLeadCompanyAddressSchema = createSelectSchema(
-  LeadCompanyAddressTable
+  LeadCompanyAddressTable,
+  {
+    id: z.uuid(),
+    leadCompanyId: z.uuid(),
+    addressId: z.uuid(),
+  }
 );
 export const updateLeadCompanyAddressSchema = createUpdateSchema(
-  LeadCompanyAddressTable
+  LeadCompanyAddressTable,
+  {
+    leadCompanyId: z.uuid().optional(),
+    addressId: z.uuid().optional(),
+  }
 ).omit({
   id: true,
   createdAt: true,

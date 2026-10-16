@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import {
@@ -109,17 +109,28 @@ export const CompanyTaskRelations = relations(CompanyTaskTable, ({ one }) => ({
   }),
 }));
 
-export const insertCompanyTaskSchema = createInsertSchema(
-  CompanyTaskTable
-).omit({
+export const insertCompanyTaskSchema = createInsertSchema(CompanyTaskTable, {
+  assigneeId: z.uuid().nullish(),
+  assignedById: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
+  updatedBy: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectCompanyTaskSchema = createSelectSchema(CompanyTaskTable);
-export const updateCompanyTaskSchema = createUpdateSchema(
-  CompanyTaskTable
-).omit({
+export const selectCompanyTaskSchema = createSelectSchema(CompanyTaskTable, {
+  id: z.uuid(),
+  assigneeId: z.uuid().nullish(),
+  assignedById: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
+  updatedBy: z.uuid().nullish(),
+});
+export const updateCompanyTaskSchema = createUpdateSchema(CompanyTaskTable, {
+  assigneeId: z.uuid().nullish(),
+  assignedById: z.uuid().nullish(),
+  updatedBy: z.uuid().nullish(),
+}).omit({
   id: true,
   source: true,
   externalId: true,

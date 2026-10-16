@@ -4,7 +4,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../db-utils";
 
@@ -24,7 +24,9 @@ export const insertVerificationSchema = createInsertSchema(
   createdAt: true,
   updatedAt: true,
 });
-export const selectVerificationSchema = createSelectSchema(VerificationTable);
+export const selectVerificationSchema = createSelectSchema(VerificationTable, {
+  id: z.uuid(),
+});
 export const updateVerificationSchema = createUpdateSchema(
   VerificationTable
 ).omit({

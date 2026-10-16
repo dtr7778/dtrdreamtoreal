@@ -51,6 +51,7 @@ export const insertSocialMediaSchema = createInsertSchema(SocialMediaTable, {
 });
 export const selectSocialMediaSchema = createSelectSchema(SocialMediaTable, {
   url: z.url(),
+  id: z.uuid(),
 });
 export const updateSocialMediaSchema = createUpdateSchema(SocialMediaTable, {
   url: z.url().optional(),

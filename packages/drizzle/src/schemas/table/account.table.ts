@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../db-utils";
 import { UserTable } from "./user";
@@ -43,8 +43,7 @@ export const AccountTable = sqliteTable(
       name: "account_user_fkey",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     uniqueIndex("account_accountProvider_accountId_idx").on(
       table.providerId,
       table.accountId
@@ -61,13 +60,21 @@ export const AccountRelations = relations(AccountTable, ({ one }) => ({
   }),
 }));
 
-export const insertAccountSchema = createInsertSchema(AccountTable).omit({
+export const insertAccountSchema = createInsertSchema(AccountTable, {
+  userId: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectAccountSchema = createSelectSchema(AccountTable);
-export const updateAccountSchema = createUpdateSchema(AccountTable);
+export const selectAccountSchema = createSelectSchema(AccountTable, {
+  id: z.uuid(),
+  userId: z.uuid(),
+});
+export const updateAccountSchema = createUpdateSchema(AccountTable, {
+  id: z.uuid().optional(),
+  userId: z.uuid().optional(),
+});
 
 export type AccountDataModel = typeof AccountTable.$inferSelect;
 export type InsertAccount = z.infer<typeof insertAccountSchema>;

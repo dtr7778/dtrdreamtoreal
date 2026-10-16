@@ -90,6 +90,8 @@ export const LeadUserRelations = relations(LeadUserTable, ({ many, one }) => ({
 export const insertLeadUserSchema = createInsertSchema(LeadUserTable, {
   website: z.url().optional(),
   email: z.email().optional(),
+  leadCompanyId: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
 }).omit({
   id: true,
   createdAt: true,
@@ -98,10 +100,14 @@ export const insertLeadUserSchema = createInsertSchema(LeadUserTable, {
 export const selectLeadUserSchema = createSelectSchema(LeadUserTable, {
   website: z.url().nullable(),
   email: z.email().nullable(),
+  id: z.uuid(),
+  leadCompanyId: z.uuid().nullish(),
+  createdBy: z.uuid().nullish(),
 });
 export const updateLeadUserSchema = createUpdateSchema(LeadUserTable, {
   website: z.url().optional(),
   email: z.email().optional(),
+  leadCompanyId: z.uuid().nullish(),
 }).omit({
   id: true,
   createdBy: true,

@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../db-utils";
 import { AddressTypeEnum } from "../enums/db-enums";
@@ -46,7 +46,9 @@ export const insertAddressSchema = createInsertSchema(AddressTable).omit({
   updatedAt: true,
   createdAt: true,
 });
-export const selectAddressSchema = createSelectSchema(AddressTable);
+export const selectAddressSchema = createSelectSchema(AddressTable, {
+  id: z.uuid(),
+});
 export const updateAddressSchema = createUpdateSchema(AddressTable).omit({
   id: true,
   updatedAt: true,

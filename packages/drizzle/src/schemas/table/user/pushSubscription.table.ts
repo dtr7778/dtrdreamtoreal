@@ -12,7 +12,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { UserTable } from "./user.table";
@@ -34,8 +34,7 @@ export const PushSubscriptionTable = sqliteTable(
       name: "push_subscription_user_fkey",
       columns: [table.userId],
       foreignColumns: [UserTable.id],
-    })
-      .onDelete("cascade"),
+    }).onDelete("cascade"),
     uniqueIndex("push_subscription_endpoint_unique").on(table.endpoint),
     index("push_subscription_user_id").on(table.userId),
   ]
@@ -53,17 +52,27 @@ export const PushSubscriptionRelations = relations(
 );
 
 export const insertPushSubscriptionSchema = createInsertSchema(
-  PushSubscriptionTable
+  PushSubscriptionTable,
+  {
+    userId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 export const selectPushSubscriptionSchema = createSelectSchema(
-  PushSubscriptionTable
+  PushSubscriptionTable,
+  {
+    id: z.uuid(),
+    userId: z.uuid(),
+  }
 );
 export const updatePushSubscriptionSchema = createUpdateSchema(
-  PushSubscriptionTable
+  PushSubscriptionTable,
+  {
+    userId: z.uuid().optional(),
+  }
 ).omit({
   id: true,
   createdAt: true,

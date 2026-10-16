@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { AuditStatusEnum } from "../../enums/db-enums";
@@ -83,13 +83,23 @@ export const SiteAuditRelations = relations(
   })
 );
 
-export const insertSiteAuditSchema = createInsertSchema(SiteAuditTable).omit({
+export const insertSiteAuditSchema = createInsertSchema(SiteAuditTable, {
+  companyId: z.uuid(),
+  triggeredBy: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectSiteAuditSchema = createSelectSchema(SiteAuditTable);
-export const updateSiteAuditSchema = createUpdateSchema(SiteAuditTable).omit({
+export const selectSiteAuditSchema = createSelectSchema(SiteAuditTable, {
+  id: z.uuid(),
+  companyId: z.uuid(),
+  triggeredBy: z.uuid().nullish(),
+});
+export const updateSiteAuditSchema = createUpdateSchema(SiteAuditTable, {
+  companyId: z.uuid().optional(),
+  triggeredBy: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

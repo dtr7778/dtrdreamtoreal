@@ -135,7 +135,12 @@ export const ChatMessageRelations = relations(
   })
 );
 
-export const insertChatMessageSchema = createInsertSchema(ChatMessageTable)
+export const insertChatMessageSchema = createInsertSchema(ChatMessageTable, {
+  roomId: z.uuid(),
+  senderId: z.uuid().nullish(),
+  parentMessageId: z.uuid().nullish(),
+  replyToMessageId: z.uuid().nullish(),
+})
   .omit({
     id: true,
     createdAt: true,
@@ -144,10 +149,19 @@ export const insertChatMessageSchema = createInsertSchema(ChatMessageTable)
   .extend({
     body: z.custom<TiptapDoc | null>().optional(),
   });
-export const selectChatMessageSchema = createSelectSchema(ChatMessageTable);
-export const updateChatMessageSchema = createUpdateSchema(
-  ChatMessageTable
-).omit({
+export const selectChatMessageSchema = createSelectSchema(ChatMessageTable, {
+  id: z.uuid(),
+  roomId: z.uuid(),
+  senderId: z.uuid().nullish(),
+  parentMessageId: z.uuid().nullish(),
+  replyToMessageId: z.uuid().nullish(),
+});
+export const updateChatMessageSchema = createUpdateSchema(ChatMessageTable, {
+  roomId: z.uuid().optional(),
+  senderId: z.uuid().nullish(),
+  parentMessageId: z.uuid().nullish(),
+  replyToMessageId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

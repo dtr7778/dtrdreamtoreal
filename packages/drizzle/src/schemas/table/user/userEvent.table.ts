@@ -5,7 +5,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { UserEventTypeEnum } from "../../enums/db-enums";
@@ -56,12 +56,22 @@ export const UserEventRelations = relations(UserEventTable, ({ one }) => ({
   }),
 }));
 
-export const insertUserEventSchema = createInsertSchema(UserEventTable).omit({
+export const insertUserEventSchema = createInsertSchema(UserEventTable, {
+  userId: z.uuid().nullish(),
+  deviceId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
 });
-export const selectUserEventSchema = createSelectSchema(UserEventTable);
-export const updateUserEventSchema = createUpdateSchema(UserEventTable).omit({
+export const selectUserEventSchema = createSelectSchema(UserEventTable, {
+  id: z.uuid(),
+  userId: z.uuid().nullish(),
+  deviceId: z.uuid().nullish(),
+});
+export const updateUserEventSchema = createUpdateSchema(UserEventTable, {
+  userId: z.uuid().nullish(),
+  deviceId: z.uuid().nullish(),
+}).omit({
   id: true,
   createdAt: true,
 });

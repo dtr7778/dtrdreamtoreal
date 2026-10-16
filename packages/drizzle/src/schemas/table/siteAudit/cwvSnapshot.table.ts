@@ -11,7 +11,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id, db_updated_at } from "../../db-utils";
 import { CwvSourceEnum, CwvStrategyEnum } from "../../enums/db-enums";
@@ -57,14 +57,17 @@ export const CwvSnapshotRelation = relations(CwvSnapshotTable, ({ one }) => ({
   }),
 }));
 
-export const insertCwvSnapshotSchema = createInsertSchema(
-  CwvSnapshotTable
-).omit({
+export const insertCwvSnapshotSchema = createInsertSchema(CwvSnapshotTable, {
+  siteAuditId: z.uuid(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const selectCwvSnapshotSchema = createSelectSchema(CwvSnapshotTable);
+export const selectCwvSnapshotSchema = createSelectSchema(CwvSnapshotTable, {
+  id: z.uuid(),
+  siteAuditId: z.uuid(),
+});
 export const updateCwvSnapshotSchema = createUpdateSchema(
   CwvSnapshotTable
 ).omit({

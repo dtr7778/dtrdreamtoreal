@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import type z from "zod";
+import z from "zod";
 
 import { db_created_at, db_id } from "../../db-utils";
 import { AiUsageTable } from "../aiUsage.table";
@@ -48,13 +48,22 @@ export const LeadCompanyAiUsageRelation = relations(
 );
 
 export const insertLeadCompanyAiUsageSchema = createInsertSchema(
-  LeadCompanyAiUsageTable
+  LeadCompanyAiUsageTable,
+  {
+    leadCompanyId: z.uuid(),
+    aiUsageId: z.uuid(),
+  }
 ).omit({
   id: true,
   createdAt: true,
 });
 export const selectLeadCompanyAiUsageSchema = createSelectSchema(
-  LeadCompanyAiUsageTable
+  LeadCompanyAiUsageTable,
+  {
+    id: z.uuid(),
+    leadCompanyId: z.uuid(),
+    aiUsageId: z.uuid(),
+  }
 );
 
 export type LeadCompanyAiUsageDataModel =
