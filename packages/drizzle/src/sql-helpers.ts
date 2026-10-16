@@ -23,17 +23,42 @@ export function jsonObject<TColumns extends Record<string, AnyColumn>>(
   )})`;
 }
 
+function buildJsonGroupArray<TColumns extends Record<string, AnyColumn>>(
+  columns: TColumns,
+  filterColumn: AnyColumn | undefined,
+  distinct: boolean
+): SQL<InferColumnsDataTypes<TColumns>[]> {
+  const filterCol = filterColumn ?? Object.values(columns)[0];
+  const aggregate = distinct
+    ? sql`json_group_array(DISTINCT ${jsonObject(columns)})`
+    : sql`json_group_array(${jsonObject(columns)})`;
+
+  // json_group_array returns '[]' when the FILTER excludes every row,
+  // so no COALESCE is needed. SQLite returns TEXT, so parse it.
+  return sql<
+    InferColumnsDataTypes<TColumns>[]
+  >`${aggregate} FILTER (WHERE ${filterCol} IS NOT NULL)`.mapWith((value) =>
+    typeof value === "string" ? JSON.parse(value) : (value ?? [])
+  );
+}
+
 export function jsonGroupArray<TColumns extends Record<string, AnyColumn>>(
   columns: TColumns,
   filterColumn?: AnyColumn
 ): SQL<InferColumnsDataTypes<TColumns>[]> {
-  const filterCol = filterColumn ?? Object.values(columns)[0];
+  return buildJsonGroupArray(columns, filterColumn, false);
+}
 
-  // json_group_array returns '[]' when the FILTER excludes every row,
-  // so no COALESCE is needed. SQLite returns TEXT, so parse it.
-  return sql<InferColumnsDataTypes<TColumns>[]>`json_group_array(${jsonObject(
-    columns
-  )}) FILTER (WHERE ${filterCol} IS NOT NULL)`.mapWith((value) =>
-    typeof value === "string" ? JSON.parse(value) : (value ?? [])
-  );
+/**
+ * Like {@link jsonGroupArray}, but de-duplicates rows that fan out from a join
+ * (for example a user appearing once per role), so the aggregate holds each
+ * distinct object once.
+ */
+export function jsonGroupArrayDistinct<
+  TColumns extends Record<string, AnyColumn>,
+>(
+  columns: TColumns,
+  filterColumn?: AnyColumn
+): SQL<InferColumnsDataTypes<TColumns>[]> {
+  return buildJsonGroupArray(columns, filterColumn, true);
 }
