@@ -839,7 +839,6 @@ table company_tasks {
   source text [not null, default: 'manual']
   external_id text
   metadata text
-  assignee_id text
   assigned_by_id text
   created_by text
   updated_by text
@@ -850,15 +849,28 @@ table company_tasks {
     
     
     
-    
     (source, external_id) [name: 'company_tasks_source_external_id_key', unique]
-    (assignee_id, status) [name: 'company_tasks_assignee_id_status_idx']
     assigned_by_id [name: 'company_tasks_assigned_by_id_idx']
     created_by [name: 'company_tasks_created_by_idx']
     status [name: 'company_tasks_status_idx']
     priority [name: 'company_tasks_priority_idx']
     due_date [name: 'company_tasks_due_date_idx']
     created_at [name: 'company_tasks_created_at_idx']
+  }
+}
+
+table company_task_assignees {
+  id text [pk, not null]
+  task_id text [not null]
+  user_id text [not null]
+  assigned_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    (task_id, user_id) [name: 'company_task_assignees_task_id_user_id_key', unique]
+    task_id [name: 'company_task_assignees_task_id_idx']
+    user_id [name: 'company_task_assignees_user_id_idx']
   }
 }
 
@@ -1014,12 +1026,14 @@ ref: files.deleted_by > users.id
 
 ref: sessions.user_id > users.id
 
-ref: company_tasks.assignee_id > users.id
-
 ref: company_tasks.assigned_by_id > users.id
 
 ref: company_tasks.created_by > users.id
 
 ref: company_tasks.updated_by > users.id
+
+ref: company_task_assignees.task_id > company_tasks.id
+
+ref: company_task_assignees.user_id > users.id
 
 ref: personal_tasks.user_id > users.id

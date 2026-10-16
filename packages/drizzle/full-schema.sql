@@ -1,4 +1,4 @@
-◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
 CREATE TABLE `chat_rooms` (
 	`id` text PRIMARY KEY NOT NULL,
 	`type` text NOT NULL,
@@ -717,26 +717,35 @@ CREATE TABLE `company_tasks` (
 	`source` text DEFAULT 'manual' NOT NULL,
 	`external_id` text,
 	`metadata` text,
-	`assignee_id` text,
 	`assigned_by_id` text,
 	`created_by` text,
 	`updated_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
-	FOREIGN KEY (`assignee_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`assigned_by_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`updated_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 
 CREATE UNIQUE INDEX `company_tasks_source_external_id_key` ON `company_tasks` (`source`,`external_id`);
-CREATE INDEX `company_tasks_assignee_id_status_idx` ON `company_tasks` (`assignee_id`,`status`);
 CREATE INDEX `company_tasks_assigned_by_id_idx` ON `company_tasks` (`assigned_by_id`);
 CREATE INDEX `company_tasks_created_by_idx` ON `company_tasks` (`created_by`);
 CREATE INDEX `company_tasks_status_idx` ON `company_tasks` (`status`);
 CREATE INDEX `company_tasks_priority_idx` ON `company_tasks` (`priority`);
 CREATE INDEX `company_tasks_due_date_idx` ON `company_tasks` (`due_date`);
 CREATE INDEX `company_tasks_created_at_idx` ON `company_tasks` (`created_at`);
+CREATE TABLE `company_task_assignees` (
+	`id` text PRIMARY KEY NOT NULL,
+	`task_id` text NOT NULL,
+	`user_id` text NOT NULL,
+	`assigned_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`task_id`) REFERENCES `company_tasks`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+);
+
+CREATE UNIQUE INDEX `company_task_assignees_task_id_user_id_key` ON `company_task_assignees` (`task_id`,`user_id`);
+CREATE INDEX `company_task_assignees_task_id_idx` ON `company_task_assignees` (`task_id`);
+CREATE INDEX `company_task_assignees_user_id_idx` ON `company_task_assignees` (`user_id`);
 CREATE TABLE `personal_tasks` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
