@@ -8,25 +8,22 @@ interface FormatDateCellBaseProps {
   options?: Parameters<typeof formatDateWithTimezone>[3];
 }
 
-type FormatDateCellProps<T extends React.ElementType = "span"> =
-  FormatDateCellBaseProps &
-    Omit<React.ComponentPropsWithoutRef<T>, keyof FormatDateCellBaseProps> & {
-      as?: T;
-    };
+type FormatDateCellProps = FormatDateCellBaseProps &
+  Omit<React.ComponentPropsWithoutRef<"time">, keyof FormatDateCellBaseProps>;
 
-export function FormatDateCell<T extends React.ElementType = "span">({
-  as,
+export function FormatDateCell({
   value,
   format,
   options,
   ...props
-}: FormatDateCellProps<T>) {
+}: FormatDateCellProps) {
   const user = useAuthStore((state) => state.user);
-  const Component = as ?? "span";
+
+  const normalizedDate = value instanceof Date ? value : new Date(value);
 
   return (
-    <Component {...props}>
-      {formatDateWithTimezone(value, format, user.timezone, options)}
-    </Component>
+    <time dateTime={normalizedDate.toISOString()} {...props}>
+      {formatDateWithTimezone(normalizedDate, format, user.timezone, options)}
+    </time>
   );
 }
