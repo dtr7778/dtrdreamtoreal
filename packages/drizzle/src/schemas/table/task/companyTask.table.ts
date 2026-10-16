@@ -21,6 +21,7 @@ import {
   TaskStatusEnum,
 } from "../../enums/db-enums";
 import { UserTable } from "../user";
+import { CompanyTaskAssigneeTable } from "./companyTaskAssignee.table";
 
 export type TaskMetadata = Record<string, unknown>;
 
@@ -40,7 +41,6 @@ export const CompanyTaskTable = sqliteTable(
     externalId: text("external_id"),
     metadata: text("metadata", { mode: "json" }).$type<TaskMetadata>(),
 
-    assigneeId: text("assignee_id"),
     assignedById: text("assigned_by_id"),
     createdBy: text("created_by"),
     updatedBy: text("updated_by"),
@@ -49,11 +49,6 @@ export const CompanyTaskTable = sqliteTable(
     updatedAt: db_updated_at,
   },
   (table) => [
-    foreignKey({
-      name: "company_tasks_assignee_id_fkey",
-      columns: [table.assigneeId],
-      foreignColumns: [UserTable.id],
-    }).onDelete("set null"),
     foreignKey({
       name: "company_tasks_assigned_by_id_fkey",
       columns: [table.assignedById],
@@ -73,10 +68,6 @@ export const CompanyTaskTable = sqliteTable(
       table.source,
       table.externalId
     ),
-    index("company_tasks_assignee_id_status_idx").on(
-      table.assigneeId,
-      table.status
-    ),
     index("company_tasks_assigned_by_id_idx").on(table.assignedById),
     index("company_tasks_created_by_idx").on(table.createdBy),
     index("company_tasks_status_idx").on(table.status),
@@ -86,31 +77,31 @@ export const CompanyTaskTable = sqliteTable(
   ]
 );
 
-export const CompanyTaskRelations = relations(CompanyTaskTable, ({ one }) => ({
-  assignee: one(UserTable, {
-    fields: [CompanyTaskTable.assigneeId],
-    references: [UserTable.id],
-    relationName: "CompanyTaskToAssignee",
-  }),
-  assignedBy: one(UserTable, {
-    fields: [CompanyTaskTable.assignedById],
-    references: [UserTable.id],
-    relationName: "CompanyTaskToAssignedBy",
-  }),
-  createdBy: one(UserTable, {
-    fields: [CompanyTaskTable.createdBy],
-    references: [UserTable.id],
-    relationName: "CompanyTaskToCreatedBy",
-  }),
-  updatedBy: one(UserTable, {
-    fields: [CompanyTaskTable.updatedBy],
-    references: [UserTable.id],
-    relationName: "CompanyTaskToUpdatedBy",
-  }),
-}));
+export const CompanyTaskRelations = relations(
+  CompanyTaskTable,
+  ({ one, many }) => ({
+    assignees: many(CompanyTaskAssigneeTable, {
+      relationName: "CompanyTaskToAssignee",
+    }),
+    assignedBy: one(UserTable, {
+      fields: [CompanyTaskTable.assignedById],
+      references: [UserTable.id],
+      relationName: "CompanyTaskToAssignedBy",
+    }),
+    createdBy: one(UserTable, {
+      fields: [CompanyTaskTable.createdBy],
+      references: [UserTable.id],
+      relationName: "CompanyTaskToCreatedBy",
+    }),
+    updatedBy: one(UserTable, {
+      fields: [CompanyTaskTable.updatedBy],
+      references: [UserTable.id],
+      relationName: "CompanyTaskToUpdatedBy",
+    }),
+  })
+);
 
 export const insertCompanyTaskSchema = createInsertSchema(CompanyTaskTable, {
-  assigneeId: z.uuid().nullish(),
   assignedById: z.uuid().nullish(),
   createdBy: z.uuid().nullish(),
   updatedBy: z.uuid().nullish(),
@@ -121,13 +112,11 @@ export const insertCompanyTaskSchema = createInsertSchema(CompanyTaskTable, {
 });
 export const selectCompanyTaskSchema = createSelectSchema(CompanyTaskTable, {
   id: z.uuid(),
-  assigneeId: z.uuid().nullish(),
   assignedById: z.uuid().nullish(),
   createdBy: z.uuid().nullish(),
   updatedBy: z.uuid().nullish(),
 });
 export const updateCompanyTaskSchema = createUpdateSchema(CompanyTaskTable, {
-  assigneeId: z.uuid().nullish(),
   assignedById: z.uuid().nullish(),
   updatedBy: z.uuid().nullish(),
 }).omit({

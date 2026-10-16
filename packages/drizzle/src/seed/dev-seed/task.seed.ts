@@ -8,12 +8,13 @@ import type {
   UserDataModel,
 } from "../../schemas";
 import {
+  CompanyTaskAssigneeTable,
   CompanyTaskTable,
   insertCompanyTaskSchema,
   insertPersonalTaskSchema,
   PersonalTaskTable,
 } from "../../schemas";
-import { insertChunkedReturning } from "../seed-utils";
+import { insertChunked, insertChunkedReturning } from "../seed-utils";
 import { seedConfigs } from "../seed.config";
 
 export async function seedCompanyTasks(
@@ -22,13 +23,14 @@ export async function seedCompanyTasks(
 ): Promise<Array<CompanyTaskDataModel>> {
   console.log("🌱 Seeding company tasks...");
 
+  const assigneeIdsByTask: Array<Array<string>> = [];
+
   const tasksData = zocker(
     insertCompanyTaskSchema.omit({
       title: true,
       description: true,
       createdBy: true,
       updatedBy: true,
-      assigneeId: true,
       assignedById: true,
       source: true,
       externalId: true,
@@ -54,13 +56,23 @@ export async function seedCompanyTasks(
         (user) => user.id !== createdUser.id
       );
 
-      const assignee =
+      const assigneeCount =
         potentialAssignees.length > 0
-          ? faker.helpers.maybe(
-              () => faker.helpers.arrayElement(potentialAssignees),
+          ? (faker.helpers.maybe(
+              () =>
+                faker.number.int({
+                  min: 1,
+                  max: Math.min(3, potentialAssignees.length),
+                }),
               { probability: 0.7 }
-            )
-          : undefined;
+            ) ?? 0)
+          : 0;
+
+      const assigneeIds = faker.helpers
+        .arrayElements(potentialAssignees, assigneeCount)
+        .map((assignee) => assignee.id);
+
+      assigneeIdsByTask.push(assigneeIds);
 
       return {
         ...task,
@@ -71,13 +83,23 @@ export async function seedCompanyTasks(
         metadata: isExternal ? { seeded: true, origin: source } : null,
         createdBy: source === "system" ? null : createdUser.id,
         updatedBy: null,
-        assigneeId: assignee ? assignee.id : null,
-        assignedById: assignee ? createdUser.id : null,
+        assignedById: assigneeIds.length > 0 ? createdUser.id : null,
       };
     });
 
   const tasks = await insertChunkedReturning(tasksData, (chunk) =>
     db.insert(CompanyTaskTable).values(chunk).returning()
+  );
+
+  const assignments = tasks.flatMap((task, index) =>
+    (assigneeIdsByTask[index] ?? []).map((userId) => ({
+      taskId: task.id,
+      userId,
+    }))
+  );
+
+  await insertChunked(assignments, (chunk) =>
+    db.insert(CompanyTaskAssigneeTable).values(chunk)
   );
 
   console.log(`✅ ${tasks.length} company tasks seeded`);

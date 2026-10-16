@@ -30,7 +30,11 @@ import { NotificationTable } from "../notification";
 import { UserRoleTable } from "../role-permission";
 import { SessionTable } from "../session.table";
 import { SiteAuditTable } from "../siteAudit";
-import { CompanyTaskTable, PersonalTaskTable } from "../task";
+import {
+  CompanyTaskAssigneeTable,
+  CompanyTaskTable,
+  PersonalTaskTable,
+} from "../task";
 import { NotificationSettingsTable } from "./notificationSetting.table";
 import { PushSubscriptionTable } from "./pushSubscription.table";
 import { UserDeviceTable } from "./userDevice.table";
@@ -94,8 +98,8 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
     relationName: "PushSubscriptionToUser",
   }),
   // task
-  assignedCompanyTasks: many(CompanyTaskTable, {
-    relationName: "CompanyTaskToAssignee",
+  companyTaskAssignments: many(CompanyTaskAssigneeTable, {
+    relationName: "CompanyTaskAssigneeToUser",
   }),
   delegatedCompanyTasks: many(CompanyTaskTable, {
     relationName: "CompanyTaskToAssignedBy",

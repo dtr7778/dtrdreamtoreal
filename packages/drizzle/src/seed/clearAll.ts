@@ -35,6 +35,7 @@ export async function clearAll(db: DatabaseType) {
   await db.delete(schema.RoleTable);
 
   await db.delete(schema.PersonalTaskTable);
+  await db.delete(schema.CompanyTaskAssigneeTable);
   await db.delete(schema.CompanyTaskTable);
   await db.delete(schema.ChatMessageAttachmentTable);
   await db.delete(schema.ChatMessageReactionTable);
