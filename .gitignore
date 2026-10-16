@@ -221,3 +221,5 @@ __unconfig*
 
 apps/**/public/sw*
 apps/**/public/swe-worker*
+
+**/__pycache__/
