@@ -14,19 +14,31 @@
   "upload_source_maps": true,
   "workers_dev": true,
   "preview_urls": true,
+  "exports": {
+    "ChatHubDurableObject": {
+      "type": "durable-object",
+      "storage": "sqlite",
+    },
+    "TaskHubDurableObject": {
+      "type": "durable-object",
+      "storage": "sqlite",
+    },
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "CHAT_HUB", "class_name": "ChatHubDurableObject" },
+      { "name": "TASK_HUB", "class_name": "TaskHubDurableObject" },
+    ],
+  },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "dtrdreamtoreal-db-local",
-      "database_id": "dd2b93c8-d3fd-4de7-8956-15b488c678f6",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../migrations",
+      "remote": false,
     },
   ],
-  "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["ChatHubDurableObject"] },
-  ],
-  "durable_objects": {
-    "bindings": [{ "name": "CHAT_HUB", "class_name": "ChatHubDurableObject" }],
-  },
   "queues": {
     "producers": [
       {
@@ -51,29 +63,56 @@
     },
   ],
   "env": {
+    "staging": {
+      "name": "dtrdreamtoreal-hono-backend",
+      "queues": {
+        "producers": [
+          {
+            "binding": "MAIL_QUEUE",
+            "queue": "dtrdreamtoreal-mail-queue-staging",
+          },
+        ],
+        "consumers": [
+          {
+            "queue": "dtrdreamtoreal-mail-queue-staging",
+            "max_batch_size": 10,
+            "max_batch_timeout": 1,
+            "max_retries": 5,
+            "max_concurrency": 5,
+          },
+        ],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "dtrdreamtoreal-db-staging",
+          "database_id": "d80509bc-4357-44c5-9353-7dc9ea1e5c62",
+          "migrations_dir": "../../migrations",
+          "remote": true,
+        },
+      ],
+      "durable_objects": {
+        "bindings": [
+          { "name": "CHAT_HUB", "class_name": "ChatHubDurableObject" },
+          { "name": "TASK_HUB", "class_name": "TaskHubDurableObject" },
+        ],
+      },
+      "r2_buckets": [
+        {
+          "binding": "BUCKET",
+          "bucket_name": "dtrdreamtoreal-bucket-staging",
+        },
+      ],
+    },
     "production": {
       "name": "dtrdreamtoreal-hono-backend",
       "routes": [
         {
           "custom_domain": true,
           "pattern": "api.dtrdreamtoreal.com",
+          "zone_name": "dtrdreamtoreal.com",
         },
       ],
-      "vars": {
-        "ENVIRONMENT": "production",
-        "APP_NAME": "Dream To Real",
-        "LOG_LEVEL": "warn",
-        "BETTER_AUTH_URL": "https://api.dtrdreamtoreal.com",
-        "WEB_URL": "https://dtrdreamtoreal.com",
-        "BACKEND_URL": "https://api.dtrdreamtoreal.com",
-        "TRUSTED_ORIGINS": "https://dtrdreamtoreal.com,https://app.dtrdreamtoreal.com",
-        "COOKIE_DOMAIN": ".dtrdreamtoreal.com",
-        "MAIL_SYSTEM_EMAIL": "notification@mail.dtrdreamtoreal.com",
-        "MAIL_SUPPORT_EMAIL": "support@mail.dtrdreamtoreal.com",
-        "R2_BUCKET_NAME": "dtrdreamtoreal-bucket",
-        "RESEND_BASE_URL": "https://api.resend.com",
-        "SKIP_ENV_VALIDATION": "true",
-      },
       "queues": {
         "producers": [
           {
@@ -96,11 +135,14 @@
           "binding": "DB",
           "database_name": "dtrdreamtoreal-db",
           "database_id": "fc84e1cc-a96e-40fc-b62e-71f105409167",
+          "migrations_dir": "../../migrations",
+          "remote": true,
         },
       ],
       "durable_objects": {
         "bindings": [
           { "name": "CHAT_HUB", "class_name": "ChatHubDurableObject" },
+          { "name": "TASK_HUB", "class_name": "TaskHubDurableObject" },
         ],
       },
       "r2_buckets": [

@@ -2,6 +2,7 @@
   "name": "hono-backend",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "author": "DTR - Dream To Real <dream.to.real.7778@gmail.com>",
   "contributors": [
     {

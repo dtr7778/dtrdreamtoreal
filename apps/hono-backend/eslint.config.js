@@ -4,5 +4,11 @@ import { config } from "@workspace/eslint-config/base";
 /** @type {import("eslint").Linter.Config[]} */
 export default [
   ...config,
-  { ignores: ["worker-configuration.d.ts", "eslint.config.js"] },
+  {
+    ignores: [
+      "worker-configuration.d.ts",
+      "eslint.config.js",
+      "vitest.config.ts",
+    ],
+  },
 ];
