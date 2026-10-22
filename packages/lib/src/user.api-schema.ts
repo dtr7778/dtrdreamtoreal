@@ -6,7 +6,7 @@ import {
   selectUserSchema,
   UserTable,
 } from "@workspace/drizzle/schemas";
-import { jsonGroupArray } from "@workspace/drizzle/sql-helpers";
+import { jsonGroupArray } from "@workspace/drizzle/utils";
 import { RoleEnumSchema } from "@workspace/drizzle/zod-db-enums";
 
 export const roleColumnSql = jsonGroupArray(
