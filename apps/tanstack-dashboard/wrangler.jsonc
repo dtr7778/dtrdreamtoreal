@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dtrdreamtoreal-tanstack-dashboard",
-  "compatibility_date": "2025-09-02",
+  "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "observability": {
@@ -15,11 +15,13 @@
       "binding": "AUTH",
       "service": "dtrdreamtoreal-hono-backend",
       "entrypoint": "AuthEntrypoint",
+      "remote": false,
     },
     {
       "binding": "TASK",
       "service": "dtrdreamtoreal-hono-backend",
       "entrypoint": "TaskEntrypoint",
+      "remote": false,
     },
   ],
   "d1_databases": [
@@ -36,17 +38,22 @@
       {
         "binding": "MAIL_QUEUE",
         "queue": "dtrdreamtoreal-mail-queue-local",
+        "remote": false,
       },
     ],
   },
   "env": {
     "staging": {
       "name": "dtrdreamtoreal-tanstack-dashboard",
+      "vars": {
+        "SKIP_ENV_VALIDATION": true,
+      },
       "queues": {
         "producers": [
           {
             "binding": "MAIL_QUEUE",
             "queue": "dtrdreamtoreal-mail-queue-staging",
+            "remote": true,
           },
         ],
       },
@@ -64,16 +71,29 @@
           "binding": "AUTH",
           "service": "dtrdreamtoreal-hono-backend",
           "entrypoint": "AuthEntrypoint",
+          "remote": true,
         },
         {
           "binding": "TASK",
           "service": "dtrdreamtoreal-hono-backend",
           "entrypoint": "TaskEntrypoint",
+          "remote": true,
         },
       ],
     },
     "production": {
       "name": "dtrdreamtoreal-tanstack-dashboard",
+      "vars": {
+        "SKIP_ENV_VALIDATION": true,
+        "ENVIRONMENT": "production",
+        "VITE_ENVIRONMENT": "production",
+        "VITE_APP_NAME": "Dream To Real",
+        "VITE_SITE_URL": "https://dtrdreamtoreal.com",
+        "VITE_BACKEND_URL": "https://api.dtrdreamtoreal.com",
+        "VITE_AUTH_URL": "https://api.dtrdreamtoreal.com",
+        "VITE_SYSTEM_MAIL": "notification@mail.dtrdreamtoreal.com",
+        "VITE_SUPPORT_MAIL": "support@mail.dtrdreamtoreal.com",
+      },
       "routes": [
         {
           "custom_domain": true,
@@ -86,6 +106,7 @@
           {
             "binding": "MAIL_QUEUE",
             "queue": "dtrdreamtoreal-mail-queue",
+            "remote": true,
           },
         ],
       },
@@ -94,11 +115,13 @@
           "binding": "AUTH",
           "service": "dtrdreamtoreal-hono-backend",
           "entrypoint": "AuthEntrypoint",
+          "remote": true,
         },
         {
           "binding": "TASK",
           "service": "dtrdreamtoreal-hono-backend",
           "entrypoint": "TaskEntrypoint",
+          "remote": true,
         },
       ],
       "d1_databases": [
