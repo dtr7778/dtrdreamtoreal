@@ -6,14 +6,14 @@ import { implement } from "@orpc/server";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import {
-  buildPaginateOptions,
-  buildPaginationMeta,
-} from "@workspace/drizzle/paginate-query";
-import {
   NotificationSettingsTable,
   NotificationTable,
   PushSubscriptionTable,
 } from "@workspace/drizzle/schemas";
+import {
+  buildPaginateOptions,
+  buildPaginationMeta,
+} from "@workspace/drizzle/utils";
 import { NotificationCategoryEnumSchema } from "@workspace/drizzle/zod-db-enums";
 import { apiResponse } from "@workspace/lib/utils";
 

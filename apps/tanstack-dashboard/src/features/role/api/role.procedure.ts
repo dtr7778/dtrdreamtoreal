@@ -14,7 +14,7 @@ import {
   RoleTable,
   UserRoleTable,
 } from "@workspace/drizzle/schemas";
-import { jsonGroupArray } from "@workspace/drizzle/sql-helpers";
+import { jsonGroupArray } from "@workspace/drizzle/utils";
 import { apiResponse } from "@workspace/lib/utils";
 
 import { roleContract } from "./role.contract";

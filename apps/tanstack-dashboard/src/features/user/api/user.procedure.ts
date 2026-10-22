@@ -23,10 +23,6 @@ import {
 } from "drizzle-orm";
 
 import {
-  buildPaginateOptions,
-  buildPaginationMeta,
-} from "@workspace/drizzle/paginate-query";
-import {
   FileTable,
   RoleTable,
   UserDeviceTable,
@@ -35,6 +31,10 @@ import {
   UserSessionTable,
   UserTable,
 } from "@workspace/drizzle/schemas";
+import {
+  buildPaginateOptions,
+  buildPaginationMeta,
+} from "@workspace/drizzle/utils";
 import {
   roleColumnSql,
   userProfileColumns,

@@ -18,7 +18,7 @@ import {
 } from "@workspace/ui/components/avatar";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { KanbanCard } from "@workspace/ui/components/kibo-ui/kanban";
+import { KanbanCard } from "@workspace/ui/components/kibo-ui/kanban/index";
 import { cn } from "@workspace/ui/lib/utils";
 
 import type { TaskBoardItem } from "../task.constant";
@@ -145,26 +145,26 @@ export function TaskKanbanCard<T extends TaskBoardItem>({
           >
             <Edit />
           </Button>
-          {visibleAssignees.length > 0 && (
-            <AvatarGroup>
-              {visibleAssignees.map((assignee) => (
-                <Avatar key={assignee.id} size="sm" title={assignee.name}>
-                  <AvatarImage
-                    src={resolveUserImage(assignee.image)}
-                    alt={assignee.name}
-                  />
-                  <AvatarFallback className="text-[10px] font-semibold uppercase">
-                    {strInitials(assignee.name)}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {hiddenAssigneeCount > 0 && (
-                <AvatarGroupCount>+{hiddenAssigneeCount}</AvatarGroupCount>
-              )}
-            </AvatarGroup>
-          )}
         </div>
       </div>
+      {visibleAssignees.length > 0 && (
+        <AvatarGroup>
+          {visibleAssignees.map((assignee) => (
+            <Avatar key={assignee.id} size="sm" title={assignee.name}>
+              <AvatarImage
+                src={resolveUserImage(assignee.image)}
+                alt={assignee.name}
+              />
+              <AvatarFallback className="text-[10px] font-semibold uppercase">
+                {strInitials(assignee.name)}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+          {hiddenAssigneeCount > 0 && (
+            <AvatarGroupCount>+{hiddenAssigneeCount}</AvatarGroupCount>
+          )}
+        </AvatarGroup>
+      )}
     </KanbanCard>
   );
 }

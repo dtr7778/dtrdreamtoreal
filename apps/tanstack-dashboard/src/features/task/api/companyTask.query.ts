@@ -9,7 +9,7 @@ import {
   UserRoleTable,
   UserTable,
 } from "@workspace/drizzle/schemas";
-import { jsonGroupArrayDistinct } from "@workspace/drizzle/sql-helpers";
+import { jsonGroupArrayDistinct } from "@workspace/drizzle/utils";
 
 const AssigneeUser = alias(UserTable, "assignee_user");
 const AssigneeUserRoleJoin = alias(UserRoleTable, "assignee_user_role_join");
@@ -119,7 +119,10 @@ export async function buildCompanyTaskListQuery(db: DatabaseType) {
       CompanyTaskAssigneeTable,
       eq(CompanyTaskAssigneeTable.taskId, CompanyTaskTable.id)
     )
-    .leftJoin(AssigneeUser, eq(AssigneeUser.id, CompanyTaskAssigneeTable.userId))
+    .leftJoin(
+      AssigneeUser,
+      eq(AssigneeUser.id, CompanyTaskAssigneeTable.userId)
+    )
     .leftJoin(
       AssigneeUserRoleJoin,
       eq(AssigneeUserRoleJoin.userId, AssigneeUser.id)
@@ -170,7 +173,8 @@ export async function buildCompanyTaskListQuery(db: DatabaseType) {
       .slice()
       .sort(
         (a, b) =>
-          Number(a.assignedAt) - Number(b.assignedAt) || a.id.localeCompare(b.id)
+          Number(a.assignedAt) - Number(b.assignedAt) ||
+          a.id.localeCompare(b.id)
       )
       .map((assignee) => ({
         id: assignee.id,

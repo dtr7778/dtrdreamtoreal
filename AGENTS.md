@@ -3,7 +3,7 @@
 DTR is a software development and digital marketing SEO/AIO/AEO/GEO focused SaaS. This repo is a Turborepo monorepo with:
 
 - Two TanStack Start + React 19 apps (`apps/tanstack-web`, a public web app, and `apps/tanstack-dashboard`, an internal dashboard) that build with Vite and deploy to Cloudflare Workers via Wrangler.
-- `apps/hono-backend`, a Hono API worker deployed with Wrangler.
+- `apps/hono-backend`, a Hono API worker deployed with Wrangler. It hosts the realtime Durable Objects (`ChatHubDurableObject`, `TaskHubDurableObject`) and the RPC entrypoints (`AuthEntrypoint`, `TaskEntrypoint`) that the dashboard reaches through service bindings. The dashboard's oRPC `task` feature publishes task change events via `TaskEntrypoint`.
 - `apps/storybook`, a Storybook component explorer.
 - Shared packages: a shadcn/ui component library (`@workspace/ui`), a Drizzle schema and DB tooling (`@workspace/drizzle`), auth (`@workspace/auth`), transactional email templates (`@workspace/mail`), server-side core logic (`@workspace/server-core`), shared utilities (`@workspace/lib`), a shared TanStack Start package for cross-app head/SEO metadata and favicon/PWA assets (`@workspace/tanstack-start`), and shared config packages (`@workspace/eslint-config`, `@workspace/typescript-config`, `@workspace/vite-config`, `@workspace/vitest-config`).
 

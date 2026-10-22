@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
-import type { PaginationMeta } from "@workspace/drizzle/paginate-query";
+import type { PaginationMeta } from "@workspace/drizzle/utils";
 import { Button } from "@workspace/ui/components/button";
 import {
   Pagination,

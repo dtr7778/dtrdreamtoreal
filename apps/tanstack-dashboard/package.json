@@ -24,7 +24,7 @@
     "preview": "pnpm run build && vite preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
     "typecheck": "tsc -b",
     "deploy": "CLOUDFLARE_ENV=production pnpm run build && wrangler deploy",
     "cf-typegen": "wrangler types --config=\"wrangler.jsonc\" --config=\"../hono-backend/wrangler.jsonc\" --env-file=\".env.local\"",
@@ -78,6 +78,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "catalog:",
     "@faker-js/faker": "catalog:",
+    "@libsql/client": "catalog:",
     "@rolldown/plugin-babel": "catalog:",
     "@serwist/window": "^9.5.13",
     "@serwist/vite": "catalog:",

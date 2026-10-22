@@ -9,7 +9,8 @@
     "SEED_REMOTE",
     "CLOUDFLARE_ACCOUNT_ID",
     "CLOUDFLARE_DATABASE_ID",
-    "CLOUDFLARE_D1_TOKEN"
+    "CLOUDFLARE_D1_TOKEN",
+    "SEED_ENV"
   ],
   "tasks": {
     "build": {

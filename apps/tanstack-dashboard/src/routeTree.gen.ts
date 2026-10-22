@@ -23,6 +23,8 @@ import { Route as dashboardDashboardLayoutRolesRouteImport } from './routes/(das
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as dashboardDashboardLayoutChatChatLayoutRouteImport } from './routes/(dashboard)/_dashboardLayout/chat/_chatLayout'
 import { Route as dashboardDashboardLayoutSettingsSettingsLayoutRouteImport } from './routes/(dashboard)/_dashboardLayout/settings/_settingsLayout'
+import { Route as dashboardDashboardLayoutTasksIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/tasks/index'
+import { Route as dashboardDashboardLayoutTasksPersonalRouteImport } from './routes/(dashboard)/_dashboardLayout/tasks/personal'
 import { Route as dashboardDashboardLayoutUsersIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/users/index'
 import { Route as dashboardDashboardLayoutUsersUserIdRouteImport } from './routes/(dashboard)/_dashboardLayout/users/$userId'
 import { Route as dashboardDashboardLayoutChatChatLayoutIndexRouteImport } from './routes/(dashboard)/_dashboardLayout/chat/_chatLayout/index'
@@ -111,6 +113,18 @@ const dashboardDashboardLayoutSettingsSettingsLayoutRoute =
     path: '/settings',
     getParentRoute: () => dashboardDashboardLayoutRoute,
   } as any)
+const dashboardDashboardLayoutTasksIndexRoute =
+  dashboardDashboardLayoutTasksIndexRouteImport.update({
+    id: '/tasks/',
+    path: '/tasks/',
+    getParentRoute: () => dashboardDashboardLayoutRoute,
+  } as any)
+const dashboardDashboardLayoutTasksPersonalRoute =
+  dashboardDashboardLayoutTasksPersonalRouteImport.update({
+    id: '/tasks/personal',
+    path: '/tasks/personal',
+    getParentRoute: () => dashboardDashboardLayoutRoute,
+  } as any)
 const dashboardDashboardLayoutUsersIndexRoute =
   dashboardDashboardLayoutUsersIndexRouteImport.update({
     id: '/users/',
@@ -189,7 +203,9 @@ export interface FileRoutesByFullPath {
   '/': typeof dashboardDashboardLayoutIndexRoute
   '/chat': typeof dashboardDashboardLayoutChatChatLayoutRouteWithChildren
   '/settings': typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
+  '/tasks/personal': typeof dashboardDashboardLayoutTasksPersonalRoute
   '/users/$userId': typeof dashboardDashboardLayoutUsersUserIdRoute
+  '/tasks/': typeof dashboardDashboardLayoutTasksIndexRoute
   '/users/': typeof dashboardDashboardLayoutUsersIndexRoute
   '/chat/$chatRoomId': typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
   '/settings/connected-apps': typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
@@ -211,7 +227,9 @@ export interface FileRoutesByTo {
   '/roles': typeof dashboardDashboardLayoutRolesRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/': typeof dashboardDashboardLayoutIndexRoute
+  '/tasks/personal': typeof dashboardDashboardLayoutTasksPersonalRoute
   '/users/$userId': typeof dashboardDashboardLayoutUsersUserIdRoute
+  '/tasks': typeof dashboardDashboardLayoutTasksIndexRoute
   '/users': typeof dashboardDashboardLayoutUsersIndexRoute
   '/chat/$chatRoomId': typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
   '/settings/connected-apps': typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
@@ -238,7 +256,9 @@ export interface FileRoutesById {
   '/(dashboard)/_dashboardLayout/': typeof dashboardDashboardLayoutIndexRoute
   '/(dashboard)/_dashboardLayout/chat/_chatLayout': typeof dashboardDashboardLayoutChatChatLayoutRouteWithChildren
   '/(dashboard)/_dashboardLayout/settings/_settingsLayout': typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
+  '/(dashboard)/_dashboardLayout/tasks/personal': typeof dashboardDashboardLayoutTasksPersonalRoute
   '/(dashboard)/_dashboardLayout/users/$userId': typeof dashboardDashboardLayoutUsersUserIdRoute
+  '/(dashboard)/_dashboardLayout/tasks/': typeof dashboardDashboardLayoutTasksIndexRoute
   '/(dashboard)/_dashboardLayout/users/': typeof dashboardDashboardLayoutUsersIndexRoute
   '/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId': typeof dashboardDashboardLayoutChatChatLayoutChatRoomIdRoute
   '/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps': typeof dashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
@@ -264,7 +284,9 @@ export interface FileRouteTypes {
     | '/'
     | '/chat'
     | '/settings'
+    | '/tasks/personal'
     | '/users/$userId'
+    | '/tasks/'
     | '/users/'
     | '/chat/$chatRoomId'
     | '/settings/connected-apps'
@@ -286,7 +308,9 @@ export interface FileRouteTypes {
     | '/roles'
     | '/api/rpc/$'
     | '/'
+    | '/tasks/personal'
     | '/users/$userId'
+    | '/tasks'
     | '/users'
     | '/chat/$chatRoomId'
     | '/settings/connected-apps'
@@ -312,7 +336,9 @@ export interface FileRouteTypes {
     | '/(dashboard)/_dashboardLayout/'
     | '/(dashboard)/_dashboardLayout/chat/_chatLayout'
     | '/(dashboard)/_dashboardLayout/settings/_settingsLayout'
+    | '/(dashboard)/_dashboardLayout/tasks/personal'
     | '/(dashboard)/_dashboardLayout/users/$userId'
+    | '/(dashboard)/_dashboardLayout/tasks/'
     | '/(dashboard)/_dashboardLayout/users/'
     | '/(dashboard)/_dashboardLayout/chat/_chatLayout/$chatRoomId'
     | '/(dashboard)/_dashboardLayout/settings/_settingsLayout/connected-apps'
@@ -428,6 +454,20 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteImport
+      parentRoute: typeof dashboardDashboardLayoutRoute
+    }
+    '/(dashboard)/_dashboardLayout/tasks/': {
+      id: '/(dashboard)/_dashboardLayout/tasks/'
+      path: '/tasks'
+      fullPath: '/tasks/'
+      preLoaderRoute: typeof dashboardDashboardLayoutTasksIndexRouteImport
+      parentRoute: typeof dashboardDashboardLayoutRoute
+    }
+    '/(dashboard)/_dashboardLayout/tasks/personal': {
+      id: '/(dashboard)/_dashboardLayout/tasks/personal'
+      path: '/tasks/personal'
+      fullPath: '/tasks/personal'
+      preLoaderRoute: typeof dashboardDashboardLayoutTasksPersonalRouteImport
       parentRoute: typeof dashboardDashboardLayoutRoute
     }
     '/(dashboard)/_dashboardLayout/users/': {
@@ -578,7 +618,9 @@ interface dashboardDashboardLayoutRouteChildren {
   dashboardDashboardLayoutIndexRoute: typeof dashboardDashboardLayoutIndexRoute
   dashboardDashboardLayoutChatChatLayoutRoute: typeof dashboardDashboardLayoutChatChatLayoutRouteWithChildren
   dashboardDashboardLayoutSettingsSettingsLayoutRoute: typeof dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
+  dashboardDashboardLayoutTasksPersonalRoute: typeof dashboardDashboardLayoutTasksPersonalRoute
   dashboardDashboardLayoutUsersUserIdRoute: typeof dashboardDashboardLayoutUsersUserIdRoute
+  dashboardDashboardLayoutTasksIndexRoute: typeof dashboardDashboardLayoutTasksIndexRoute
   dashboardDashboardLayoutUsersIndexRoute: typeof dashboardDashboardLayoutUsersIndexRoute
 }
 
@@ -593,8 +635,12 @@ const dashboardDashboardLayoutRouteChildren: dashboardDashboardLayoutRouteChildr
       dashboardDashboardLayoutChatChatLayoutRouteWithChildren,
     dashboardDashboardLayoutSettingsSettingsLayoutRoute:
       dashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren,
+    dashboardDashboardLayoutTasksPersonalRoute:
+      dashboardDashboardLayoutTasksPersonalRoute,
     dashboardDashboardLayoutUsersUserIdRoute:
       dashboardDashboardLayoutUsersUserIdRoute,
+    dashboardDashboardLayoutTasksIndexRoute:
+      dashboardDashboardLayoutTasksIndexRoute,
     dashboardDashboardLayoutUsersIndexRoute:
       dashboardDashboardLayoutUsersIndexRoute,
   }

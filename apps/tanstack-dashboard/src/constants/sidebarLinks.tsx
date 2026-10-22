@@ -1,6 +1,7 @@
 import type { SidebarGroupMenuLinkType, SidebarMenuLinkType } from "#/types";
 import {
   Bell,
+  ClipboardList,
   House,
   MessageSquare,
   Settings,
@@ -24,6 +25,24 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         icon: <MessageSquare />,
         path: "/chat",
         pathRegex: /^\/chat(\/.*)?$/,
+      },
+      {
+        title: "Tasks",
+        icon: <ClipboardList />,
+        path: "/tasks",
+        pathRegex: /^\/tasks(\/.*)?$/,
+        items: [
+          {
+            title: "All Tasks",
+            path: "/tasks",
+            pathRegex: /^\/tasks$/,
+          },
+          {
+            title: "Personal Tasks",
+            path: "/tasks/personal",
+            pathRegex: /^\/tasks\/personal$/,
+          },
+        ],
       },
     ],
   },
