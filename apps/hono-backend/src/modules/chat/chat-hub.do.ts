@@ -7,6 +7,11 @@ import type {
   ChatRealtimeClientEvent,
   ChatRealtimeServerEvent,
 } from "@workspace/lib/types";
+import {
+  SWITCHING_PROTOCOLS,
+  UNAUTHORIZED,
+  UPGRADE_REQUIRED,
+} from "@workspace/server-core";
 
 import type { AppEnv } from "@/types";
 
@@ -122,12 +127,16 @@ export class ChatHubDurableObject extends DurableObject<AppEnv> {
     }
 
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
-      return new Response("Expected WebSocket upgrade", { status: 426 });
+      return new Response("Expected WebSocket upgrade", {
+        status: UPGRADE_REQUIRED,
+      });
     }
 
     const userId = request.headers.get("x-user-id");
     if (!userId) {
-      return new Response("Missing authenticated user", { status: 401 });
+      return new Response("Missing authenticated user", {
+        status: UNAUTHORIZED,
+      });
     }
 
     const pair = new WebSocketPair();
@@ -157,7 +166,10 @@ export class ChatHubDurableObject extends DurableObject<AppEnv> {
       );
     }
 
-    return new Response(null, { status: 101, webSocket: client });
+    return new Response(null, {
+      status: SWITCHING_PROTOCOLS,
+      webSocket: client,
+    });
   }
 
   async webSocketMessage(
