@@ -2,19 +2,31 @@ import { WorkerEntrypoint } from "cloudflare:workers";
 
 import { createDrizzleClient } from "@workspace/drizzle/client";
 import { logger } from "@workspace/lib/logger";
+import type { TaskRealtimePublishPayload } from "@workspace/lib/types";
 import { MailQueueProcessor } from "@workspace/mail/consumer";
 import { ResendMailTransport } from "@workspace/mail/transports";
 
 import app from "./app";
 import { getAuth } from "./lib/auth";
 import { validateEnv } from "./lib/env";
+import { TASK_HUB_NAME } from "./modules/task/task-hub.do";
 import type { AppEnv } from "./types";
 
 export { ChatHubDurableObject } from "./modules/chat/chat-hub.do";
+export { TaskHubDurableObject } from "./modules/task/task-hub.do";
 
-/**
- * RPC entrypoint
- */
+export class TaskEntrypoint extends WorkerEntrypoint<AppEnv> {
+  async publish(payload: TaskRealtimePublishPayload) {
+    const stub = this.env.TASK_HUB.getByName(TASK_HUB_NAME);
+
+    await stub.fetch("https://task-hub.internal/publish", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
+}
+
 export class AuthEntrypoint extends WorkerEntrypoint<AppEnv> {
   async getSession(headers: Headers) {
     return getAuth(this.env).api.getSession({ headers });

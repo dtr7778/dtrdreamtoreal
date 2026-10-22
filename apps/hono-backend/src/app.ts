@@ -5,6 +5,7 @@ import { getEnv } from "@/lib/env";
 
 import chatRouter from "@/modules/chat";
 import mailRouter from "@/modules/mail";
+import taskRouter from "@/modules/task";
 import uploadRouter from "@/modules/upload";
 import type { ApiVariables, AppEnv } from "@/types";
 
@@ -32,7 +33,7 @@ configureOpenAPI(app, {
   version: packageJSON.version,
 });
 
-const routes = [mailRouter, chatRouter, uploadRouter] as const;
+const routes = [mailRouter, chatRouter, taskRouter, uploadRouter] as const;
 
 routes.forEach((route) => {
   app.route("/", route);
