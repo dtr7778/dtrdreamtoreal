@@ -2,15 +2,10 @@ import { faker } from "@faker-js/faker";
 import { zocker } from "zocker";
 
 import type { DatabaseType } from "../../clients/drizzle-client";
-import type {
-  NotificationDataModel,
-  UserDataModel} from "../../schemas";
-import {
-  insertNotificationSchema,
-  NotificationTable
-} from "../../schemas";
+import type { NotificationDataModel, UserDataModel } from "../../schemas";
+import { insertNotificationSchema, NotificationTable } from "../../schemas";
+import { insertChunkedReturning } from "../../utils";
 import { seedConfigs } from "../seed.config";
-import { insertChunkedReturning } from "../seed-utils";
 
 export async function seedNotifications(
   db: DatabaseType,

@@ -6,11 +6,23 @@
     {
       "binding": "DB",
       "database_name": "dtrdreamtoreal-db-local",
-      "database_id": "dd2b93c8-d3fd-4de7-8956-15b488c678f6",
+      "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "../../migrations",
+      "remote": false,
     },
   ],
   "env": {
+    "staging": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "dtrdreamtoreal-db-staging",
+          "database_id": "d80509bc-4357-44c5-9353-7dc9ea1e5c62",
+          "migrations_dir": "../../migrations",
+          "remote": true,
+        },
+      ],
+    },
     "production": {
       "d1_databases": [
         {
@@ -18,6 +30,7 @@
           "database_name": "dtrdreamtoreal-db",
           "database_id": "fc84e1cc-a96e-40fc-b62e-71f105409167",
           "migrations_dir": "../../migrations",
+          "remote": true,
         },
       ],
     },

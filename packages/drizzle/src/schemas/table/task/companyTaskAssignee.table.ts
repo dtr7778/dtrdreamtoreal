@@ -2,7 +2,6 @@ import { relations, sql } from "drizzle-orm";
 import {
   foreignKey,
   index,
-  integer,
   sqliteTable,
   text,
   uniqueIndex,
@@ -14,7 +13,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_id } from "../../db-utils";
+import { db_date, db_id } from "../../../utils/db-utils";
 import { UserTable } from "../user";
 import { CompanyTaskTable } from "./companyTask.table";
 
@@ -24,7 +23,7 @@ export const CompanyTaskAssigneeTable = sqliteTable(
     id: db_id,
     taskId: text("task_id").notNull(),
     userId: text("user_id").notNull(),
-    assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
+    assignedAt: db_date("assigned_at")
       .notNull()
       .default(sql`(unixepoch() * 1000)`),
   },

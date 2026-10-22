@@ -13,7 +13,12 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { AuditStatusEnum } from "../../enums/db-enums";
 import { LeadCompanyTable } from "../lead";
 import { UserTable } from "../user";
@@ -38,8 +43,8 @@ export const SiteAuditTable = sqliteTable(
     passedItems: integer("passed_items").default(0).notNull(),
     failedItems: integer("failed_items").default(0).notNull(),
 
-    startedAt: integer("started_at", { mode: "timestamp_ms" }),
-    completedAt: integer("completed_at", { mode: "timestamp_ms" }),
+    startedAt: db_date("started_at"),
+    completedAt: db_date("completed_at"),
 
     triggeredBy: text("triggered_by"),
     createdAt: db_created_at,

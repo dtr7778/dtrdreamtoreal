@@ -1,46 +1,18 @@
-const D1_MAX_BOUND_PARAMS = 100;
+import { faker } from "@faker-js/faker";
 
-type InsertQuery<R = unknown> = {
-  toSQL(): { params: unknown[] };
-} & PromiseLike<R>;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-async function runChunks<T, R>(
-  rows: T[],
-  build: (chunk: T[]) => InsertQuery<R>,
-  collect: (result: R) => void
-): Promise<void> {
-  if (rows.length === 0) return;
-
-  const query = build(rows);
-
-  // D1 allows at most 100 bound parameters per statement. Split the batch until
-  // each compiled statement fits (a single row is sent as-is even if it cannot).
-  if (rows.length === 1 || query.toSQL().params.length <= D1_MAX_BOUND_PARAMS) {
-    collect(await query);
-    return;
-  }
-
-  const mid = Math.ceil(rows.length / 2);
-  await runChunks(rows.slice(0, mid), build, collect);
-  await runChunks(rows.slice(mid), build, collect);
+export function daysAgo(days: number): Date {
+  return new Date(Date.now() - days * DAY_MS);
 }
 
-export async function insertChunked<T>(
-  rows: T[],
-  build: (chunk: T[]) => InsertQuery
-): Promise<void> {
-  await runChunks<T, unknown>(rows, build, () => {});
+export function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * DAY_MS);
 }
 
-export async function insertChunkedReturning<T, R>(
-  rows: T[],
-  build: (chunk: T[]) => InsertQuery<R[]>
-): Promise<R[]> {
-  const results: R[] = [];
+export function splitAmount(total: number): Array<number> {
+  if (total < 2 || !faker.datatype.boolean(0.5)) return [total];
 
-  await runChunks<T, R[]>(rows, build, (result) => {
-    results.push(...result);
-  });
-
-  return results;
+  const first = faker.number.int({ min: 1, max: total - 1 });
+  return [first, total - first];
 }

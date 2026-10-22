@@ -2,7 +2,6 @@ import { relations, sql } from "drizzle-orm";
 import {
   foreignKey,
   index,
-  integer,
   sqliteTable,
   text,
   uniqueIndex,
@@ -14,7 +13,12 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { ChatMemberRoleEnum } from "../../enums/db-enums";
 import { UserTable } from "../user";
 import { ChatMessageTable } from "./chatMessage.table";
@@ -28,12 +32,12 @@ export const ChatRoomMemberTable = sqliteTable(
     userId: text("user_id").notNull(),
 
     role: ChatMemberRoleEnum("role").notNull().default("member"),
-    isMuted: integer("is_muted", { mode: "boolean" }).notNull().default(false),
+    isMuted: db_bool("is_muted").notNull().default(false),
 
     lastReadMessageId: text("last_read_message_id"),
-    lastReadAt: integer("last_read_at", { mode: "timestamp_ms" }),
+    lastReadAt: db_date("last_read_at"),
 
-    joinedAt: integer("joined_at", { mode: "timestamp_ms" })
+    joinedAt: db_date("joined_at")
       .notNull()
       .default(sql`(unixepoch() * 1000)`),
     updatedAt: db_updated_at,

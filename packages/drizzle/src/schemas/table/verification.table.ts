@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -6,13 +6,18 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../db-utils";
+import {
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../utils/db-utils";
 
 export const VerificationTable = sqliteTable("verifications", {
   id: db_id,
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+  expiresAt: db_date("expires_at").notNull(),
   createdAt: db_created_at,
   updatedAt: db_updated_at,
 });

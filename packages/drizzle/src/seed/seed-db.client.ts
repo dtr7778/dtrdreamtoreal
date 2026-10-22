@@ -10,6 +10,7 @@ export async function seedDbClient() {
   const configPath = process.env.WRANGLER_CONFIG_PATH;
   const persistPath = process.env.WRANGLER_PERSIST_PATH;
   const isRemote = process.env.SEED_REMOTE === "true";
+  const seedEnvironment = process.env.SEED_ENV || "production";
 
   if (!configPath) {
     throw new Error(
@@ -18,12 +19,12 @@ export async function seedDbClient() {
   }
 
   console.log(
-    `🔌 Connecting to the ${isRemote ? "REMOTE" : "local"} D1 database via ${configPath}\n`
+    `🔌 Connecting to the ${isRemote ? `REMOTE (${seedEnvironment})` : "local"} D1 database via ${configPath}\n`
   );
 
   const { env, dispose } = await getPlatformProxy<SeedEnv>({
     configPath,
-    environment: isRemote ? "production" : undefined,
+    environment: isRemote ? seedEnvironment : undefined,
     remoteBindings: isRemote,
     persist: isRemote ? false : persistPath ? { path: persistPath } : false,
   });

@@ -21,7 +21,7 @@ import {
   ChatRoomTable,
   FileTable,
 } from "../../schemas";
-import { insertChunked, insertChunkedReturning } from "../seed-utils";
+import { insertChunked, insertChunkedReturning } from "../../utils";
 import { seedConfigs } from "../seed.config";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👀", "🙌", "😮"];

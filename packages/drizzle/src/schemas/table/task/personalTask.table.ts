@@ -14,7 +14,12 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import {
   TaskPriorityEnum,
   TaskSourceEnum,
@@ -32,9 +37,9 @@ export const PersonalTaskTable = sqliteTable(
     description: text("description"),
     status: TaskStatusEnum("status").default("todo").notNull(),
     priority: TaskPriorityEnum("priority").default("medium").notNull(),
-    dueDate: integer("due_date", { mode: "timestamp_ms" }),
-    startedAt: integer("started_at", { mode: "timestamp_ms" }),
-    completedAt: integer("completed_at", { mode: "timestamp_ms" }),
+    dueDate: db_date("due_date"),
+    startedAt: db_date("started_at"),
+    completedAt: db_date("completed_at"),
     sortOrder: integer("sort_order").default(0).notNull(),
 
     source: TaskSourceEnum("source").default("manual").notNull(),

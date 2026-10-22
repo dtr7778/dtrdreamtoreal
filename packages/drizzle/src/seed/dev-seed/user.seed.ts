@@ -8,7 +8,8 @@ import type {
   InsertUser,
   InsertUserRole,
   RoleDataModel,
-  UserDataModel} from "../../schemas";
+  UserDataModel,
+} from "../../schemas";
 import {
   AccountTable,
   insertUserSchema,
@@ -17,9 +18,9 @@ import {
 } from "../../schemas";
 import type { RoleEnumType } from "../../schemas/enums/zod-db-enums";
 import { RoleEnumSchema } from "../../schemas/enums/zod-db-enums";
+import { insertChunked, insertChunkedReturning } from "../../utils";
 import { SYSTEM_ROLES } from "../roles.seed";
 import { seedConfigs } from "../seed.config";
-import { insertChunked, insertChunkedReturning } from "../seed-utils";
 
 const DEFAULT_USERS: Array<{
   name: string;

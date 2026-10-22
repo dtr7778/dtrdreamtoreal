@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  foreignKey,
-  index,
-  integer,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
+import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -13,7 +7,13 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import {
   NotificationCategoryEnum,
   NotificationLevelEnum,
@@ -31,11 +31,9 @@ export const NotificationTable = sqliteTable(
     title: text("title").notNull(),
     message: text("message").notNull(),
     data: text("data", { mode: "json" }), // Stores contextual information (e.g., leadId, action links)
-    isRead: integer("is_read", { mode: "boolean" }).default(false).notNull(),
-    readAt: integer("read_at", { mode: "timestamp_ms" }),
-    isArchived: integer("is_archived", { mode: "boolean" })
-      .default(false)
-      .notNull(),
+    isRead: db_bool("is_read").default(false).notNull(),
+    readAt: db_date("read_at"),
+    isArchived: db_bool("is_archived").default(false).notNull(),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },

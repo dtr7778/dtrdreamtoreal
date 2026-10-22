@@ -7,7 +7,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../db-utils";
+import { db_created_at, db_id, db_updated_at } from "../../utils/db-utils";
 import { AddressTypeEnum } from "../enums/db-enums";
 import { LeadCompanyAddressTable, LeadUserAddressTable } from "./lead";
 

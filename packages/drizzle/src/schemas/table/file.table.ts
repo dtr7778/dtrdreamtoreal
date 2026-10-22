@@ -13,7 +13,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_id, db_soft_delete } from "../db-utils";
+import { db_date, db_id, db_soft_delete } from "../../utils/db-utils";
 import {
   FileEntityTypeEnumSchema,
   type FileEntityTypeEnumType,
@@ -34,7 +34,7 @@ export const FileTable = sqliteTable(
     uploadedBy: text("uploaded_by"),
     entityType: text("entity_type").$type<FileEntityTypeEnumType>(),
     entityId: text("entity_id"), // ID of the associated entity
-    uploadedAt: integer("uploaded_at", { mode: "timestamp_ms" })
+    uploadedAt: db_date("uploaded_at")
       .notNull()
       .default(sql`(unixepoch() * 1000)`),
     ...db_soft_delete,

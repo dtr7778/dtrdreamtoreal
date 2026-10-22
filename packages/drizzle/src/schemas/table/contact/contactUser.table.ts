@@ -13,7 +13,13 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { ContactSubmissionTable } from "./contactSubmission.table";
 
 export const ContactUserTable = sqliteTable(
@@ -27,13 +33,11 @@ export const ContactUserTable = sqliteTable(
     phone: text("phone"),
     company: text("company"),
 
-    isBlocked: integer("is_blocked", { mode: "boolean" })
-      .notNull()
-      .default(false),
+    isBlocked: db_bool("is_blocked").notNull().default(false),
     blockedReason: text("blocked_reason"),
     spamCount: integer("spam_count").notNull().default(0),
     submissionCount: integer("submission_count").notNull().default(0),
-    lastSubmittedAt: integer("last_submitted_at", { mode: "timestamp_ms" }),
+    lastSubmittedAt: db_date("last_submitted_at"),
 
     createdAt: db_created_at,
     updatedAt: db_updated_at,

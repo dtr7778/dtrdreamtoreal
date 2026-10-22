@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  foreignKey,
-  index,
-  integer,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
+import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -13,7 +7,13 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { ContactSubmissionTable } from "../contact";
 import { LeadCompanyEmailThreadTable, LeadUserEmailThreadTable } from "../lead";
 import { UserTable } from "../user";
@@ -30,10 +30,8 @@ export const EmailThreadTable = sqliteTable(
     contactEmail: text("contact_email").notNull(), // The original contact form email
     contactName: text("contact_name"),
 
-    isClosed: integer("is_closed", { mode: "boolean" })
-      .notNull()
-      .default(false),
-    closedAt: integer("closed_at", { mode: "timestamp_ms" }),
+    isClosed: db_bool("is_closed").notNull().default(false),
+    closedAt: db_date("closed_at"),
     closedBy: text("closed_by"),
 
     createdAt: db_created_at,

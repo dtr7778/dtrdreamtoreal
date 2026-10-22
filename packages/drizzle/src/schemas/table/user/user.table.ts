@@ -1,10 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  integer,
-  sqliteTable,
-  text,
-  uniqueIndex,
-} from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -12,7 +7,13 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { RoleEnumSchema, type RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
 import { AiUsageTable } from "../aiUsage.table";
@@ -47,14 +48,12 @@ export const UserTable = sqliteTable(
     id: db_id,
     name: text("name").notNull(),
     email: text("email").notNull(),
-    emailVerified: integer("email_verified", { mode: "boolean" })
-      .notNull()
-      .default(false),
+    emailVerified: db_bool("email_verified").notNull().default(false),
     image: text("image"),
     role: text("role").$type<RoleEnumType>().notNull(),
-    banned: integer("banned", { mode: "boolean" }).default(false),
+    banned: db_bool("banned").default(false),
     banReason: text("ban_reason"),
-    banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
+    banExpires: db_date("ban_expires"),
 
     // settings
     timezone: text("timezone").default("UTC").notNull(),

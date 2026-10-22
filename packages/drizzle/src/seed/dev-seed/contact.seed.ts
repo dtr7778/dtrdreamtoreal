@@ -15,7 +15,7 @@ import {
   insertContactSubmissionSchema,
   insertContactUserSchema,
 } from "../../schemas";
-import { insertChunked, insertChunkedReturning } from "../seed-utils";
+import { insertChunked, insertChunkedReturning } from "../../utils";
 import { seedConfigs } from "../seed.config";
 
 export async function seedContacts(

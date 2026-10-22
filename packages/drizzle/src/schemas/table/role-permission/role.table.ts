@@ -7,7 +7,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_id } from "../../db-utils";
+import { db_id } from "../../../utils/db-utils";
 import { RoleEnum } from "../../enums/db-enums";
 import { RolePermissionTable } from "./rolePermission.table";
 import { UserRoleTable } from "./userRole.table";

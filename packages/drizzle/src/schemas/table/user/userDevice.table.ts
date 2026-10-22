@@ -2,7 +2,6 @@ import { relations, sql } from "drizzle-orm";
 import {
   foreignKey,
   index,
-  integer,
   sqliteTable,
   text,
   uniqueIndex,
@@ -14,7 +13,12 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { UserTable } from "./user.table";
 import { UserEventTable } from "./userEvent.table";
 import { UserSessionTable } from "./userSession.table";
@@ -28,10 +32,10 @@ export const UserDeviceTable = sqliteTable(
     browser: text("browser"),
     os: text("os"),
     deviceType: text("device_type"),
-    firstSeenAt: integer("first_seen_at", { mode: "timestamp_ms" })
+    firstSeenAt: db_date("first_seen_at")
       .notNull()
       .default(sql`(unixepoch() * 1000)`),
-    lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" })
+    lastSeenAt: db_date("last_seen_at")
       .notNull()
       .default(sql`(unixepoch() * 1000)`),
     createdAt: db_created_at,

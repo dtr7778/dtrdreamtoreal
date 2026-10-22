@@ -3,23 +3,24 @@ import { zocker } from "zocker";
 
 import type { DatabaseType } from "../../clients/drizzle-client";
 import type {
-  LeadCompanyDataModel,
   InsertLeadCompanyAddress,
   InsertLeadCompanySocial,
   InsertSocialMedia,
-  UserDataModel} from "../../schemas";
+  LeadCompanyDataModel,
+  UserDataModel,
+} from "../../schemas";
 import {
   AddressTable,
+  insertAddressSchema,
+  insertLeadCompanySchema,
   LeadCompanyAddressTable,
   LeadCompanySocialTable,
   LeadCompanyTable,
-  insertAddressSchema,
-  insertLeadCompanySchema,
-  SocialMediaTable
+  SocialMediaTable,
 } from "../../schemas";
 import { SocialMediaPlatfromTypeEnumSchema } from "../../schemas/enums/zod-db-enums";
+import { insertChunked, insertChunkedReturning } from "../../utils";
 import { seedConfigs } from "../seed.config";
-import { insertChunked, insertChunkedReturning } from "../seed-utils";
 
 export async function seedCompanies(
   db: DatabaseType,
@@ -79,9 +80,8 @@ export async function seedCompanies(
     } satisfies InsertSocialMedia;
   });
 
-  const socialMedia = await insertChunkedReturning(
-    socialMediaData,
-    (chunk) => db.insert(SocialMediaTable).values(chunk).returning()
+  const socialMedia = await insertChunkedReturning(socialMediaData, (chunk) =>
+    db.insert(SocialMediaTable).values(chunk).returning()
   );
 
   await insertChunked(

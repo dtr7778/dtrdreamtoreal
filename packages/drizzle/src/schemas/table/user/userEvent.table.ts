@@ -7,7 +7,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id } from "../../db-utils";
+import { db_created_at, db_id } from "../../../utils/db-utils";
 import { UserEventTypeEnum } from "../../enums/db-enums";
 import { UserTable } from "./user.table";
 import { UserDeviceTable } from "./userDevice.table";

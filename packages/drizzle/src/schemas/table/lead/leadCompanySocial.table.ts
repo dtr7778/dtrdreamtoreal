@@ -3,7 +3,7 @@ import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id } from "../../db-utils";
+import { db_created_at, db_id } from "../../../utils/db-utils";
 import { SocialMediaTable } from "../socialMedia.table";
 import { LeadCompanyTable } from "./leadCompany.table";
 

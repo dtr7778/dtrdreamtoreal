@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  foreignKey,
-  index,
-  integer,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
+import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -13,7 +7,13 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { ChatRoomTypeEnum } from "../../enums/db-enums";
 import { FileTable } from "../file.table";
 import { UserTable } from "../user";
@@ -32,11 +32,9 @@ export const ChatRoomTable = sqliteTable(
 
     createdBy: text("created_by"),
 
-    lastMessageAt: integer("last_message_at", { mode: "timestamp_ms" }),
+    lastMessageAt: db_date("last_message_at"),
 
-    isArchived: integer("is_archived", { mode: "boolean" })
-      .notNull()
-      .default(false),
+    isArchived: db_bool("is_archived").notNull().default(false),
 
     createdAt: db_created_at,
     updatedAt: db_updated_at,

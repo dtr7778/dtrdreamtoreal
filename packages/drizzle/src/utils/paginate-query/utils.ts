@@ -25,7 +25,8 @@ export function getColumn(
   tableColumns: TableColumns,
   field: string
 ): SQLiteColumn | undefined {
-  const col = tableColumns[field];
+  // The index signature hides that a field may be absent at runtime.
+  const col = tableColumns[field] as SQLiteColumn | undefined;
   return col && "columnType" in col ? col : undefined;
 }
 

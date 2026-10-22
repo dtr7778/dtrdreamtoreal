@@ -6,7 +6,7 @@ import type {
   PermissionLevelEnumType,
   ResourceTypeEnumType,
 } from "../schemas/enums/zod-db-enums";
-import { insertChunkedReturning } from "./seed-utils";
+import { insertChunkedReturning } from "../utils";
 
 export type PermissionType = Pick<
   PermissionDataModel,

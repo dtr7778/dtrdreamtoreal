@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
   foreignKey,
-  integer,
   sqliteTable,
   text,
   uniqueIndex,
@@ -13,7 +12,12 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { NotificationCategoryEnum } from "../../enums/db-enums";
 import { UserTable } from "./user.table";
 
@@ -23,15 +27,9 @@ export const NotificationSettingsTable = sqliteTable(
     id: db_id,
     userId: text("user_id").notNull(),
     category: NotificationCategoryEnum("category").notNull(),
-    emailEnabled: integer("email_enabled", { mode: "boolean" })
-      .default(true)
-      .notNull(),
-    pushEnabled: integer("push_enabled", { mode: "boolean" })
-      .default(true)
-      .notNull(),
-    inAppEnabled: integer("in_app_enabled", { mode: "boolean" })
-      .default(true)
-      .notNull(),
+    emailEnabled: db_bool("email_enabled").default(true).notNull(),
+    pushEnabled: db_bool("push_enabled").default(true).notNull(),
+    inAppEnabled: db_bool("in_app_enabled").default(true).notNull(),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },

@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  foreignKey,
-  index,
-  integer,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
+import { foreignKey, index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -13,7 +7,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id } from "../../db-utils";
+import { db_bool, db_created_at, db_id } from "../../../utils/db-utils";
 import { AddressTable } from "../address.table";
 import { LeadUserTable } from "./leadUser.table";
 
@@ -23,9 +17,7 @@ export const LeadUserAddressTable = sqliteTable(
     id: db_id,
     leadUserId: text("lead_user_id").notNull(),
     addressId: text("address_id").notNull(),
-    isPrimary: integer("is_primary", { mode: "boolean" })
-      .notNull()
-      .default(true),
+    isPrimary: db_bool("is_primary").notNull().default(true),
     createdAt: db_created_at,
   },
   (table) => [

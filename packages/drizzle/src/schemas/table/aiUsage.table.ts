@@ -14,7 +14,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id } from "../db-utils";
+import { db_created_at, db_id } from "../../utils/db-utils";
 import { LeadCompanyAiUsageTable } from "./lead";
 import { UserTable } from "./user";
 

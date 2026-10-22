@@ -2,7 +2,6 @@ import { relations } from "drizzle-orm";
 import {
   foreignKey,
   index,
-  integer,
   sqliteTable,
   text,
   uniqueIndex,
@@ -14,7 +13,13 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import {
+  db_bool,
+  db_created_at,
+  db_date,
+  db_id,
+  db_updated_at,
+} from "../../../utils/db-utils";
 import { ContactStatusEnum } from "../../enums/db-enums";
 import { EmailThreadTable } from "../email";
 import { ContactUserTable } from "./contactUser.table";
@@ -33,11 +38,11 @@ export const ContactSubmissionTable = sqliteTable(
     userAgent: text("user_agent"),
     notes: text("notes"),
 
-    isSpam: integer("is_spam", { mode: "boolean" }).notNull().default(false),
+    isSpam: db_bool("is_spam").notNull().default(false),
     spamReason: text("spam_reason"),
 
-    readAt: integer("read_at", { mode: "timestamp_ms" }),
-    closedAt: integer("closed_at", { mode: "timestamp_ms" }),
+    readAt: db_date("read_at"),
+    closedAt: db_date("closed_at"),
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },

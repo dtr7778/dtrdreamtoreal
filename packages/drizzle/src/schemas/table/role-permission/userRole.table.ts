@@ -2,7 +2,6 @@ import { relations, sql } from "drizzle-orm";
 import {
   foreignKey,
   index,
-  integer,
   sqliteTable,
   text,
   uniqueIndex,
@@ -10,7 +9,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import z from "zod";
 
-import { db_id } from "../../db-utils";
+import { db_date, db_id } from "../../../utils/db-utils";
 import { UserTable } from "../user";
 import { RoleTable } from "./role.table";
 
@@ -20,7 +19,7 @@ export const UserRoleTable = sqliteTable(
     id: db_id,
     roleId: text("role_id").notNull(),
     userId: text("user_id").notNull(),
-    assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
+    assignedAt: db_date("assigned_at")
       .default(sql`(unixepoch() * 1000)`)
       .notNull(),
   },

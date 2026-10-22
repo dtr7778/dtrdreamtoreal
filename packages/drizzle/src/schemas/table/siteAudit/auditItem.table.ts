@@ -14,7 +14,7 @@ import {
 } from "drizzle-zod";
 import z from "zod";
 
-import { db_created_at, db_id, db_updated_at } from "../../db-utils";
+import { db_created_at, db_id, db_updated_at } from "../../../utils/db-utils";
 import { AuditItemStatusEnum } from "../../enums/db-enums";
 import { SiteAuditTable } from "./siteAudit.table";
 
