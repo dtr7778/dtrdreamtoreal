@@ -6,6 +6,7 @@ import type {
 } from "@workspace/drizzle/zod-db-enums";
 
 export * from "./chatRealtime";
+export * from "./taskRealtime";
 
 export type NODE_ENV_TYPE = "development" | "test" | "production";
 
