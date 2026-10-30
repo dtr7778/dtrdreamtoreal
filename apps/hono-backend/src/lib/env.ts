@@ -4,7 +4,6 @@ const envSchema = z.object({
   ENVIRONMENT: z
     .enum(["development", "production", "test"] as const)
     .default("development"),
-  APP_NAME: z.string().min(1),
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"] as const)
     .default("debug"),

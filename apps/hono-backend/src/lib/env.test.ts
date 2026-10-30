@@ -4,7 +4,6 @@ import { validateEnv } from "@/lib/env";
 
 const validEnv = {
   ENVIRONMENT: "production",
-  APP_NAME: "Dream To Real",
   LOG_LEVEL: "warn",
   BETTER_AUTH_SECRET: "secret",
   BETTER_AUTH_URL: "https://api.dtrdreamtoreal.com",
@@ -44,11 +43,11 @@ describe("validateEnv", () => {
   it("throws when the environment is invalid and validation is not skipped", () => {
     vi.spyOn(console, "log").mockImplementation(() => undefined);
 
-    expect(() => validateEnv({ APP_NAME: "Dream To Real" })).toThrow();
+    expect(() => validateEnv({})).toThrow();
   });
 
   it("skips throwing when SKIP_ENV_VALIDATION is set", () => {
-    const source = { SKIP_ENV_VALIDATION: "true", APP_NAME: "Dream To Real" };
+    const source = { SKIP_ENV_VALIDATION: "true" };
 
     expect(() => validateEnv(source)).not.toThrow();
   });

@@ -1,3 +1,4 @@
+import { SITE_NAME } from "#/constants";
 import { env as workerEnv } from "cloudflare:workers";
 
 import { createMailService } from "@workspace/mail/factory";
@@ -10,7 +11,7 @@ export function getMailService() {
     database: getDB(),
     queue: workerEnv.MAIL_QUEUE,
     mailConfig: {
-      appName: env.VITE_APP_NAME,
+      appName: SITE_NAME,
       systemMail: env.VITE_SYSTEM_MAIL,
       supportMail: env.VITE_SUPPORT_MAIL,
     },

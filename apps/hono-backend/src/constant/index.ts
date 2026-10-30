@@ -49,3 +49,5 @@ export const IMAGE_MIME_TYPES = [
 ] as const;
 
 export const DEFAULT_UPLOAD_SCOPE = "general";
+
+export const SITE_NAME = "Dream To Real";

@@ -13,7 +13,6 @@ export const env = createEnv({
     VITE_ENVIRONMENT: z
       .enum(["development", "production", "test"] as const)
       .default("development"),
-    VITE_APP_NAME: z.string(),
     VITE_SITE_URL: z.url(),
     VITE_DASHBOARD_URL: z.url(),
     VITE_SYSTEM_MAIL: z.email(),

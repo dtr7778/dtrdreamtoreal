@@ -1,4 +1,4 @@
-import { env } from "#/lib/env";
+import { SITE_NAME } from "#/constants";
 import { SmartCoercionPlugin } from "@orpc/json-schema";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
@@ -23,7 +23,7 @@ export const openAPIHandler = new OpenAPIHandler(router, {
       schemaConverters: [new ZodToJsonSchemaConverter()],
       specGenerateOptions: {
         info: {
-          title: env.VITE_APP_NAME,
+          title: SITE_NAME,
           version: pkg.version,
         },
 

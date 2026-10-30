@@ -1,5 +1,7 @@
 import { env } from "#/lib/env";
 
+import { SITE_NAME } from "..";
+
 export interface NavItem {
   label: string;
   href: string;
@@ -11,7 +13,7 @@ export interface SocialLink {
 }
 
 export const brand = {
-  name: env.VITE_APP_NAME,
+  name: SITE_NAME,
   tagline: "Software that ships. Search that ranks.",
 } as const;
 

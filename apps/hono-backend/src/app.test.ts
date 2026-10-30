@@ -7,7 +7,6 @@ import type { AppEnv } from "./types";
 const { handler, appEnv } = vi.hoisted(() => {
   const env = {
     ENVIRONMENT: "production",
-    APP_NAME: "app_name",
     LOG_LEVEL: "warn",
     BETTER_AUTH_SECRET: "better_auth_secret",
     BETTER_AUTH_URL: "https://api.dtrdreamtoreal.com",

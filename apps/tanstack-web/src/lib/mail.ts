@@ -1,3 +1,4 @@
+import { SITE_NAME } from "#/constants";
 import { env as workerEnv } from "cloudflare:workers";
 
 import type { DatabaseType } from "@workspace/drizzle/client";
@@ -11,7 +12,7 @@ export function getMailService(db?: DatabaseType) {
     database: db ?? getDB(),
     queue: workerEnv.MAIL_QUEUE,
     mailConfig: {
-      appName: env.VITE_APP_NAME,
+      appName: SITE_NAME,
       systemMail: env.VITE_SYSTEM_MAIL,
       supportMail: env.VITE_SUPPORT_MAIL,
     },

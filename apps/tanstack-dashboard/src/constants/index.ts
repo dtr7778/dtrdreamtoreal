@@ -5,6 +5,10 @@ export const DEFAULT_AUTH_PATH = "/";
 export const RESET_PASSWORD_PATH = "/reset-password";
 export const ERROR_PAGE_PATH = "/auth-error";
 
+export const SITE_NAME = "Dream To Real";
+export const SITE_DESCRIPTION =
+  "Builds web products and makes them discoverable with SEO, AIO, AEO and GEO. From idea to production, and from page one to AI answers.";
+
 export const SUPPORTED_OAUTH_PROVIDERS = ["google"] as const;
 
 export const breadcrumbRoutes: Array<BreadcrumbRouteType> = [

@@ -1,9 +1,8 @@
+import { SITE_DESCRIPTION } from "#/constants";
 import { brand } from "#/constants/content";
 import { env } from "#/lib/env";
 import { head } from "#/lib/siteHead";
 import { createFileRoute } from "@tanstack/react-router";
-
-import { SITE_DESCRIPTION } from "@workspace/tanstack-start";
 
 export const Route = createFileRoute("/")({
   head: ({ match }) => ({

@@ -1,5 +1,5 @@
+import { SITE_NAME } from "#/constants";
 import { ChatSidebar } from "#/features/chat/components/ChatSidebar";
-import { env } from "#/lib/env";
 import { head } from "#/lib/siteHead";
 import { orpcTQClient } from "#/server/orpc";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
@@ -30,7 +30,7 @@ export const Route = createFileRoute(
     head({
       titleByTemplate: "Messages",
       pathname: match.pathname,
-      description: `Chats and conversations in ${env.VITE_APP_NAME}.`,
+      description: `Chats and conversations in ${SITE_NAME}.`,
     }),
   component: RouteComponent,
 });

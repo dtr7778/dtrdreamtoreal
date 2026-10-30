@@ -9,7 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { createQueryClient } from "@workspace/ui/lib/tanstack-query/query-client.orpc";
 
-import { env } from "./lib/env";
+import { SITE_NAME } from "./constants";
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
@@ -71,11 +71,9 @@ function Loading() {
         {/* Logo/Brand */}
         <div className="mb-12 flex flex-col items-center justify-center gap-4">
           <div className="flex aspect-square size-8 items-center justify-center">
-            <img src="/sitelogo.png" alt={`${env.VITE_APP_NAME} logo`} />
+            <img src="/sitelogo.png" alt={`${SITE_NAME} logo`} />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {env.VITE_APP_NAME}
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">{SITE_NAME}</h1>
         </div>
 
         {/* Loading Spinner */}

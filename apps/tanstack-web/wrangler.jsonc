@@ -35,7 +35,6 @@
       ],
       "vars": {
         "VITE_ENVIRONMENT": "production",
-        "VITE_APP_NAME": "Dream To Real",
         "VITE_DASHBOARD_URL": "https://app.dtrdreamtoreal.com",
         "VITE_SITE_URL": "https://dtrdreamtoreal.com",
         "VITE_SUPPORT_MAIL": "support@mail.dtrdreamtoreal.com",

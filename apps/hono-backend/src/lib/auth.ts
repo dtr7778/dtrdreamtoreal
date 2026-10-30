@@ -3,6 +3,7 @@ import { createDrizzleClient } from "@workspace/drizzle/client";
 import { logger } from "@workspace/lib/logger";
 import { createMailService } from "@workspace/mail/factory";
 
+import { SITE_NAME } from "@/constant";
 import type { AppEnv } from "@/types";
 
 import { getEnv } from "./env";
@@ -16,14 +17,14 @@ function buildAuth(env: AppEnv): AuthType {
     database,
     queue: env.MAIL_QUEUE,
     mailConfig: {
-      appName: getEnv("APP_NAME"),
+      appName: SITE_NAME,
       systemMail: getEnv("MAIL_SYSTEM_EMAIL"),
       supportMail: getEnv("MAIL_SUPPORT_EMAIL"),
     },
   });
 
   return createBetterAuth({
-    appName: getEnv("APP_NAME"),
+    appName: SITE_NAME,
     secret: getEnv("BETTER_AUTH_SECRET"),
     isDev: getEnv("ENVIRONMENT") === "development",
     baseURL: getEnv("BETTER_AUTH_URL"),
